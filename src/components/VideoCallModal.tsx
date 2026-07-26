@@ -1,0 +1,392 @@
+import { useEffect, useRef, useState } from "react";
+import AgoraRTC, {
+  IAgoraRTCClient,
+  ICameraVideoTrack,
+  IMicrophoneAudioTrack,
+  IAgoraRTCRemoteUser,
+} from "agora-rtc-sdk-ng";
+import { Button } from "@/components/ui/button";
+import {
+  useUserEndCall,
+  useDoctorEndCallMutation,
+  useUploadDoctorVideo,
+  useDoctorCallNote,
+} from "@/queries";
+import {
+  Mic,
+  MicOff,
+  Video as CamIcon,
+  VideoOff,
+  PhoneOff,
+  MessageSquare,
+} from "lucide-react";
+import { set } from "idb-keyval";
+
+interface VideoCallModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  contactName: string;
+  contactProfile?: string;
+  agoraToken: string;
+  channelName: string;
+  appId: string;
+  role?: "doctor" | "patient";
+  callId?: number;
+  conversationId: number;
+  patientIdP: number | null;
+  doctorIdP: number | null;
+}
+
+export default function VideoCallModal({
+  isOpen,
+  onClose,
+  contactName,
+  agoraToken,
+  channelName,
+  appId,
+  role = "patient",
+  callId,
+  conversationId,
+  patientIdP,
+  doctorIdP,
+}: VideoCallModalProps) {
+  const clientRef = useRef<IAgoraRTCClient | null>(null);
+
+  // Recording setup
+  const hiddenVideoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<BlobPart[]>([]);
+
+  const [localVideoTrack, setLocalVideoTrack] =
+    useState<ICameraVideoTrack | null>(null);
+  const [localAudioTrack, setLocalAudioTrack] =
+    useState<IMicrophoneAudioTrack | null>(null);
+  const [, setRemoteUsers] = useState<IAgoraRTCRemoteUser[]>([]);
+  const [callStartTime, setCallStartTime] = useState<Date | null>(null);
+
+  const localVideoRef = useRef<HTMLDivElement | null>(null);
+  const remoteVideoRef = useRef<HTMLDivElement | null>(null);
+
+  const [micEnabled, setMicEnabled] = useState(true);
+  const [cameraEnabled, setCameraEnabled] = useState(true);
+  const [, setDuration] = useState("00:00");
+
+  const [hasRemoteJoined, setHasRemoteJoined] = useState(false);
+
+  const [showChat, setShowChat] = useState(false);
+  const [doctorNoteText, setDoctorNoteText] = useState("");
+
+  const { mutate: doctorCallNote } = useDoctorCallNote();
+  const { mutate: endUserCall } = useUserEndCall();
+  const { mutate: endDoctorCall } = useDoctorEndCallMutation();
+  const { mutate: uploadDoctorVideo } = useUploadDoctorVideo();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (callStartTime) {
+      timer = setInterval(() => {
+        const elapsed = (Date.now() - callStartTime.getTime()) / 1000;
+        const m = Math.floor(elapsed / 60)
+          .toString()
+          .padStart(2, "0");
+        const s = Math.floor(elapsed % 60)
+          .toString()
+          .padStart(2, "0");
+        setDuration(`${m}:${s}`);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [callStartTime]);
+
+  const cleanup = async () => {
+    localAudioTrack?.stop();
+    localAudioTrack?.close();
+    localVideoTrack?.stop();
+    localVideoTrack?.close();
+
+    await clientRef.current?.leave();
+    clientRef.current?.removeAllListeners();
+    clientRef.current = null;
+
+    setHasRemoteJoined(false); // ✅ Reset the remote join state
+  };
+
+  const handleEndCall = async () => {
+    if (role === "doctor") {
+      mediaRecorderRef.current?.stop();
+    }
+
+    await cleanup();
+
+    try {
+      localAudioTrack?.stop();
+      localAudioTrack?.close();
+      localVideoTrack?.stop();
+      localVideoTrack?.close();
+
+      await clientRef.current?.leave();
+      clientRef.current?.removeAllListeners();
+      clientRef.current = null;
+    } catch (error) {
+      console.error("⚠️ Error cleaning up Agora:", error);
+    }
+
+    if (callId) {
+      if (role === "patient") {
+        endUserCall({
+          call_id: callId,
+          conversation_id: conversationId,
+          receiver_id: doctorIdP ?? 0,
+          receiver_type: "Doctor",
+        });
+      } else {
+        endDoctorCall({
+          call_id: callId,
+          conversation_id: conversationId,
+          receiver_id: patientIdP ?? 0,
+          receiver_type: "User",
+        });
+      }
+    }
+
+    if (role === "doctor" && callId && doctorNoteText.trim()) {
+      const userId = patientIdP ?? 0;
+      doctorCallNote({
+        call_id: callId,
+        user_id: userId,
+        note: doctorNoteText,
+      });
+    }
+
+    onClose(); // ✅ Close modal
+  };
+
+  const toggleMic = async () => {
+    if (localAudioTrack) {
+      const newState = !micEnabled;
+      await localAudioTrack.setEnabled(newState);
+      setMicEnabled(newState);
+    }
+  };
+
+  const toggleCamera = async () => {
+    if (localVideoTrack) {
+      const newState = !cameraEnabled;
+      await localVideoTrack.setEnabled(newState);
+      setCameraEnabled(newState);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let recorder: MediaRecorder;
+
+    const initCall = async () => {
+      const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+      clientRef.current = client;
+
+      client.on("user-published", async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
+        if (mediaType === "video" && remoteVideoRef.current) {
+          user.videoTrack?.play(remoteVideoRef.current);
+        }
+        if (mediaType === "audio") {
+          user.audioTrack?.play();
+        }
+
+        // ✅ Mark that remote has joined
+        setHasRemoteJoined(true);
+
+        setRemoteUsers((prev) => [
+          ...prev.filter((u) => u.uid !== user.uid),
+          user,
+        ]);
+
+        if (!callStartTime) {
+          setCallStartTime(new Date()); // ✅ Start duration only when remote joins
+        }
+      });
+
+      client.on("user-unpublished", (user, mediaType) => {
+        // Don't remove the user entirely – just update their tracks
+        setRemoteUsers((prev) =>
+          prev.map((u) =>
+            u.uid === user.uid
+              ? {
+                  ...u,
+                  [mediaType === "video" ? "videoTrack" : "audioTrack"]:
+                    undefined,
+                }
+              : u
+          )
+        );
+
+        // If both tracks are gone, then the user has really left
+        const isStillPresent = !!(user.audioTrack || user.videoTrack);
+        if (!isStillPresent) {
+          setHasRemoteJoined(false);
+        }
+      });
+
+      await client.join(appId, channelName, agoraToken);
+
+      const [micTrack, camTrack] =
+        await AgoraRTC.createMicrophoneAndCameraTracks();
+      setLocalAudioTrack(micTrack);
+      setLocalVideoTrack(camTrack);
+      await client.publish([micTrack, camTrack]);
+
+      if (localVideoRef.current) {
+        camTrack.play(localVideoRef.current);
+      }
+
+      // Set up hidden video and canvas recorder
+      if (role === "doctor") {
+        hiddenVideoRef.current = document.createElement("video");
+        hiddenVideoRef.current.srcObject = new MediaStream([
+          camTrack.getMediaStreamTrack(),
+        ]);
+        hiddenVideoRef.current.play();
+
+        canvasRef.current = document.createElement("canvas");
+        const canvas = canvasRef.current;
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext("2d")!;
+        hiddenVideoRef.current.addEventListener("play", function draw() {
+          ctx.drawImage(
+            hiddenVideoRef.current!,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+          requestAnimationFrame(draw);
+        });
+
+        const canvasStream = canvas.captureStream(30);
+        canvasStream.addTrack(micTrack.getMediaStreamTrack());
+
+        const options = MediaRecorder.isTypeSupported("video/webm; codecs=vp9")
+          ? { mimeType: "video/webm; codecs=vp9" }
+          : { mimeType: "video/webm; codecs=vp8" };
+        recorder = new MediaRecorder(canvasStream, options);
+        mediaRecorderRef.current = recorder;
+
+        recorder.ondataavailable = (e) =>
+          recordedChunksRef.current.push(e.data);
+
+        recorder.onstop = async () => {
+          const blob = new Blob(recordedChunksRef.current, {
+            type: recorder.mimeType,
+          });
+          if (!callId) return;
+
+          const file = new File([blob], `call-${callId}.webm`, {
+            type: blob.type,
+          });
+
+          const fd = new FormData();
+          fd.append("video", file);
+          fd.append("callId", String(callId));
+
+          uploadDoctorVideo(
+            { video: file, callId },
+            {
+              onSuccess: (res) => console.log("Upload successful:", res),
+              onError: (err) => console.error("Upload failed:", err),
+            }
+          );
+
+          const timestamp = Date.now().toString();
+          await set(`recording-${timestamp}`, blob);
+        };
+
+        recorder.start();
+      }
+    };
+
+    initCall();
+
+    return () => {
+      if (recorder?.state === "recording") {
+        recorder.stop();
+      }
+      cleanup();
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex">
+      {/* Video Area */}
+      <div className={`relative bg-black transition-all w-full`}>
+        {/* Full screen remote video */}
+        <div
+          ref={remoteVideoRef}
+          className="absolute inset-0 bg-black z-10"
+          id="remote-video"
+        />
+
+        {/* Waiting Message */}
+        {!hasRemoteJoined && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 z-20">
+            <p className="text-white text-lg font-semibold">
+              Waiting for {contactName || "the user"} to join...
+            </p>
+          </div>
+        )}
+
+        {/* Small corner local video */}
+        <div
+          ref={localVideoRef}
+          className="absolute top-4 right-4 w-32 h-48 z-20 rounded-lg overflow-hidden shadow-lg border border-white"
+          id="local-video"
+        />
+
+        {role === "doctor" && showChat && (
+          <div className="absolute bottom-20 left-4 right-4 z-40">
+            <textarea
+              placeholder="Type your note here... When you end the call, it will be saved and sent to the patient."
+              value={doctorNoteText}
+              onChange={(e) => setDoctorNoteText(e.target.value)}
+              className="w-full h-32 p-4 bg-white bg-opacity-90 text-black rounded-md shadow-lg resize-none"
+            />
+          </div>
+        )}
+
+        {/* Controls */}
+        <div className="absolute bottom-4 flex items-center gap-4 justify-center w-full z-30">
+          <span className="text-white text-sm font-medium"></span>
+
+          <Button onClick={toggleMic} variant="ghost" className="text-white">
+            {micEnabled ? <Mic /> : <MicOff />}
+          </Button>
+          <Button onClick={toggleCamera} variant="ghost" className="text-white">
+            {cameraEnabled ? <CamIcon /> : <VideoOff />}
+          </Button>
+          {role === "doctor" && (
+            <Button
+              onClick={() => setShowChat((prev) => !prev)}
+              variant="ghost"
+              className="text-white"
+            >
+              <MessageSquare />
+            </Button>
+          )}
+
+          <Button
+            variant="destructive"
+            onClick={handleEndCall}
+            className="px-6 py-2 text-white"
+          >
+            <PhoneOff className="mr-2" />
+            End Call
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

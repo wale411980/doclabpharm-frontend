@@ -1,0 +1,69 @@
+[
+    {
+      "name": "Afghanistan",
+      "dial_code": "+93",
+      "code": "AF",
+      "flag": "https://flagcdn.com/w20/af.png"
+    },
+    {
+      "name": "Albania",
+      "dial_code": "+355",
+      "code": "AL",
+      "flag": "https://flagcdn.com/w20/al.png"
+    },
+    {
+      "name": "Algeria",
+      "dial_code": "+213",
+      "code": "DZ",
+      "flag": "https://flagcdn.com/w20/dz.png"
+    },
+    {
+      "name": "Nigeria",
+      "dial_code": "+234",
+      "code": "NG",
+      "flag": "https://flagcdn.com/w20/ng.png"
+    },
+    {
+      "name": "United States",
+      "dial_code": "+1",
+      "code": "US",
+      "flag": "https://flagcdn.com/w20/us.png"
+    },
+    {
+      "name": "United Kingdom",
+      "dial_code": "+44",
+      "code": "GB",
+      "flag": "https://flagcdn.com/w20/gb.png"
+    },
+    {
+      "name": "Ghana",
+      "dial_code": "+233",
+      "code": "GH",
+      "flag": "https://flagcdn.com/w20/gh.png"
+    },
+    {
+      "name": "South Africa",
+      "dial_code": "+27",
+      "code": "ZA",
+      "flag": "https://flagcdn.com/w20/za.png"
+    },
+    {
+      "name": "Kenya",
+      "dial_code": "+254",
+      "code": "KE",
+      "flag": "https://flagcdn.com/w20/ke.png"
+    },
+    {
+      "name": "Canada",
+      "dial_code": "+1",
+      "code": "CA",
+      "flag": "https://flagcdn.com/w20/ca.png"
+    },
+    {
+      "name": "India",
+      "dial_code": "+91",
+      "code": "IN",
+      "flag": "https://flagcdn.com/w20/in.png"
+    }
+  ]
+  

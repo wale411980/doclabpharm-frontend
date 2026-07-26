@@ -1,0 +1,75 @@
+dev configuration for env 
+VITE_API_URL=http://api.mydoclab.internal/
+
+
+dev configuration for vite configuration
+import path from "path"
+import tailwindcss from "@tailwindcss/vite"
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: '/',
+  server: {
+    host: 'mydoclab.internal',
+    port: 3000,
+  },
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+
+
+
+
+prod configuration for env 
+VITE_API_URL=https://api.doclabpharm.com/
+
+
+prod configuration for vite configuration
+import path from "path"
+import tailwindcss from "@tailwindcss/vite"
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: '/',
+  server: {
+    host: 'api.doclabpharm.com',
+    or
+    host: '0.0.0.0'
+  },
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+
+
+
+// localhost:3000 config
+import path from "path"
+import tailwindcss from "@tailwindcss/vite"
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: '/',
+  server: {
+    port: 3000,
+  },
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
