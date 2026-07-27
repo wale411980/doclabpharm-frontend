@@ -149,20 +149,17 @@ export default function VideoCallModal({
         });
       }
     }
+
     if (role === "doctor" && callId && doctorNoteText.trim()) {
       const userId = patientIdP ?? 0;
-      doctorCallNote(
-        { call_id: callId, user_id: userId, note: doctorNoteText },
-        {
-          onSuccess: () => onClose(),
-          onError: () => {
-            alert("Failed to save note. Please try again before closing.");
-          },
-        }
-      );
-    } else {
-      onClose();
+      doctorCallNote({
+        call_id: callId,
+        user_id: userId,
+        note: doctorNoteText,
+      });
     }
+
+    onClose(); // ✅ Close modal
   };
 
   const toggleMic = async () => {
