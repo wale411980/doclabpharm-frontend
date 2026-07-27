@@ -475,13 +475,11 @@ export default function DoctorSettings() {
                   Qualifications & Certifications
                 </Label>
 
-                <ImageUpload
-                  onUploadComplete={(url: string) => {
-                    setProfileData((prev) => ({
-                      ...prev,
-                      certifications: url,
-                    }));
-                  }}
+                <RichTextEditor
+                  value={profileData.certifications}
+                  onChange={(data: string) =>
+                    setProfileData({ ...profileData, certifications: data })
+                  }
                 />
                 {errors.certifications && (
                   <p className="text-sm text-red-500">
