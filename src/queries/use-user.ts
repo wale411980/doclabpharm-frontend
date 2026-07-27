@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
+  GetDoctorPrescriptions,
   User,
   Doctor,
   Consultations,
@@ -422,6 +423,17 @@ export const useGetUserVitals = () => {
     queryFn: async () => {
       const response = await api.get(URIS.user.userVitalsDetails);
       return response.data.data;
+    },
+  });
+};
+
+// get patient's own prescription list
+export const useGetUserPrescriptions = () => {
+  return useQuery<GetDoctorPrescriptions[]>({
+    queryKey: ["userPrescriptions"],
+    queryFn: async () => {
+      const response = await api.get(URIS.user.getUserPrescriptions);
+      return response.data;
     },
   });
 };

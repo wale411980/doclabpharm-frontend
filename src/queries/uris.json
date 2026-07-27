@@ -40,6 +40,7 @@
     "userLabTechnicianById": "/user/lab/diagnosis",
     "getUserById": "/user/details",
     "getUserNotesById": "/user/notes",
+    "getUserPrescriptions": "/user/prescriptions",
     "userCheckout": "/user/checkout",
     "userReport": "/user/report",
     "userNotification": "/user/notification",

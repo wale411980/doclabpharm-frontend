@@ -69,6 +69,7 @@ import PatientList from "@/pages/doctor/PatientList";
 import PatientDetail from "@/pages/doctor/PatientDetail";
 import DoctorAppointment from "@/pages/doctor/DoctorAppointment";
 import DoctorPrescriptions from "@/pages/doctor/DoctorPrescriptions";
+import UserPrescriptions from "@/pages/user/UserPrescriptions";
 import MedicalDashboard from "@/pages/doctor/Analytics";
 import DoctorWallet from "@/pages/doctor/DoctorWallet";
 import DoctorMessages from "@/pages/doctor/DoctorMessages";
@@ -178,6 +179,7 @@ function router() {
             <Route path="/user/profile" element={<PatientProfile />} />
             <Route path="/user/appointments" element={<PatientAppointment />} />
             <Route path="/user/orders" element={<PatientOrder />} />
+            <Route path="/user/prescriptions" element={<UserPrescriptions />} />
             <Route path="/user/pharmacy" element={<PatientPharmacy />} />
             <Route path="/doctor/select" element={<AvailableDoctors />} />
             <Route

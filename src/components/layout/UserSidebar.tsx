@@ -35,6 +35,7 @@ export function UserSidebar({ onClose }: SidebarProps) {
     },
     { icon: ShoppingBag, label: "Order History", href: "/user/orders" },
     { icon: Pill, label: "Pharmacy", href: "/user/pharmacy" },
+    { icon: Pill, label: "Prescriptions", href: "/user/prescriptions" },
     { icon: Flask, label: "Tests", href: "/patient/booking/select-test" },
     { icon: FileText, label: "Results", href: "/user/results" },
   ];
