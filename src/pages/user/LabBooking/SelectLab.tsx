@@ -42,7 +42,7 @@ export default function SelectLab() {
     const labData = {
       id: lab.id,
       name: lab.businessName,
-      address: "123 Medical Avenue, Abuja",
+      address: [lab.address, lab.city, lab.state].filter(Boolean).join(", ") || "Address not available",
       rating: 4.5,
       distance: "2.3 km away",
     };
