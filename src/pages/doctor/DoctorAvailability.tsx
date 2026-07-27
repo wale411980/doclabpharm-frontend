@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { format, addMonths, subMonths, isToday, isTomorrow } from "date-fns";
+import { format, addMonths, subMonths, addDays, isBefore, isAfter } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -100,9 +100,10 @@ const DoctorAvailability = () => {
     return `${formattedHour}:${minutes} ${ampm}`;
   };
 
-  // Check if the selected date is valid (today or tomorrow)
+  // Check if the selected date is valid (today through 60 days ahead)
   const isValidDate = (date: Date) => {
-    return isToday(date) || isTomorrow(date);
+    const maxDate = addDays(new Date(), 60);
+    return !isBefore(date, new Date().setHours(0,0,0,0)) && !isAfter(date, maxDate);
   };
 
   // Handle date change
