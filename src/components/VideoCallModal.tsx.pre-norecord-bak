@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   useUserEndCall,
   useDoctorEndCallMutation,
+  useUploadDoctorVideo,
   useDoctorCallNote,
 } from "@/queries";
 import {
@@ -19,6 +20,7 @@ import {
   PhoneOff,
   MessageSquare,
 } from "lucide-react";
+import { set } from "idb-keyval";
 
 interface VideoCallModalProps {
   isOpen: boolean;
@@ -50,6 +52,12 @@ export default function VideoCallModal({
 }: VideoCallModalProps) {
   const clientRef = useRef<IAgoraRTCClient | null>(null);
 
+  // Recording setup
+  const hiddenVideoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<BlobPart[]>([]);
+
   const [localVideoTrack, setLocalVideoTrack] =
     useState<ICameraVideoTrack | null>(null);
   const [localAudioTrack, setLocalAudioTrack] =
@@ -72,6 +80,7 @@ export default function VideoCallModal({
   const { mutate: doctorCallNote } = useDoctorCallNote();
   const { mutate: endUserCall } = useUserEndCall();
   const { mutate: endDoctorCall } = useDoctorEndCallMutation();
+  const { mutate: uploadDoctorVideo } = useUploadDoctorVideo();
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -104,6 +113,10 @@ export default function VideoCallModal({
   };
 
   const handleEndCall = async () => {
+    if (role === "doctor") {
+      mediaRecorderRef.current?.stop();
+    }
+
     await cleanup();
 
     try {
@@ -170,6 +183,7 @@ export default function VideoCallModal({
 
   useEffect(() => {
     if (!isOpen) return;
+    let recorder: MediaRecorder;
 
     const initCall = async () => {
       const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
@@ -229,11 +243,79 @@ export default function VideoCallModal({
       if (localVideoRef.current) {
         camTrack.play(localVideoRef.current);
       }
+
+      // Set up hidden video and canvas recorder
+      if (role === "doctor") {
+        hiddenVideoRef.current = document.createElement("video");
+        hiddenVideoRef.current.srcObject = new MediaStream([
+          camTrack.getMediaStreamTrack(),
+        ]);
+        hiddenVideoRef.current.play();
+
+        canvasRef.current = document.createElement("canvas");
+        const canvas = canvasRef.current;
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext("2d")!;
+        hiddenVideoRef.current.addEventListener("play", function draw() {
+          ctx.drawImage(
+            hiddenVideoRef.current!,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+          requestAnimationFrame(draw);
+        });
+
+        const canvasStream = canvas.captureStream(30);
+        canvasStream.addTrack(micTrack.getMediaStreamTrack());
+
+        const options = MediaRecorder.isTypeSupported("video/webm; codecs=vp9")
+          ? { mimeType: "video/webm; codecs=vp9" }
+          : { mimeType: "video/webm; codecs=vp8" };
+        recorder = new MediaRecorder(canvasStream, options);
+        mediaRecorderRef.current = recorder;
+
+        recorder.ondataavailable = (e) =>
+          recordedChunksRef.current.push(e.data);
+
+        recorder.onstop = async () => {
+          const blob = new Blob(recordedChunksRef.current, {
+            type: recorder.mimeType,
+          });
+          if (!callId) return;
+
+          const file = new File([blob], `call-${callId}.webm`, {
+            type: blob.type,
+          });
+
+          const fd = new FormData();
+          fd.append("video", file);
+          fd.append("callId", String(callId));
+
+          uploadDoctorVideo(
+            { video: file, callId },
+            {
+              onSuccess: (res) => console.log("Upload successful:", res),
+              onError: (err) => console.error("Upload failed:", err),
+            }
+          );
+
+          const timestamp = Date.now().toString();
+          await set(`recording-${timestamp}`, blob);
+        };
+
+        recorder.start();
+      }
     };
 
     initCall();
 
     return () => {
+      if (recorder?.state === "recording") {
+        recorder.stop();
+      }
       cleanup();
     };
   }, [isOpen]);
