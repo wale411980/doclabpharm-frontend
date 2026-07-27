@@ -101,8 +101,9 @@ export const useGetDoctorAppointments = () => {
 };
 
 export const useGetAllMessagesDoctor = () => {
+  const { user } = useAuth();
   return useQuery<GetAllMessages[]>({
-    queryKey: ["messages"],
+    queryKey: ["messages", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.user.getAllMessages);
       return response.data;
@@ -120,6 +121,7 @@ export const useGetDoctorConversationMessages = (conversationId: number) => {
       return response.data;
     },
     enabled: !!conversationId, // ensures query only runs if conversationId is provided
+    refetchInterval: 5000,
   });
 };
 

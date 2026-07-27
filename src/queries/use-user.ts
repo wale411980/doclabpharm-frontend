@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import type {
   GetDoctorPrescriptions,
   User,
@@ -107,8 +108,9 @@ export const useGetMedicines = () => {
 };
 
 export const useGetAllMessages = () => {
+  const { user } = useAuth();
   return useQuery<GetAllMessages[]>({
-    queryKey: ["messages"],
+    queryKey: ["messages", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.user.getAllMessages);
       return response.data;
@@ -126,6 +128,7 @@ export const useGetUserConversationMessages = (conversationId: number) => {
       return response.data;
     },
     enabled: !!conversationId, // ensures query only runs if conversationId is provided
+    refetchInterval: 5000,
   });
 };
 
