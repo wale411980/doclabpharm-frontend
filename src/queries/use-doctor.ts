@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import type {
   Doctor,
   Availability,
@@ -194,8 +195,9 @@ export const useDoctorSendMessage = () => {
 };
 
 export const useGetDoctorStats = () => {
+  const { user } = useAuth();
   return useQuery<DoctorStats>({
-    queryKey: ["doctorStats"],
+    queryKey: ["doctorStats", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.doctorStats);
       return response.data;
