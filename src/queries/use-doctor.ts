@@ -35,8 +35,9 @@ import URIS from "@/queries/uris.json";
 import { convertKeysToSnakeCase } from "@/utils/caseConverter";
 
 export const useGetDoctorProfile = () => {
+  const { user } = useAuth();
   return useQuery<Doctor>({
-    queryKey: ["doctorProfile"],
+    queryKey: ["doctorProfile", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.getDoctorProfile);
       return response.data.original;
@@ -81,8 +82,9 @@ export const useSetAvailability = () => {
 };
 
 export const useGetDoctorWallet = () => {
+  const { user } = useAuth();
   return useQuery<DoctorWallet>({
-    queryKey: ["doctorWallet"],
+    queryKey: ["doctorWallet", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.doctorWallet);
       return response.data;
@@ -91,8 +93,9 @@ export const useGetDoctorWallet = () => {
 };
 
 export const useGetDoctorAppointments = () => {
+  const { user } = useAuth();
   return useQuery<DoctorAppointment[]>({
-    queryKey: ["doctorAppointments"],
+    queryKey: ["doctorAppointments", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.doctorAppointments);
       return response.data;
@@ -208,8 +211,9 @@ export const useGetDoctorStats = () => {
 };
 
 export const useGetDoctorRecentAppointments = () => {
+  const { user } = useAuth();
   return useQuery<DoctorRecentAppointments[]>({
-    queryKey: ["doctorRecentAppointments"],
+    queryKey: ["doctorRecentAppointments", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.doctorRecentAppointments);
       return response.data;
@@ -218,8 +222,9 @@ export const useGetDoctorRecentAppointments = () => {
 };
 
 export const useGetDoctorRecentMessages = () => {
+  const { user } = useAuth();
   return useQuery<DoctorRecentMessages[]>({
-    queryKey: ["messages"],
+    queryKey: ["doctorRecentMessages", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.doctorRecentMessages);
       return response.data;
@@ -228,8 +233,9 @@ export const useGetDoctorRecentMessages = () => {
 };
 
 export const useGetDoctorRecentUsers = () => {
+  const { user } = useAuth();
   return useQuery<DoctorRecentUser[]>({
-    queryKey: ["recentUser"],
+    queryKey: ["recentUser", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.doctorRecentUsers);
       return response.data;
@@ -265,8 +271,9 @@ export const useDoctorUpdatePassword = () => {
 
 // get doctor prescription list
 export const useGetDoctorPrescriptions = () => {
+  const { user } = useAuth();
   return useQuery<GetDoctorPrescriptions[]>({
-    queryKey: ["doctorPrescriptions"],
+    queryKey: ["doctorPrescriptions", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.getDoctorPrescriptions);
       return response.data;
@@ -301,6 +308,7 @@ export const useCreateDoctorPrescription = () => {
 
 export const useAddDoctorPrescriptionMedicine = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async ({
@@ -324,15 +332,16 @@ export const useAddDoctorPrescriptionMedicine = () => {
 
       // Optional: Invalidate list of all prescriptions if needed
       queryClient.invalidateQueries({
-        queryKey: ["doctorPrescriptions"],
+        queryKey: ["doctorPrescriptions", user?.id],
       });
     },
   });
 };
 
 export const useGetDoctorAllPatients = () => {
+  const { user } = useAuth();
   return useQuery<GetAllPatients[]>({
-    queryKey: ["getAllPatients"],
+    queryKey: ["getAllPatients", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.getAllPatients);
       return response.data;
@@ -396,8 +405,9 @@ export const useDoctorEndCallMutation = () => {
 
 // get doctor analytics
 export const useGetDoctorAnalytics = () => {
+  const { user } = useAuth();
   return useQuery<DoctorAnalytics>({
-    queryKey: ["doctorAnalytics"],
+    queryKey: ["doctorAnalytics", user?.id],
     queryFn: async () => {
       const response = await api.get(URIS.doctor.doctorAnalytics);
       return response.data;
