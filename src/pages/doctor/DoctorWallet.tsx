@@ -571,7 +571,7 @@ export default function DoctorWallet() {
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
               <DialogTitle className="text-base">
                 Are you sure to withdraw{" "}
-                {formatAmount(Number(withdrawAmount) || 10000)}?
+                {formatAmount(Number(withdrawAmount))}?
               </DialogTitle>
             </div>
           </DialogHeader>
