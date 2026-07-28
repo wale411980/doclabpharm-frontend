@@ -13,6 +13,7 @@ import { RoleSelectionModal } from "../authUser/RoleSelection";
 import { DoctorRoleSelectionModal } from "../authDoctor/DoctorRoleSelection";
 import { useCartCount } from "@/hooks/useCartCount";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavbarProps {
   currentPage: PageType;
@@ -23,6 +24,22 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const isLoggedIn = !!token;
+  const { user } = useAuth();
+
+  const dashboardPathByRole: Record<string, string> = {
+    user: "/user/dashboard",
+    doctor: "/doctor/dashboard",
+    pharmacy: "/pharmacy/dashboard",
+    admin: "/admin/dashboard",
+    lab_technician: "/lab_technician/dashboard",
+    super_admin: "/super-admin/dashboard",
+  };
+  const goToDashboard = () => {
+    const path = user?.userType
+      ? dashboardPathByRole[user.userType] ?? "/user/dashboard"
+      : "/user/dashboard";
+    navigate(path);
+  };
 
   const cartCount = useCartCount();
   const [isOpen, setIsOpen] = useState(false);
@@ -169,7 +186,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
               ) : (
                 <Button
                   variant="ghost"
-                  onClick={() => navigate("/user/dashboard")}
+                  onClick={goToDashboard}
                   className="text-lg"
                 >
                   Dashboard
@@ -283,7 +300,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                           className="w-full justify-start h-12 text-gray-700"
                           onClick={() => {
                             setIsOpen(false);
-                            navigate("/user/dashboard");
+                            goToDashboard();
                           }}
                         >
                           Dashboard
