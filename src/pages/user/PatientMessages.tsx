@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
 import {
   Search,
   Lock,
@@ -25,7 +25,8 @@ import {
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import AcceptCallModal from "@/components/AcceptCallModal";
 import { useIncomingCallListener } from "@/hooks/useIncomingCallListener";
-import VideoCallModal from "@/components/VideoCallModal";
+// Lazy-loaded: Agora SDK only fetched when a call actually opens.
+const VideoCallModal = lazy(() => import("@/components/VideoCallModal"));
 import { toast } from "react-toastify";
 
 export default function PatientMessages() {
@@ -669,25 +670,29 @@ export default function PatientMessages() {
         </div>
       </div>
 
-      <VideoCallModal
-        isOpen={isVideoCallOpen}
-        onClose={() => {
-          setIsVideoCallOpen(false); // ✅ closes modal
-          setIsCalling(false); // ✅ hides overlay
-        }}
-        contactName={selectedMessageData?.contactName || "Doctor"}
-        contactProfile={selectedMessageData?.contactProfile}
-        agoraToken={agoraToken}
-        channelName={channelName}
-        appId={import.meta.env.VITE_AGORA_APP_ID}
-        role="patient" // or "patient"
-        callId={activeCallId}
-        conversationId={
-          incomingCallData?.conversation_id ?? Number(selectedContact)
-        }
-        doctorIdP={doctorIdP} // Pass the doctor ID here
-        patientIdP={patientIdP}
-      />
+      {isVideoCallOpen && (
+        <Suspense fallback={null}>
+          <VideoCallModal
+            isOpen={isVideoCallOpen}
+            onClose={() => {
+              setIsVideoCallOpen(false); // ✅ closes modal
+              setIsCalling(false); // ✅ hides overlay
+            }}
+            contactName={selectedMessageData?.contactName || "Doctor"}
+            contactProfile={selectedMessageData?.contactProfile}
+            agoraToken={agoraToken}
+            channelName={channelName}
+            appId={import.meta.env.VITE_AGORA_APP_ID}
+            role="patient" // or "patient"
+            callId={activeCallId}
+            conversationId={
+              incomingCallData?.conversation_id ?? Number(selectedContact)
+            }
+            doctorIdP={doctorIdP} // Pass the doctor ID here
+            patientIdP={patientIdP}
+          />
+        </Suspense>
+      )}
 
       <AcceptCallModal
         isOpen={!!incomingCallData}

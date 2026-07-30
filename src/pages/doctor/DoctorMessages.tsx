@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
 import {
   Search,
   Lock,
@@ -22,7 +22,8 @@ import {
   useReadMessage,
 } from "@/queries";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
-import VideoCallModal from "@/components/VideoCallModal";
+// Lazy-loaded: Agora SDK only fetched when a call actually opens.
+const VideoCallModal = lazy(() => import("@/components/VideoCallModal"));
 import { useIncomingCallListener } from "@/hooks/useIncomingCallListener";
 import AcceptCallModal from "@/components/AcceptCallModal";
 import { Badge } from "@/components/ui/badge";
@@ -674,26 +675,30 @@ export default function DoctorMessages() {
         </div>
       </div>
 
-      {/* Video Call Modal */}
-      <VideoCallModal
-        isOpen={isVideoCallOpen}
-        onClose={() => {
-          setIsVideoCallOpen(false); // ✅ closes modal
-          setIsCalling(false); // ✅ hides overlay
-        }}
-        contactName={selectedMessageData?.contactName || "Patient"}
-        contactProfile={selectedMessageData?.contactProfile}
-        agoraToken={agoraToken}
-        channelName={channelName}
-        appId={import.meta.env.VITE_AGORA_APP_ID}
-        role="doctor" // or "patient"
-        callId={activeCallId}
-        conversationId={
-          incomingCallData?.conversation_id ?? Number(selectedContact)
-        }
-        patientIdP={patientIdP}
-        doctorIdP={doctorIdP}
-      />
+      {/* Video Call Modal - only mounted (and Agora chunk fetched) while a call is open */}
+      {isVideoCallOpen && (
+        <Suspense fallback={null}>
+          <VideoCallModal
+            isOpen={isVideoCallOpen}
+            onClose={() => {
+              setIsVideoCallOpen(false); // ✅ closes modal
+              setIsCalling(false); // ✅ hides overlay
+            }}
+            contactName={selectedMessageData?.contactName || "Patient"}
+            contactProfile={selectedMessageData?.contactProfile}
+            agoraToken={agoraToken}
+            channelName={channelName}
+            appId={import.meta.env.VITE_AGORA_APP_ID}
+            role="doctor" // or "patient"
+            callId={activeCallId}
+            conversationId={
+              incomingCallData?.conversation_id ?? Number(selectedContact)
+            }
+            patientIdP={patientIdP}
+            doctorIdP={doctorIdP}
+          />
+        </Suspense>
+      )}
 
       <AcceptCallModal
         isOpen={!!incomingCallData}

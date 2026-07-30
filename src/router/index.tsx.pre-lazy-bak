@@ -1,4 +1,3 @@
-import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import Index from "@/pages/common/Index";
@@ -70,8 +69,8 @@ import PatientList from "@/pages/doctor/PatientList";
 import PatientDetail from "@/pages/doctor/PatientDetail";
 import DoctorAppointment from "@/pages/doctor/DoctorAppointment";
 import DoctorPrescriptions from "@/pages/doctor/DoctorPrescriptions";
-// Lazy-loaded: pulls in recharts (~478KB) only when the analytics page is visited.
-const MedicalDashboard = lazy(() => import("@/pages/doctor/Analytics"));
+import UserPrescriptions from "@/pages/user/UserPrescriptions";
+import MedicalDashboard from "@/pages/doctor/Analytics";
 import DoctorWallet from "@/pages/doctor/DoctorWallet";
 import DoctorMessages from "@/pages/doctor/DoctorMessages";
 import DoctorCallRecordings from "@/pages/doctor/DoctorCallRecordings";
@@ -180,6 +179,7 @@ function router() {
             <Route path="/user/profile" element={<PatientProfile />} />
             <Route path="/user/appointments" element={<PatientAppointment />} />
             <Route path="/user/orders" element={<PatientOrder />} />
+            <Route path="/user/prescriptions" element={<UserPrescriptions />} />
             <Route path="/user/pharmacy" element={<PatientPharmacy />} />
             <Route path="/doctor/select" element={<AvailableDoctors />} />
             <Route
@@ -243,7 +243,7 @@ function router() {
               path="/doctor/prescriptions"
               element={<DoctorPrescriptions />}
             />
-            <Route path="/doctor/analytics" element={<Suspense fallback={<div className="p-6">Loading analytics...</div>}><MedicalDashboard /></Suspense>} />
+            <Route path="/doctor/analytics" element={<MedicalDashboard />} />
             <Route path="/doctor/wallet" element={<DoctorWallet />} />
             <Route path="/doctor/messages" element={<DoctorMessages />} />
             <Route

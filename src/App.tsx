@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 
 import Index from "@/router/index";
 import { AuthProvider } from "./providers/AuthProvider";
@@ -11,8 +11,11 @@ import Spinner from "@/components/Spinner";
 import { onMessage } from "firebase/messaging";
 import { messaging } from "@/lib/firebase";
 import AcceptCallModal from "@/components/AcceptCallModal";
-import VideoCallModal from "@/components/VideoCallModal";
 import TawkToWidget from "@/components/TawkToWidget";
+
+// Lazy-loaded: pulls in the Agora video SDK (~1.3MB) only when a call opens,
+// instead of on every page load.
+const VideoCallModal = lazy(() => import("@/components/VideoCallModal"));
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -73,19 +76,23 @@ const App = () => {
         }}
       />
 
-      {/* Video Call Modal */}
-      <VideoCallModal
-        isOpen={isVideoCallOpen}
-        onClose={() => setIsVideoCallOpen(false)}
-        contactName={incomingCallData?.callerName}
-        contactProfile={"/doctor.png"}
-        agoraToken={incomingCallData?.agoraToken}
-        channelName={incomingCallData?.channelName}
-        appId={import.meta.env.VITE_AGORA_APP_ID}
-        conversationId={incomingCallData?.conversationId}
-        patientIdP={incomingCallData?.patientIdP}
-        doctorIdP={incomingCallData?.doctorIdP}
-      />
+      {/* Video Call Modal - only mounted (and its Agora chunk fetched) while a call is open */}
+      {isVideoCallOpen && (
+        <Suspense fallback={null}>
+          <VideoCallModal
+            isOpen={isVideoCallOpen}
+            onClose={() => setIsVideoCallOpen(false)}
+            contactName={incomingCallData?.callerName}
+            contactProfile={"/doctor.png"}
+            agoraToken={incomingCallData?.agoraToken}
+            channelName={incomingCallData?.channelName}
+            appId={import.meta.env.VITE_AGORA_APP_ID}
+            conversationId={incomingCallData?.conversationId}
+            patientIdP={incomingCallData?.patientIdP}
+            doctorIdP={incomingCallData?.doctorIdP}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
