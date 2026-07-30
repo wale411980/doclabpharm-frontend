@@ -26,8 +26,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Optional: redirect to login
-      window.location.href = "/";
+      /* DOCLAB_AUTH_CLEAR_FIX_V1 - redirected but left the token in localStorage,
+         so Navbar.tsx kept rendering the Dashboard button, which then hit
+         ProtectedRoute and bounced to /unauthorized. */
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      if (window.location.pathname !== "/") {
+        window.location.href = "/";
+      }
     }
     return Promise.reject(error);
   }

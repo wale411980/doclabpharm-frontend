@@ -17,18 +17,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          agora: ["agora-rtc-sdk-ng", "agora-rtc-react"],
-          firebase: ["firebase/app", "firebase/messaging"],
-          charts: ["chart.js", "recharts"],
-          motion: ["framer-motion"],
-        },
-      },
-    },
-    chunkSizeWarningLimit: 1000,
-  },
 })
 
