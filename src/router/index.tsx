@@ -7,7 +7,6 @@ import { Login } from "@/components/authAdmin/Login";
 import { SuperAdminLogin } from "@/components/authSuperAdmin/Login";
 
 import { ResetPassword } from "@/components/authUser/ResetPassword";
-import { ResetPassword as CareResetPassword } from "@/components/authDoctor/ResetPassword";
 import DoctorLayout from "@/components/layout/DoctorLayout";
 import UserLayout from "@/components/layout/UserLayout";
 import PharmacyLayout from "@/components/layout/PharmacyLayout";
@@ -140,10 +139,7 @@ function router() {
         <Route path="/super-admin/login" element={<SuperAdminLogin />} />
 
         <Route path="/password-reset" element={<ResetPassword />} />
-        <Route
-          path="/caregiver/password-reset"
-          element={<CareResetPassword />}
-        />
+        <Route path="/caregiver/password-reset" element={<ResetPassword />} />
         <Route
           path="/user/verify-email"
           element={<VerifyEmailNoticePatient />}

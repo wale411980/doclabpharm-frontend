@@ -3,15 +3,17 @@ import { useState } from "react";
 import { Eye, EyeOff, Check, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useResetPassword } from "@/queries/use-auth";
+import { useResetPassword, useResetPasswordForCare } from "@/queries/use-auth";
 import { toast } from "react-toastify";
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const user_id = searchParams.get("userId");
+  const role = searchParams.get("role");
   const navigate = useNavigate();
-  const { mutate: resetPassword } = useResetPassword();
+  const { mutateAsync: resetPassword } = useResetPassword();
+  const { mutateAsync: resetPasswordForCare } = useResetPasswordForCare();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -84,21 +86,35 @@ export function ResetPassword() {
     setIsSubmitting(true);
 
     try {
-      await resetPassword({
+      const payload = {
         token: token || "",
         password: newPassword,
         password_confirmation: confirmPassword,
         user_id: user_id || "",
-      });
+      };
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      /* role is only present on caregiver reset links; without it this is a
+         patient reset and goes to the original endpoint. */
+      if (role) {
+        await resetPasswordForCare({ ...payload, role: role as any });
+      } else {
+        await resetPassword(payload);
+      }
+
       setIsSuccess(true);
 
       setTimeout(() => {
         navigate("/");
       }, 2000);
-    } catch (err) {
-      setError("Failed to reset password. Please try again.");
+    } catch (err: any) {
+      const fe = err?.response?.data?.errors;
+      const first = fe && typeof fe === "object" ? Object.values(fe)[0] : null;
+      const msg = Array.isArray(first)
+        ? String(first[0])
+        : err?.response?.data?.message ||
+          "Failed to reset password. Please try again.";
+      toast.error(msg);
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
