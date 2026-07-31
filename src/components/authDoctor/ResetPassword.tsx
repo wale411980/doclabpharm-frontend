@@ -3,15 +3,22 @@ import { useState } from "react";
 import { Eye, EyeOff, Check, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useResetPassword } from "@/queries/use-auth";
+import { useResetPasswordForCare } from "@/queries/use-auth";
 import { toast } from "react-toastify";
+
+const VALID_ROLES = ["doctor", "pharmacy", "lab_technician"] as const;
+type CareRole = (typeof VALID_ROLES)[number];
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const user_id = searchParams.get("userId");
+  const roleParam = searchParams.get("role");
+  const role = VALID_ROLES.includes(roleParam as CareRole)
+    ? (roleParam as CareRole)
+    : null;
   const navigate = useNavigate();
-  const { mutate: resetPassword } = useResetPassword();
+  const { mutateAsync: resetPassword } = useResetPasswordForCare();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -19,7 +26,7 @@ export function ResetPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState<
+  const [passwordStrength, setPasswordStrength] = useState
     "weak" | "medium" | "strong" | null
   >(null);
 
@@ -57,12 +64,36 @@ export function ResetPassword() {
     validatePassword(value);
   };
 
+  /* Laravel returns {errors: {field: ["msg"]}} on 422/404 and
+     {message, errors} on validation failure. Pull the first field message,
+     then fall back to message, then to a generic string. */
+  const extractError = (err: any): string => {
+    const data = err?.response?.data;
+    const fieldErrors = data?.errors;
+    if (fieldErrors && typeof fieldErrors === "object") {
+      const first = Object.values(fieldErrors)[0];
+      if (Array.isArray(first) && first.length) return String(first[0]);
+      if (typeof first === "string") return first;
+    }
+    if (data?.message) return String(data.message);
+    return "Failed to reset password. Please try again.";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!token) {
-      toast.error("Invalid reset token");
+    if (!token || !user_id) {
+      setError(
+        "This reset link is incomplete. Please request a new password reset email."
+      );
+      return;
+    }
+
+    if (!role) {
+      setError(
+        "This reset link is missing a valid account type. Please request a new password reset email."
+      );
       return;
     }
 
@@ -84,25 +115,26 @@ export function ResetPassword() {
     setIsSubmitting(true);
 
     try {
+      /* mutateAsync, not mutate: mutate() returns void, so the previous
+         await resolved immediately and the success screen showed even when
+         the reset had failed. */
       await resetPassword({
-        token: token || "",
+        token,
+        user_id,
+        role,
         password: newPassword,
         password_confirmation: confirmPassword,
-        user_id: user_id || "",
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
       setIsSuccess(true);
 
       setTimeout(() => {
         navigate("/");
-      }, 9000);
-
-      //   navigate("/login");
-    } catch (error: any) {
-      const errMsg = error?.response?.data?.message;
-      toast.error("Failed to reset password. " + errMsg);
-      setError("Failed to reset password. Please try again.");
+      }, 5000);
+    } catch (err: any) {
+      const msg = extractError(err);
+      toast.error(msg);
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -121,6 +153,8 @@ export function ResetPassword() {
     }
   };
 
+  const linkIsBroken = !token || !user_id || !role;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md p-6 bg-white shadow rounded-lg">
@@ -130,6 +164,16 @@ export function ResetPassword() {
         <p className="mb-6 text-center text-gray-600">
           Please create a new password for your account
         </p>
+
+        {linkIsBroken && !isSuccess && (
+          <div className="mb-4 flex items-start rounded-md bg-red-50 p-3 text-sm text-red-600">
+            <AlertCircle className="mr-2 h-5 w-5 shrink-0" />
+            <span>
+              This reset link is invalid or incomplete. Please request a new
+              password reset email.
+            </span>
+          </div>
+        )}
 
         {!isSuccess ? (
           <form onSubmit={handleSubmit} className="w-full space-y-4">
@@ -141,7 +185,8 @@ export function ResetPassword() {
                   placeholder="New password"
                   value={newPassword}
                   onChange={handlePasswordChange}
-                  className="w-full rounded-lg border border-gray-300 p-3 pr-10 focus:border-[#2E9063] focus:outline-none"
+                  disabled={linkIsBroken}
+                  className="w-full rounded-lg border border-gray-300 p-3 pr-10 focus:border-[#2E9063] focus:outline-none disabled:bg-gray-100"
                 />
                 <button
                   type="button"
@@ -198,8 +243,9 @@ export function ResetPassword() {
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={linkIsBroken}
                 className={cn(
-                  "w-full rounded-lg border p-3 pr-10 focus:outline-none",
+                  "w-full rounded-lg border p-3 pr-10 focus:outline-none disabled:bg-gray-100",
                   confirmPassword && newPassword !== confirmPassword
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-[#2E9063]"
@@ -231,7 +277,7 @@ export function ResetPassword() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || linkIsBroken}
               className="w-full rounded-lg bg-[#2E9063] py-3 text-white hover:bg-[#267a53] transition-colors disabled:opacity-70"
             >
               {isSubmitting ? (

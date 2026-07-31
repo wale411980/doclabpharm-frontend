@@ -26,6 +26,10 @@ export type ResetPasswordRequest = {
   user_id: string;
 };
 
+export type ResetPasswordForCareRequest = ResetPasswordRequest & {
+  role: "doctor" | "pharmacy" | "lab_technician";
+};
+
 export type RegisterDoctorRequest = {
   firstName: string;
   lastName: string;

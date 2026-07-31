@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { RegisterRequest, LoginRequest, ForgotPassword, ResetPasswordRequest, RegisterDoctorRequest, LoginDoctorRequest, adminLoginRequest } from "@/types";
+import type { RegisterRequest, LoginRequest, ForgotPassword, ResetPasswordRequest, ResetPasswordForCareRequest, RegisterDoctorRequest, LoginDoctorRequest, adminLoginRequest } from "@/types";
 import api from "@/lib/axios";
 import URIS from "@/queries/uris.json";
 
@@ -58,6 +58,14 @@ export const useResetPassword = () => {
   })
 }
 
+export const useResetPasswordForCare = () => {
+  return useMutation({
+    mutationFn: async (data: ResetPasswordForCareRequest) => {
+      const response = await api.post(URIS.auth.resetPasswordDoctor, data);
+      return response.data
+    }
+  })
+}
 export const useRegisterDoctor = () => {
   return useMutation({
     mutationFn: async (userDetails: RegisterDoctorRequest) => {

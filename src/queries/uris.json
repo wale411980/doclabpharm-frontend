@@ -12,7 +12,9 @@
     "verifyOtpDoctor": "/caregiver/verify-otp",
     "requestOtpDoctor": "/caregiver/request-otp",
     "adminLogin": "/admin/login",
-    "superAdminLogin": "/super-admin/login"
+    "superAdminLogin": "/super-admin/login",
+    "forgotPasswordDoctor": "/caregiver/forgot-password",
+    "resetPasswordDoctor": "/caregiver/reset-password"
   },
   "user": {
     "getUserProfile": "/user",
@@ -69,7 +71,6 @@
     "getAllPatients": "/doctor/patients",
     "doctorVideoCall": "/chat/generate",
     "doctorVideoUpload": "/chat/call/upload",
-
     "doctorAnalytics": "/doctor/analytics",
     "doctorAppointmentUpdate": "/doctor/bookings",
     "doctorAppointmentReschedule": "/doctor/reschedule",
@@ -188,7 +189,6 @@
     "adminReportsAdd": "/admin/lab-technician/reports/add",
     "adminReportsUpdate": "/admin/lab-technician/reports",
     "adminReportsDelete": "/admin/lab-technician/reports",
-
     "adminPatientReports": "/admin/lab-technician/reports",
     "adminPatientReportById": "/admin/lab-technician/reports",
     "getAllDiagnosisList": "/admin/lab-technician/diagnosis/list",
@@ -200,7 +200,6 @@
     "addDiagnosisCategory": "/admin/lab-technician/categories/add",
     "updateDiagnosisCategory": "/admin/lab-technician/categories",
     "deleteDiagnosisCategory": "/admin/lab-technician/categories",
-
     "adminPharmacyMedicineCategories": "/admin/pharmacy/categories/list",
     "adminPharmacyMedicineCategoriesById": "/admin/pharmacy/categories",
     "addAdminPharmacyMedicineCategory": "/admin/pharmacy/categories/add",
@@ -251,13 +250,11 @@
     "superAdminReportsAdd": "/admin/lab-technician/reports/add",
     "superAdminReportsUpdate": "/admin/lab-technician/reports",
     "superAdminReportsDelete": "/admin/lab-technician/reports",
-
     "superAdminAdminList": "/super-admin/admins/list",
     "superAdminAdminListById": "/super-admin/admins",
     "superAdminAddAdmin": "/super-admin/admins",
     "superAdminUpdateAdmin": "/super-admin/admins",
     "superAdminDeleteAdmin": "/super-admin/admins",
-
     "superAdminPatientReports": "/admin/lab-technician/reports",
     "superAdminPatientReportById": "/admin/lab-technician/reports",
     "getAllDiagnosisList": "/admin/lab-technician/diagnosis/list",
@@ -269,7 +266,6 @@
     "addDiagnosisCategory": "/admin/lab-technician/categories/add",
     "updateDiagnosisCategory": "/admin/lab-technician/categories",
     "deleteDiagnosisCategory": "/admin/lab-technician/categories",
-
     "superAdminPharmacyMedicineCategories": "/admin/pharmacy/categories/list",
     "superAdminPharmacyMedicineCategoriesById": "/admin/pharmacy/categories",
     "superAddAdminPharmacyMedicineCategory": "/admin/pharmacy/categories/add",
