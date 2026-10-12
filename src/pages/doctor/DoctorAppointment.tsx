@@ -4,6 +4,7 @@ import {
   useUpdateDoctorAppointment,
   useRescheduleDoctorAppointment,
   useGetDoctorProfile,
+  useStartAppointment,
 } from "@/queries";
 import {
   Calendar,
@@ -55,6 +56,8 @@ export default function DoctorAppointments() {
     useUpdateDoctorAppointment();
   const { mutate: rescheduleAppointment, isPending: isRescheduling } =
     useRescheduleDoctorAppointment();
+  const { mutate: startAppointmentNotify, isPending: isStarting } =
+    useStartAppointment();
 
   // State for filters and search
   const [searchTerm, setSearchTerm] = useState("");
@@ -122,12 +125,15 @@ export default function DoctorAppointments() {
     });
   }, [appointments, searchTerm, statusFilter, dateFilter, toDateFilter]);
 
-  // Get today's appointments
+  // Get today's appointments — exclude completed so they don't duplicate in the upcoming view
   const todaysAppointments = filteredAppointments.filter(
     (appointment: DoctorAppointment) => {
       const appointmentDate = new Date(appointment.slot.availableDate);
       const today = new Date();
-      return appointmentDate.toDateString() === today.toDateString();
+      return (
+        appointmentDate.toDateString() === today.toDateString() &&
+        appointment.status !== "completed"
+      );
     }
   );
 
@@ -913,20 +919,25 @@ export default function DoctorAppointments() {
               </Button>
               <Button
                 className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
-                onClick={() =>
+                disabled={isStarting}
+                onClick={() => {
+                  if (selectedAppointment?.id) {
+                    // APPT_START_FCM_V1: notify patient's device; navigate regardless of FCM result
+                    startAppointmentNotify(selectedAppointment.id);
+                  }
                   navigate("/doctor/messages", {
                     state: {
                       receiverId: selectedAppointment?.user?.id,
                       receiverType: "MydocLab\\Models\\User",
                       conversationId: 0,
-                      contactName: `${selectedAppointment?.user?.firstName} ${selectedAppointment?.user?.lastName}`,
+                      contactName: `${selectedAppointment?.user?.firstName ?? ""} ${selectedAppointment?.user?.lastName ?? ""}`.trim(),
                       contactProfile: selectedAppointment?.user?.profileImage,
                       isNewChat: true,
                     },
-                  })
-                }
+                  });
+                }}
               >
-                Start Appointment
+                {isStarting ? "Starting..." : "Start Appointment"}
               </Button>
             </div>
           </div>

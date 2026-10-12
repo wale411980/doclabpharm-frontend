@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useLabTechnicianMostRecentAppointments } from "@/queries";
+import { useLabTechnicianMostRecentAppointments, useCancelLabBooking } from "@/queries";
 import type { MostRecentAppointments } from "@/types";
+import { toast } from "react-toastify";
 import {
   startOfMonth,
   endOfMonth,
@@ -34,9 +35,33 @@ interface CalendarDay {
 export default function AppointmentsDashboard() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
 
-  const { data: mostRecentAppointments } =
+  const { data: mostRecentAppointments, refetch: refetchAppointments } =
     useLabTechnicianMostRecentAppointments();
+  const { mutate: cancelBooking } = useCancelLabBooking();
+
+  const handleCancelBooking = (orderId: number) => {
+    setCancellingId(orderId);
+    cancelBooking(
+      { orderId, reason: "Cancelled by lab technician" },
+      {
+        onSuccess: () => {
+          toast.success("Appointment cancelled successfully", {
+            position: "top-right",
+          });
+          refetchAppointments();
+          setCancellingId(null);
+        },
+        onError: (error: any) => {
+          const errMsg =
+            error?.response?.data?.message || "Failed to cancel appointment";
+          toast.error(errMsg, { position: "top-right" });
+          setCancellingId(null);
+        },
+      }
+    );
+  };
 
   function generateCalendarDays(currentDate: Date): CalendarDay[] {
     const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 }); // Sunday
@@ -201,6 +226,22 @@ export default function AppointmentsDashboard() {
                               >
                                 {appointment.status}
                               </Badge>
+                              {appointment.status !== "cancelled" &&
+                                appointment.status !== "completed" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs border-red-300 text-red-600 hover:bg-red-50"
+                                    disabled={cancellingId === appointment.id}
+                                    onClick={() =>
+                                      handleCancelBooking(appointment.id)
+                                    }
+                                  >
+                                    {cancellingId === appointment.id
+                                      ? "Cancelling..."
+                                      : "Cancel"}
+                                  </Button>
+                                )}
                             </div>
                           </div>
                         </CardContent>

@@ -512,3 +512,15 @@ export const useDoctorCallRecordings = () => {
     },
   });
 };
+
+// APPT_START_FCM_V1: notify patient when doctor starts an appointment
+export const useStartAppointment = () => {
+  return useMutation({
+    mutationFn: async (appointmentId: number) => {
+      const response = await api.post(
+        `${URIS.doctor.doctorStartAppointment}/${appointmentId}/start`
+      );
+      return response.data;
+    },
+  });
+};

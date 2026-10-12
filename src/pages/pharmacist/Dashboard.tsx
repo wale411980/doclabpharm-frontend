@@ -179,7 +179,7 @@ export default function PharmacistDashboard() {
 
           <div className="space-y-3">
             {orders?.slice(0, 5).map((item: PharmacyOrders) => (
-              <div key={item.id} className="bg-white rounded-lg p-3 flex">
+              <div key={item.id} className="bg-white rounded-lg p-3 flex cursor-pointer hover:bg-green-50 transition-colors" onClick={() => navigate("/pharmacy/orders")}>
                 <div className="bg-green-100 rounded p-2 text-center mr-4 w-16">
                   <div className="text-green-700 text-xs font-medium">
                     {new Date(item.createdAt).toLocaleString("default", {

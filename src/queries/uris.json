@@ -85,7 +85,8 @@
     "doctorUserPrescription": "/user/prescriptions",
     "doctorCallNote": "/doctor/call/note",
     "doctorCallRecordings": "/chat/call/recordings",
-    "doctorCallRecordingById": "/chat/call/recordings"
+    "doctorCallRecordingById": "/chat/call/recordings",
+    "doctorStartAppointment": "/doctor/appointments"
   },
   "pharmacy": {
     "getPharmacyProfile": "/pharmacy",
@@ -137,7 +138,8 @@
     "labTechnicianReportsDelete": "/lab-technician/reports",
     "labTechnicianReportsUpdate": "/lab-technician/reports",
     "labTechnicianReportsAdd": "/lab-technician/reports/add",
-    "labTechnicianAvailability": "/lab-technician/availability"
+    "labTechnicianAvailability": "/lab-technician/availability",
+    "cancelBooking": "/lab-technician/bookings"
   },
   "search": {
     "medicineSearch": "/medicine/search",

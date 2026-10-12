@@ -663,6 +663,7 @@ export default function DoctorPrescriptions() {
                     <div
                       key={medicine.id}
                       className="px-3 py-2 hover:bg-green-100 cursor-pointer text-sm"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
                         setAddPrescription({
                           ...addPrescription,

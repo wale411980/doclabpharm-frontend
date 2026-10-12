@@ -394,6 +394,28 @@ export const useReportsDelete = () => {
   });
 };
 
+// cancel a lab technician booking by orderId
+export const useCancelLabBooking = () => {
+  const refreshLabData = useRefreshLabData();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      reason,
+    }: {
+      orderId: string | number;
+      reason: string;
+    }) => {
+      const response = await api.post(
+        `${URIS.labTechnician.cancelBooking}/${orderId}`,
+        { status: "cancelled", reason }
+      );
+      return response.data;
+    },
+    onSuccess: refreshLabData,
+  });
+};
+
 // add lab reports
 export const useReportsAdd = () => {
   const refreshLabData = useRefreshLabData();

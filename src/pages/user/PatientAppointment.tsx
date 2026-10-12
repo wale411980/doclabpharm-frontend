@@ -222,7 +222,7 @@ export default function AppointmentDashboard() {
                           <div>
                             <h3 className="font-semibold text-green-800">
                               Dr.{" "}
-                              {`${appointment.doctor.firstName} ${appointment.doctor.lastName}`}
+                              {`${appointment.doctor?.firstName ?? ""} ${appointment.doctor?.lastName ?? ""}`.trim() || "Unknown"}
                             </h3>
                             <p className="text-sm text-gray-600">
                               {appointment?.consultation?.name}
@@ -283,7 +283,7 @@ export default function AppointmentDashboard() {
                               <div className="flex-1">
                                 <h3 className="font-semibold text-green-800 text-lg">
                                   Dr.{" "}
-                                  {`${appointment.doctor.firstName} ${appointment.doctor.lastName}`}
+                                  {`${appointment.doctor?.firstName ?? ""} ${appointment.doctor?.lastName ?? ""}`.trim() || "Unknown"}
                                 </h3>
                                 <p className="text-gray-600 mt-1">
                                   {appointment?.consultation?.name}
@@ -359,7 +359,7 @@ export default function AppointmentDashboard() {
                             <TableCell className="py-4">
                               <div className="font-medium text-green-800">
                                 Dr.{" "}
-                                {`${appointment.doctor.firstName} ${appointment.doctor.lastName}`}
+                                {`${appointment.doctor?.firstName ?? ""} ${appointment.doctor?.lastName ?? ""}`.trim() || "Unknown"}
                               </div>
                             </TableCell>
                             <TableCell className="py-4">

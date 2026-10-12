@@ -11,9 +11,9 @@ const ALL_CATEGORIES = "All Categories";
 
 const labDisplayName = (test: BookableTest) => {
   const lab = test.labTechnician;
-  if (!lab) return "";
+  if (!lab) return "Unknown Lab";
   return (
-    lab.businessName || `${lab.firstName ?? ""} ${lab.lastName ?? ""}`.trim()
+    lab.businessName || `${lab.firstName ?? ""} ${lab.lastName ?? ""}`.trim() || "Unknown Lab"
   );
 };
 
