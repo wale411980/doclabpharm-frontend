@@ -110,7 +110,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
             <div className="flex items-center gap-1">
               <Phone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 flex-shrink-0" />
               <span className="text-xs sm:text-sm md:text-base lg:text-xl whitespace-nowrap">
-                + 234 9078 8468
+                +234 707 710 1826
               </span>
             </div>
             <div className="flex items-center gap-1">

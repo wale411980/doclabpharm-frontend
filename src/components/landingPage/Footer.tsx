@@ -115,7 +115,7 @@ export function Footer() {
               <li className="flex items-start">
                 <Phone className="h-5 w-5 mr-2 shrink-0 mt-0.5" />
                 <span className="text-white/80 text-sm">
-                  +234 (0) 700 - DIAG - LAB
+                  +234 707 710 1826
                 </span>
               </li>
               <li className="flex items-start">

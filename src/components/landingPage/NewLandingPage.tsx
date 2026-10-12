@@ -1657,7 +1657,7 @@ export default function NewLandingPage() {
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <Phone className="h-4 w-4" />
-                    <span className="text-sm">+234 903 8888</span>
+                    <span className="text-sm">+234 707 710 1826</span>
                   </motion.div>
                   <motion.div
                     className="text-sm"
