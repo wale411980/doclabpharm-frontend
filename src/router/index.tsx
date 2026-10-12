@@ -63,6 +63,8 @@ import SelectTest from "@/pages/user/LabBooking/SelectTest";
 import Notification from "@/pages/user/Notification";
 // USER_PRESCRIPTIONS_ROUTE_V1 — component existed but was never imported or routed
 import UserPrescriptions from "@/pages/user/UserPrescriptions";
+// MEDICINES_ROUTE_V1: add medicines browser to user routes
+import MedicationBrowser from "@/pages/user/Medicines";
 
 // Doctor imports
 import DoctorDashboard from "@/pages/doctor/Dashboard";
@@ -219,6 +221,8 @@ function router() {
             {/* USER_PRESCRIPTIONS_ROUTE_V1 — add routes for patient prescriptions */}
             <Route path="/user/prescriptions" element={<UserPrescriptions />} />
             <Route path="/user/prescriptions/:id" element={<UserPrescriptions />} />
+            {/* MEDICINES_ROUTE_V1: medicines browser was built but never routed */}
+            <Route path="/user/medicines" element={<MedicationBrowser />} />
             <Route
               path="/user/profile-details"
               element={<PatientDetailsLandingPage />}

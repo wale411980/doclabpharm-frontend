@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   FlaskRoundIcon as Flask,
   FileText,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -35,6 +36,7 @@ export function UserSidebar({ onClose }: SidebarProps) {
     },
     { icon: ShoppingBag, label: "Order History", href: "/user/orders" },
     { icon: Pill, label: "Pharmacy", href: "/user/pharmacy" },
+    { icon: Pill, label: "Medicines", href: "/user/medicines" },
     { icon: Pill, label: "Prescriptions", href: "/user/prescriptions" },
     { icon: Flask, label: "Tests", href: "/patient/booking/select-test" },
     { icon: FileText, label: "Results", href: "/user/results" },
@@ -138,6 +140,20 @@ export function UserSidebar({ onClose }: SidebarProps) {
       </div>
 
       <div className="mt-auto pt-4">
+        {/* HELP_SUPPORT_V1: Help & Support link */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.75, duration: 0.3 }}
+        >
+          <a
+            href="mailto:support@doclabpharm.com"
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100"
+          >
+            <HelpCircle className="h-5 w-5" color="rgba(58, 150, 108, 0.7)" strokeWidth={2} />
+            <span style={{ color: "rgba(58, 150, 108, 0.7)" }}>Help & Support</span>
+          </a>
+        </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
