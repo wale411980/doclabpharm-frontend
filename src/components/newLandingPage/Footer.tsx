@@ -95,7 +95,7 @@ export default function Footer() {
           >
             <h3 className="font-bold text-lg mb-4">Contact us</h3>
             <div className="space-y-2 text-sm">
-              <p>+ 234 9078 8468</p>
+              <p>+234 707 710 1826</p>
               <p>Mon - Sat (7am - 6pm)</p>
               <p>info@doclabpharm.com</p>
               <p>www.doclabpharm.com</p>
