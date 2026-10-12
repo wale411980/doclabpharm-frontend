@@ -74,14 +74,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ImageUpload from "@/components/ImageUpload";
 
-const categories = [
-  "All Categories",
-  "Blood Tests",
-  "Imaging",
-  "Microbiology",
-  "Urinalysis",
-];
-
 export default function SuperAdminDiagnosis() {
   const { data: PatientReports, refetch: patientReportsRefetch } =
     useSuperAdminLabTechnicianPatientReports();
@@ -91,6 +83,15 @@ export default function SuperAdminDiagnosis() {
     data: LabTechnicianDiagnosisByCategories,
     refetch: refetchCategories,
   } = useGetSuperAdminLabTechnicianDiagnosisByCategories();
+  /* DOCLAB_CATEGORY_LIST_V1: this list was a hardcoded literal that did not
+     match the categories actually stored, so the filter silently matched nothing. */
+  const categories = useMemo(
+    () => [
+      "All Categories",
+      ...((LabTechnicianDiagnosisByCategories ?? []).map((c: any) => c.name)),
+    ],
+    [LabTechnicianDiagnosisByCategories]
+  );
   const { mutate: addDiagnosis, isPending: isPendingAddDiagnosis } =
     useAddSuperAdminLabTechnicianDiagnosis();
   const { mutate: updateDiagnosis, isPending: isPendingUpdateDiagnosis } =

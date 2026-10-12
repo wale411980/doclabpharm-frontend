@@ -37,7 +37,7 @@ export function PhoneInput({
 
   useEffect(() => {
     // Fetch countries from the JSON file
-    fetch("/countries.json")
+    fetch("/data/countries.json")
       .then((response) => response.json())
       .then((data) => {
         setCountries(data);

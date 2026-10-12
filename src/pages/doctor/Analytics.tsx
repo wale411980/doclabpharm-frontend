@@ -13,8 +13,6 @@ import {
   Users,
   UserPlus,
   Clock,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 import {
   LineChart,
@@ -332,10 +330,6 @@ export default function MedicalDashboard() {
                   <p className="text-3xl font-bold">
                     {analyticsData?.totalPatients}
                   </p>
-                  <div className="flex items-center mt-2">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <span className="text-sm">12% vs last year</span>
-                  </div>
                 </div>
                 <Users className="h-8 w-8 text-white/80" />
               </div>
@@ -352,10 +346,6 @@ export default function MedicalDashboard() {
                   <p className="text-3xl font-bold">
                     {analyticsData?.appointment}
                   </p>
-                  <div className="flex items-center mt-2">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <span className="text-sm">8% vs last month</span>
-                  </div>
                 </div>
                 <Calendar className="h-8 w-8 text-white/80" />
               </div>
@@ -372,10 +362,6 @@ export default function MedicalDashboard() {
                   <p className="text-3xl font-bold">
                     {analyticsData?.patientsMonth}
                   </p>
-                  <div className="flex items-center mt-2">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <span className="text-sm">5% vs last month</span>
-                  </div>
                 </div>
                 <UserPlus className="h-8 w-8 text-white/80" />
               </div>
@@ -387,15 +373,11 @@ export default function MedicalDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-white/80">
-                    Average Appointment Duration
+                    Standard Slot Length (mins)
                   </p>
                   <p className="text-3xl font-bold">
                     {analyticsData?.duration}
                   </p>
-                  <div className="flex items-center mt-2">
-                    <TrendingDown className="h-4 w-4 mr-1" />
-                    <span className="text-sm">3% vs last month</span>
-                  </div>
                 </div>
                 <Clock className="h-8 w-8 text-white/80" />
               </div>
