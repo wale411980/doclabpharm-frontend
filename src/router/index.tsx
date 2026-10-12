@@ -61,6 +61,8 @@ import ConfirmTest from "@/pages/user/LabBooking/ConfirmTest";
 import SelectDateTime from "@/pages/user/LabBooking/SelectDateTime";
 import SelectTest from "@/pages/user/LabBooking/SelectTest";
 import Notification from "@/pages/user/Notification";
+// USER_PRESCRIPTIONS_ROUTE_V1 — component existed but was never imported or routed
+import UserPrescriptions from "@/pages/user/UserPrescriptions";
 
 // Doctor imports
 import DoctorDashboard from "@/pages/doctor/Dashboard";
@@ -214,6 +216,9 @@ function router() {
             />
             <Route path="/patient/booking/confirm" element={<ConfirmTest />} />
             <Route path="/user/notifications" element={<Notification />} />
+            {/* USER_PRESCRIPTIONS_ROUTE_V1 — add routes for patient prescriptions */}
+            <Route path="/user/prescriptions" element={<UserPrescriptions />} />
+            <Route path="/user/prescriptions/:id" element={<UserPrescriptions />} />
             <Route
               path="/user/profile-details"
               element={<PatientDetailsLandingPage />}

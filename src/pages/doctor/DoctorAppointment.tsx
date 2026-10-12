@@ -97,10 +97,11 @@ export default function DoctorAppointments() {
   // Filter and search appointments
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment: DoctorAppointment) => {
+      // DOCTOR_APPT_NULL_V1 — guard against appointments where user is null
       const fullName =
-        `${appointment.user.firstName} ${appointment.user.lastName}`?.toLowerCase();
-      const firstName = appointment.user.firstName?.toLowerCase();
-      const lastName = appointment.user.lastName?.toLowerCase();
+        `${appointment.user?.firstName ?? ""} ${appointment.user?.lastName ?? ""}`.toLowerCase();
+      const firstName = (appointment.user?.firstName ?? "").toLowerCase();
+      const lastName = (appointment.user?.lastName ?? "").toLowerCase();
       const searchLower = searchTerm.toLowerCase();
 
       const matchesSearch =
