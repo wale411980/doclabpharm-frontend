@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   Pharmacy,
   PharmacyStats,
@@ -11,6 +11,25 @@ import type {
 } from "@/types";
 import api from "@/lib/axios";
 import URIS from "@/queries/uris.json";
+
+// Everything that shows pharmacy stock, categories, orders or the dashboard
+// figures; refreshed after any change so the pharmacist never sees stale data.
+const useRefreshPharmacyData = () => {
+  const queryClient = useQueryClient();
+
+  return () => {
+    [
+      "pharmacyMedicines",
+      "pharmacyMedicineById",
+      "pharmacyMedicineCategories",
+      "pharmacyMedicineCategoriesById",
+      "pharmacyStats",
+      "pharmacyOrders",
+      "pharmacyOrderById",
+      "pharmacyWallet",
+    ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+  };
+};
 
 export const useGetPharmacyProfile = () => {
   return useQuery<Pharmacy>({
@@ -33,6 +52,23 @@ export const useUpdatePharmacyProfileSettings = () => {
     }) => {
       const response = await api.put(
         `${URIS.pharmacy.updatePharmacyProfile}/${pharmacyId}`,
+        data
+      );
+      return response.data;
+    },
+  });
+};
+
+// change the logged-in pharmacy's own password
+export const usePharmacyUpdatePassword = () => {
+  return useMutation({
+    mutationFn: async ({
+      data,
+    }: {
+      data: { oldPassword: string; newPassword: string; confirmPassword: string };
+    }) => {
+      const response = await api.post(
+        URIS.pharmacy.pharmacyUpdatePassword,
         data
       );
       return response.data;
@@ -160,16 +196,21 @@ export const useGetPharmacyMedicineById = (medicineId: string) => {
 
 // add new pharmacy medicine
 export const useAddPharmacyMedicine = () => {
+  const refreshPharmacyData = useRefreshPharmacyData();
+
   return useMutation({
     mutationFn: async (data: AddPharmacyMedicine) => {
       const response = await api.post(URIS.pharmacy.addPharmacyMedicine, data);
       return response.data;
     },
+    onSuccess: refreshPharmacyData,
   });
 };
 
 // update pharmacy medicine
 export const useUpdatePharmacyMedicine = () => {
+  const refreshPharmacyData = useRefreshPharmacyData();
+
   return useMutation({
     mutationFn: async ({
       medicineId,
@@ -184,11 +225,14 @@ export const useUpdatePharmacyMedicine = () => {
       );
       return response.data;
     },
+    onSuccess: refreshPharmacyData,
   });
 };
 
 // update pharmacy medicine quantity
 export const useUpdatePharmacyMedicineQuantity = () => {
+  const refreshPharmacyData = useRefreshPharmacyData();
+
   return useMutation({
     mutationFn: async ({
       medicineId,
@@ -203,11 +247,14 @@ export const useUpdatePharmacyMedicineQuantity = () => {
       );
       return response.data;
     },
+    onSuccess: refreshPharmacyData,
   });
 };
 
 // delete pharmacy medicine
 export const useDeletePharmacyMedicine = () => {
+  const refreshPharmacyData = useRefreshPharmacyData();
+
   return useMutation({
     mutationFn: async (medicineId: number) => {
       const response = await api.delete(
@@ -215,6 +262,7 @@ export const useDeletePharmacyMedicine = () => {
       );
       return response.data;
     },
+    onSuccess: refreshPharmacyData,
   });
 };
 
@@ -249,6 +297,8 @@ export const useGetPharmacyOrderById = (
 
 // approve pharmacy order by id
 export const useApprovePharmacyOrder = () => {
+  const refreshPharmacyData = useRefreshPharmacyData();
+
   return useMutation({
     mutationFn: async (data: {
       orderId: number;
@@ -260,11 +310,15 @@ export const useApprovePharmacyOrder = () => {
       );
       return response.data;
     },
+    // stock, wallet and the dashboard figures change when an order is accepted
+    onSettled: refreshPharmacyData,
   });
 };
 
 // approve pharmacy order individually by id
 export const useApprovePharmacyOrderIndividually = () => {
+  const refreshPharmacyData = useRefreshPharmacyData();
+
   return useMutation({
     mutationFn: async (data: {
       itemId: number;
@@ -276,5 +330,6 @@ export const useApprovePharmacyOrderIndividually = () => {
       );
       return response.data;
     },
+    onSettled: refreshPharmacyData,
   });
 };

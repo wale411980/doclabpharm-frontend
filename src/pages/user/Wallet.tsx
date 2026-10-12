@@ -42,7 +42,13 @@ export default function Wallet() {
   const [amountFormatted, setAmountFormatted] = useState(""); // e.g., "6,000"
 
   const currentBalance = data?.balance ?? 0;
-  const transactions = data?.histories || [];
+  // Newest first (the API already returns them in this order; sorting a copy
+  // keeps the list correct regardless).
+  const transactions = [...(data?.histories || [])].sort(
+    (a: UserWalletHistories, b: UserWalletHistories) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
+      Number(b.id) - Number(a.id)
+  );
 
   const filteredTransactions = transactions.filter(
     (transaction: UserWalletHistories) => {

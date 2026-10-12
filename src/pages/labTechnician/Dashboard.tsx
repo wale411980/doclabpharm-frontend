@@ -166,9 +166,8 @@ function Dashboard() {
             </CardHeader>
             <CardContent className="pb-2">
               <div className="flex justify-between items-center">
-                <span className="text-5xl font-bold">
-                  {stats.totalDiagnosis}
-                </span>
+                {/* Test orders placed with this lab (each order is a booking) */}
+                <span className="text-5xl font-bold">{stats.appointment}</span>
                 <div className="bg-green-500/30 p-4 rounded-lg">
                   <ShoppingCart className="h-12 w-12 text-white" />
                 </div>
@@ -178,7 +177,7 @@ function Dashboard() {
               <Button
                 variant="link"
                 className="text-white p-0 h-auto"
-                onClick={() => navigate("/lab_technician/wallet")}
+                onClick={() => navigate("/lab_technician/appointments")}
               >
                 View All
               </Button>
@@ -186,6 +185,7 @@ function Dashboard() {
                 size="icon"
                 variant="ghost"
                 className="text-white hover:bg-green-500 h-8 w-8"
+                onClick={() => navigate("/lab_technician/appointments")}
               >
                 <ArrowRight className="h-5 w-5" />
               </Button>
@@ -235,7 +235,7 @@ function Dashboard() {
                         className="hover:bg-gray-50 border-b border-gray-100"
                       >
                         <TableCell className="py-2 text-sm">
-                          {`${request.user.firstName} ${request.user.lastName}`}
+                          {`${request.user?.firstName ?? ""} ${request.user?.lastName ?? ""}`}
                         </TableCell>
                         <TableCell className="py-2 text-sm">
                           {new Date(request.createdAt).toLocaleDateString()}

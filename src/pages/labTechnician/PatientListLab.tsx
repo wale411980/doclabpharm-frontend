@@ -77,6 +77,18 @@ export default function PatientList() {
               </tr>
             </thead>
             <tbody>
+              {(paginatedPatients ?? []).length === 0 && (
+                <tr className="bg-white">
+                  <td
+                    colSpan={4}
+                    className="px-4 py-8 text-center text-sm text-gray-600"
+                  >
+                    {searchQuery
+                      ? "No patients match your search."
+                      : "No patients yet. Patients who book a test with you will appear here."}
+                  </td>
+                </tr>
+              )}
               {(paginatedPatients ?? []).map((patient) => (
                 <tr key={patient.id} className="border-b bg-white">
                   <td className="px-4 py-3">

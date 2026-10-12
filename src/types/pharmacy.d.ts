@@ -45,6 +45,8 @@ export type PharmacyStats = {
   revenueToday: number;
   availableMedicine: number;
   medicineLow: number;
+  outOfStock?: number;
+  lowStockThreshold?: number;
 }
 
 export type PharmacyWallet = {
@@ -92,6 +94,7 @@ export type UpdatePharmacy = {
   city: string;
   worktime: string;
   state: string;
+  about?: string;
 
 }
 
@@ -100,6 +103,10 @@ export type PharmacyMedicineCategory = {
   name: string;
   createdAt: string;
   updatedAt: string;
+  // number of this pharmacy's products in the category
+  medicinesCount?: number;
+  // products in the category (returned when a single category is fetched)
+  medicines?: PharmacyMedicine[];
 }
 
 export type AddPharmacyMedicineCategory = {

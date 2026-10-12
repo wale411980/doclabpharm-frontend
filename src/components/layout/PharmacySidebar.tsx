@@ -9,6 +9,7 @@ import {
   Columns4,
   LogOut,
   Wallet,
+  CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -29,6 +30,11 @@ export function PharmacySidebar({ onClose }: SidebarProps) {
       icon: Package,
       label: "Products Category",
       href: "/pharmacy/products-category",
+    },
+    {
+      icon: CalendarClock,
+      label: "Availability",
+      href: "/pharmacy/availability",
     },
     { icon: Wallet, label: "Wallet", href: "/pharmacy/wallet" },
     { icon: Settings, label: "Settings", href: "/pharmacy/settings" },

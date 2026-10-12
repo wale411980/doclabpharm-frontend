@@ -42,6 +42,8 @@ export type EditDiagnosticService = {
         status: string;}
 
 export type AddDiagnosticService = {
+        // admins only: the laboratory that will provide the service
+        labTechnicianId?: number;
         id: number;
     name: string;
     turnaround: string;
@@ -180,6 +182,8 @@ export type MostRecentAppointments = {
         orderId: number;
         labTechnicianId: number;
         status: "scheduled" | "rescheduled" | "completed" | "canceled";
+        // how many reports have been issued for this booking
+        reportsCount?: number;
         date: string;
         time: string;
         createdAt: string;
@@ -258,6 +262,13 @@ export type DiagnosisList = {
             createdAt: string;
             updatedAt: string;
         }
+        // the laboratory that provides the service (present on admin / patient lists)
+        labTechnician?: {
+            id: number;
+            firstName: string;
+            lastName: string;
+            businessName: string | null;
+        } | null;
 
 }
 
@@ -279,6 +290,9 @@ export type GetDiagnosisCategory = {
     name: string;
     createdAt: string;
     updatedAt: string;
+    // the signed-in lab technician's services filed under this category
+    diagnoses?: DiagnosisList[];
+    serviceCount?: number;
 
 }
 
@@ -297,8 +311,8 @@ export type ReportsUpdate = {
 }
 
 export type ReportsAdd = {
-  userId: number;
-  diagnosisId: number;
+  userId?: number;
+  diagnosisId?: number;
   bookingId: number;
   status: string;
   imageUrl: string;

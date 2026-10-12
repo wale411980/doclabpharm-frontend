@@ -12,7 +12,8 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { useGetLabAvailability } from "@/queries";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
@@ -44,6 +45,30 @@ export default function SelectDateTimeLandingPage() {
   const labData = {
     id: searchParams.get("labId") || "",
   };
+
+  // The laboratory's published availability; laboratories that have not
+  // published any keep the default time list.
+  const labIdNumber =
+    Number.parseInt(String(labData.id || bookingData.labId || ""), 10) || 0;
+  const { data: labSchedule } = useGetLabAvailability(
+    labIdNumber,
+    undefined,
+    true
+  );
+  const { data: labDay } = useGetLabAvailability(
+    selectedDate ? labIdNumber : 0,
+    selectedDate || undefined,
+    true
+  );
+  const hasSchedule = !!labSchedule?.hasSchedule;
+  const availableDates = hasSchedule
+    ? (labSchedule?.availabilities ?? []).map((entry) => parseISO(entry.date))
+    : undefined;
+  const availableTimes: string[] = hasSchedule
+    ? selectedDate
+      ? labDay?.slots ?? []
+      : []
+    : timeSlots;
 
   const renderProgressSteps = () => {
     const steps = [
@@ -167,10 +192,13 @@ export default function SelectDateTimeLandingPage() {
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
                   <DatePicker
                     selected={selectedDate ? new Date(selectedDate) : null}
-                    onChange={(date) =>
-                      setSelectedDate(format(date as Date, "yyyy-MM-dd"))
-                    }
+                    onChange={(date) => {
+                      if (!date) return;
+                      setSelectedDate(format(date as Date, "yyyy-MM-dd"));
+                      setSelectedTime("");
+                    }}
                     minDate={new Date()}
+                    includeDates={availableDates}
                     dateFormat="dd-MM-yyyy"
                     placeholderText="dd-mm-yyyy"
                     className="pl-10 w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-sm sm:text-base"
@@ -188,13 +216,20 @@ export default function SelectDateTimeLandingPage() {
                     <SelectValue placeholder="Select time" />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeSlots.map((time) => (
+                    {availableTimes.map((time) => (
                       <SelectItem key={time} value={time}>
                         {time}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {hasSchedule && (
+                  <p className="text-xs text-gray-600">
+                    {selectedDate && availableTimes.length === 0
+                      ? "No times are left on this date. Please pick another date."
+                      : "Only the dates and times this laboratory is available can be selected."}
+                  </p>
+                )}
               </div>
             </div>
 

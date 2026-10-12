@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useGetUserAppointments } from "@/queries";
 import type { UserAppointments } from "@/types";
 import { useNavigate } from "react-router-dom";
+import LabAppointmentsList from "./LabAppointmentsList";
 
 export default function AppointmentDashboard() {
   const navigate = useNavigate();
@@ -419,7 +420,7 @@ export default function AppointmentDashboard() {
                 </Card>
               )}
 
-              <div className="flex justify-between items-center mt-4 mb-16">
+              <div className="flex justify-between items-center mt-4 mb-8">
                 <Button
                   variant="ghost"
                   disabled={currentPage === 1}
@@ -448,6 +449,9 @@ export default function AppointmentDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Test appointments booked with laboratories */}
+      <LabAppointmentsList />
     </div>
   );
 }

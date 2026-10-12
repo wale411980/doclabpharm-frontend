@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,21 +11,25 @@ import {
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, Lock, Eye, EyeOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, htmlToPlainText } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import {
   useUpdateLabTechnicianProfileSettings,
-  useDoctorUpdatePassword,
+  useLabTechnicianUpdatePassword,
+  useGetLabTechnicianProfile,
 } from "@/queries";
 import { useAuth } from "@/hooks/useAuth";
 import ImageUpload from "@/components/ImageUpload";
-import RichTextEditor from "../doctor/RichTextEditor";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LabTechnicianSettings() {
   const { mutate: updateProfile, isPending } =
     useUpdateLabTechnicianProfileSettings();
   const { mutate: updatePassword, isPending: isPendingPassword } =
-    useDoctorUpdatePassword();
+    useLabTechnicianUpdatePassword();
+  const { data: profile } = useGetLabTechnicianProfile();
+  const queryClient = useQueryClient();
   const { user, login } = useAuth(); // 👈 Get current user and login function
   const labTechnicianId = user?.id;
 
@@ -59,6 +63,28 @@ export default function LabTechnicianSettings() {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // Pre-fill the form once with the saved profile.
+  const [isPrefilled, setIsPrefilled] = useState(false);
+  useEffect(() => {
+    if (!profile || isPrefilled) return;
+    const saved = profile as any;
+    setProfileData((prev) => ({
+      ...prev,
+      firstName: saved.firstName ?? prev.firstName,
+      lastName: saved.lastName ?? prev.lastName,
+      email: saved.email ?? "",
+      phoneNumber: saved.phone ?? "",
+      address: htmlToPlainText(saved.address),
+      city: saved.city ?? "",
+      state: saved.state ?? "",
+      about: htmlToPlainText(saved.about),
+      certifications: htmlToPlainText(saved.certifications),
+      experience: htmlToPlainText(saved.experience),
+      profile_image: saved.profileImage ?? "",
+    }));
+    setIsPrefilled(true);
+  }, [profile, isPrefilled]);
 
   const toggleCollapsible = (id: string) => {
     setOpenCollapsible(openCollapsible === id ? null : id);
@@ -136,24 +162,27 @@ export default function LabTechnicianSettings() {
         },
       },
       {
-        onSuccess: (updatedPassword: any) => {
-          // merge updated data into existing user
-          const updatedUser = { ...user, ...updatedPassword };
-          // update context + localStorage
-          login(updatedUser);
-
-          // Navigate to dashboard after successful update and notify
-          window.location.href = "/lab_technician/dashboard"; // 🔁 Hard reload of the page
+        onSuccess: () => {
+          setErrors({});
+          setPasswordData({
+            oldPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
+          setOpenCollapsible(null);
           toast.success("Password updated successfully!", {
             position: "top-right",
           });
         },
         onError: (error: any) => {
-          const errMsg = error?.response?.data?.message;
-          toast.error(
-            "Failed to update password. Please try again. " + errMsg,
-            { position: "top-right" }
-          );
+          const data = error?.response?.data;
+          const errMsg =
+            (typeof data?.message === "string" && data.message) ||
+            (typeof data?.error === "string" && data.error) ||
+            "Please check your current password and try again.";
+          toast.error("Failed to update password. " + errMsg, {
+            position: "top-right",
+          });
         },
       }
     );
@@ -174,17 +203,7 @@ export default function LabTechnicianSettings() {
     }
 
     if (!profileData.phoneNumber.trim())
-      newErrors.phoneNumber = "phoneNumber number is required";
-    if (!profileData.address.trim()) newErrors.address = "Address is required";
-    if (!profileData.certifications.trim())
-      newErrors.certifications = "Certifications are required";
-    if (!profileData.experience.trim())
-      newErrors.experience = "Experience is required";
-    if (!profileData.profile_image.trim())
-      newErrors.profile_image = "Profile Image is required";
-    if (!profileData.city.trim()) newErrors.city = "City is required";
-    if (!profileData.about.trim()) newErrors.about = "About is required";
-    if (!profileData.state.trim()) newErrors.state = "State is required";
+      newErrors.phoneNumber = "Phone number is required";
 
     // If there are errors, show them and stop submission
     if (Object.keys(newErrors).length > 0) {
@@ -218,25 +237,24 @@ export default function LabTechnicianSettings() {
             },
           },
           {
-            onSuccess: (updatedLabTechnician: any) => {
-
-              // merge updated data into existing user
-              const updatedUser = { ...user, ...updatedLabTechnician };
-              // update context + localStorage
-              login(updatedUser);
-
-              // Navigate to dashboard after successful update and notify
-              window.location.href = "/lab_technician/dashboard"; // 🔁 Hard reload of the page
+            onSuccess: (response: any) => {
+              // keep the signed-in user (header, greetings) in sync with the saved profile
+              if (response?.user) {
+                login({ ...user, ...response.user, userType: user.userType });
+              }
+              queryClient.invalidateQueries({ queryKey: ["labTechnicianProfile"] });
               toast.success("Profile updated successfully!", {
                 position: "top-right",
               });
             },
             onError: (error: any) => {
-              const errMsg = error?.response?.data?.message;
-              toast.error(
-                "Failed to update profile. Please try again. " + errMsg,
-                { position: "top-right" }
-              );
+              const data = error?.response?.data;
+              const errMsg =
+                (typeof data?.message === "string" && data.message) ||
+                "Please try again.";
+              toast.error("Failed to update profile. " + errMsg, {
+                position: "top-right",
+              });
             },
           }
         );
@@ -346,7 +364,7 @@ export default function LabTechnicianSettings() {
 
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber" className="text-teal-800">
-                  phoneNumber Number
+                  Phone Number
                 </Label>
                 <Input
                   id="phoneNumber"
@@ -393,13 +411,15 @@ export default function LabTechnicianSettings() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-
-                <RichTextEditor
+                <Label htmlFor="address" className="text-teal-800">
+                  Address
+                </Label>
+                <Input
+                  id="address"
+                  name="address"
                   value={profileData.address}
-                  onChange={(value) =>
-                    setProfileData((prev) => ({ ...prev, address: value }))
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white"
                 />
                 {errors.address && (
                   <p className="text-sm text-red-500">{errors.address}</p>
@@ -410,11 +430,12 @@ export default function LabTechnicianSettings() {
                 <Label htmlFor="experience" className="text-teal-800">
                   Experience
                 </Label>
-                <RichTextEditor
+                <Textarea
+                  id="experience"
+                  name="experience"
                   value={profileData.experience}
-                  onChange={(data: string) =>
-                    setProfileData({ ...profileData, experience: data })
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
                 />
                 {errors.experience && (
                   <p className="text-sm text-red-500">{errors.experience}</p>
@@ -425,38 +446,46 @@ export default function LabTechnicianSettings() {
                 <Label htmlFor="certifications" className="text-teal-800">
                   Qualifications & Certifications
                 </Label>
-                <RichTextEditor
+                <Textarea
+                  id="certifications"
+                  name="certifications"
                   value={profileData.certifications}
-                  onChange={(data: string) =>
-                    setProfileData({ ...profileData, certifications: data })
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
                 />
                 {errors.certifications && (
-                  <p className="text-sm text-red-500">
-                    {errors.certifications}
-                  </p>
+                  <p className="text-sm text-red-500">{errors.certifications}</p>
                 )}
               </div>
-            </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="about">About</Label>
-
-              <RichTextEditor
-                value={profileData.about}
-                onChange={(value) =>
-                  setProfileData((prev) => ({ ...prev, about: value }))
-                }
-              />
-              {errors.about && (
-                <p className="text-sm text-red-500">{errors.about}</p>
-              )}
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="about" className="text-teal-800">
+                  About
+                </Label>
+                <Textarea
+                  id="about"
+                  name="about"
+                  value={profileData.about}
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
+                />
+                {errors.about && (
+                  <p className="text-sm text-red-500">{errors.about}</p>
+                )}
+              </div>
             </div>
 
             <div>
               <Label htmlFor="profile_image" className="text-teal-800">
                 Profile Image
               </Label>
+              {profileData.profile_image && (
+                <img
+                  src={profileData.profile_image}
+                  alt="Current profile"
+                  className="h-20 w-20 rounded-full object-cover border my-2"
+                />
+              )}
               <ImageUpload
                 onUploadComplete={(url: string) => {
                   setProfileData((prev) => ({ ...prev, profile_image: url }));

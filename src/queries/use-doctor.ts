@@ -58,7 +58,8 @@ export const useUpdateProfileSettings = () => {
         `${URIS.doctor.updateDoctorProfile}/${doctorId}`,
         data
       );
-      return response.data.original; // automatically camelCased
+      // the update endpoint answers with a plain object (no "original" wrapper)
+      return response.data?.original ?? response.data;
     },
   });
 };

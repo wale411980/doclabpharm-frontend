@@ -52,7 +52,7 @@ export default function DoctorWallet() {
   const [bankAccount, setBankAccount] = useState<BankAccount>({
     bankName: "",
     accountName: "",
-    accountNumber: 0,
+    accountNumber: "",
     bankCode: "",
   });
 
@@ -60,19 +60,23 @@ export default function DoctorWallet() {
   const [remarks, setRemarks] = useState("");
   const [openBankSelect, setOpenBankSelect] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
 
   const transactionsPerPage = 15;
 
-  const { data: doctorWallet, isLoading } = useGetDoctorWallet();
+  const { data: doctorWallet, isLoading, refetch } = useGetDoctorWallet();
   const { mutate: saveBankAccount, isPending: isPendingBank } =
     useSaveBankAccount();
   const { mutate: withdrawMoney, isPending: isPendingWithdraw } =
     useWithdrawMoney();
 
-  const sortedHistories = doctorWallet?.histories?.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  // Newest first. Sort a copy: the query cache must not be mutated.
+  const sortedHistories = [...(doctorWallet?.histories ?? [])].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
+      b.id - a.id
   );
 
   const totalPages = Math.ceil(
@@ -117,10 +121,13 @@ export default function DoctorWallet() {
   const handleSaveAccount = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!bankAccount.accountNumber) {
+    // Kept as a string: account numbers can start with 0.
+    const accountNumber = String(bankAccount.accountNumber ?? "").trim();
+
+    if (!accountNumber) {
       newErrors.accountNumber = "Account number is required";
-    } else if (bankAccount.accountNumber.toString().length !== 10) {
-      newErrors.accountNumber = "Account number must be 10 digits";
+    } else if (!/^\d{10}$/.test(accountNumber)) {
+      newErrors.accountNumber = "Account number must be exactly 10 digits";
     }
 
     if (!bankAccount.bankName.trim()) {
@@ -136,21 +143,37 @@ export default function DoctorWallet() {
       return;
     }
 
+    setErrors({});
+
     // No errors – proceed to save
-    saveBankAccount(bankAccount, {
-      onSuccess: () => {
-        toast.success("Bank account added successfully!");
-        setShowAddAccountDialog(false);
-        setShowSuccessDialog(true);
-      },
-      onError: (error: any) => {
-        const errMsg = error?.response?.data?.message;
-        toast.error("Error adding bank account " + errMsg);
-      },
-    });
+    saveBankAccount(
+      { ...bankAccount, accountNumber },
+      {
+        onSuccess: (response: any) => {
+          const accountName = response?.data?.accountName;
+          toast.success("Bank account added successfully!");
+          setShowAddAccountDialog(false);
+          setSuccessMessage(
+            accountName
+              ? `Your bank account (${accountName}) has been verified and saved for withdrawals.`
+              : "Your bank account has been verified and saved for withdrawals."
+          );
+          setShowSuccessDialog(true);
+        },
+        onError: (error: any) => {
+          const errMsg = error?.response?.data?.message;
+          toast.error(
+            typeof errMsg === "string" && errMsg
+              ? errMsg
+              : "Error adding bank account. Please try again."
+          );
+        },
+      }
+    );
   };
 
   const handleSelectAccount = () => {
+    setErrors({});
     setShowSelectAccountDialog(false);
     setShowWithdrawAmountDialog(true);
   };
@@ -164,6 +187,10 @@ export default function DoctorWallet() {
       newErrors.withdrawAmount = "Amount is required";
     } else if (isNaN(amount) || amount < 1000) {
       newErrors.withdrawAmount = "Minimum amount allowed is ₦1,000";
+    } else if (!Number.isInteger(amount)) {
+      newErrors.withdrawAmount = "Enter a whole amount in naira (no decimals)";
+    } else if (amount > Number(doctorWallet.balance ?? 0)) {
+      newErrors.withdrawAmount = "Amount exceeds your available balance";
     }
 
     // If there are errors, show them and stop submission
@@ -172,34 +199,41 @@ export default function DoctorWallet() {
       return;
     }
 
+    setErrors({});
     setShowWithdrawAmountDialog(false);
     setShowConfirmDialog(true);
   };
 
   const handleFinalConfirm = () => {
-    // withdraw using mutation and show toast notification
-    withdrawMoney(
-      {
-        amount: Number(withdrawAmount),
-        remarks: remarks,
-        bankAccount: bankAccount,
-      } as Withdraw,
-      {
-        onSuccess: () => {
-          toast.success("Withdrawal request submitted successfully!");
-          setShowWithdrawAmountDialog(false);
-          setShowSuccessDialog(true);
-        },
-        onError: (error: any) => {
-          const errMsg = error?.response?.data?.message;
-          toast.error(`Error submitting withdrawal request. ${errMsg}`);
-        },
-      }
-    );
+    // The amount entered by the user is the amount requested and the amount
+    // shown everywhere; it is only cleared once the request has finished.
+    const amount = Number(withdrawAmount);
 
-    // Reset form data
-    setWithdrawAmount("");
-    setRemarks("");
+    withdrawMoney({ amount } as Withdraw, {
+      onSuccess: () => {
+        toast.success("Withdrawal request submitted successfully!");
+        setShowConfirmDialog(false);
+        setSuccessMessage(
+          `Your withdrawal of ${formatAmount(
+            amount
+          )} has been submitted and will be paid into your bank account.`
+        );
+        setShowSuccessDialog(true);
+        setWithdrawAmount("");
+        setRemarks("");
+        refetch();
+      },
+      onError: (error: any) => {
+        const errMsg = error?.response?.data?.message;
+        toast.error(
+          typeof errMsg === "string" && errMsg
+            ? errMsg
+            : "Error submitting withdrawal request. Please try again."
+        );
+        setShowConfirmDialog(false);
+        refetch();
+      },
+    });
   };
 
   const formatAmount = (amount: number) => {
@@ -432,11 +466,13 @@ export default function DoctorWallet() {
             <Input
               id="account-number"
               placeholder="0000000000"
+              inputMode="numeric"
+              maxLength={10}
               value={bankAccount.accountNumber}
               onChange={(e) =>
                 setBankAccount({
                   ...bankAccount,
-                  accountNumber: Number(e.target.value),
+                  accountNumber: e.target.value.replace(/\D/g, "").slice(0, 10),
                 })
               }
             />
@@ -480,10 +516,7 @@ export default function DoctorWallet() {
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Successful
             </h2>
-            <p className="text-gray-600 text-sm mb-6">
-              Your Bank Account have been successfully added to your payment
-              Methods
-            </p>
+            <p className="text-gray-600 text-sm mb-6">{successMessage}</p>
             <Button
               variant="outline"
               className="w-full"
@@ -562,7 +595,7 @@ export default function DoctorWallet() {
       <Dialog
         open={showConfirmDialog}
         onOpenChange={(open) => {
-          if (!isPendingBank) setShowConfirmDialog(open);
+          if (!isPendingWithdraw) setShowConfirmDialog(open);
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -579,6 +612,7 @@ export default function DoctorWallet() {
             <Button
               variant="outline"
               onClick={() => setShowConfirmDialog(false)}
+              disabled={isPendingWithdraw}
             >
               Cancel
             </Button>

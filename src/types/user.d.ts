@@ -100,6 +100,13 @@ export type Medicines = {
   deletedAt: null;
   dosage: string;
   description: string;
+  pharmacy?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    city?: string | null;
+    state?: string | null;
+  } | null;
 };
 
 export interface Hospital {

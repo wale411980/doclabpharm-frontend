@@ -16,6 +16,7 @@ function LabTechnicianHeader({ onMenuClick }: HeaderProps) {
     "/lab_technician/dashboard": "Dashboard",
     "/lab_technician/patients": "Patients",
     "/lab_technician/appointments": "Appointments",
+    "/lab_technician/availability": "Availability",
     "/lab_technician/diagnosis": "Diagnosis",
     "/lab_technician/wallet": "Wallet",
     "/lab_technician/payments": "Payments",

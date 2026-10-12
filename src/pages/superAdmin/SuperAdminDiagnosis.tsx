@@ -57,6 +57,7 @@ import {
   useSuperAdminReportsUpdate,
   useSuperAdminReportsDelete,
   useSuperAdminReportsAdd,
+  useSuperAdminLabList,
 } from "@/queries";
 import type {
   DiagnosisList,
@@ -153,6 +154,9 @@ export default function SuperAdminDiagnosis() {
 
   // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  // A diagnostic service always belongs to the laboratory that provides it
+  const { data: laboratories } = useSuperAdminLabList();
+  const [serviceLabId, setServiceLabId] = useState(0);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [isReportViewDialogOpen, setIsReportViewDialogOpen] = useState(false);
@@ -339,7 +343,13 @@ export default function SuperAdminDiagnosis() {
     )
       return;
 
+    if (!serviceLabId) {
+      toast.error("Select the laboratory that provides this service.");
+      return;
+    }
+
     const newService: AddDiagnosticService = {
+      labTechnicianId: serviceLabId,
       name: formData.name,
       details: formData.details,
       price: Number.parseInt(formData.price),
@@ -723,6 +733,28 @@ export default function SuperAdminDiagnosis() {
                       </div>
                     </div>
 
+                    <div>
+                      <Label htmlFor="serviceLabId">Laboratory</Label>
+                      <Select
+                        value={serviceLabId ? String(serviceLabId) : ""}
+                        onValueChange={(value) =>
+                          setServiceLabId(Number(value))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select the laboratory that provides it" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(laboratories ?? []).map((lab) => (
+                            <SelectItem key={lab.id} value={String(lab.id)}>
+                              {lab.businessName ||
+                                `${lab.firstName} ${lab.lastName}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <p className="text-sm text-gray-600">
                       This service will be available for new diagnostic requests
                     </p>
@@ -751,6 +783,12 @@ export default function SuperAdminDiagnosis() {
                         <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">
                           {service.categoryName}
                         </p>
+                        {service.labTechnician && (
+                          <p className="text-xs text-gray-500 truncate">
+                            {service.labTechnician.businessName ||
+                              `${service.labTechnician.firstName} ${service.labTechnician.lastName}`}
+                          </p>
+                        )}
                       </div>
                       <Badge
                         variant={service.status ? "default" : "secondary"}

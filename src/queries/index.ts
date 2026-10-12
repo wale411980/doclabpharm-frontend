@@ -7,3 +7,4 @@ export * from "./use-admin";
 export * from "./use-superAdmin";
 export * from "./use-search";
 export * from "./use-general";
+export * from "./use-availability";

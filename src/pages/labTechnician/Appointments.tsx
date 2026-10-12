@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, CalendarClock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +32,7 @@ interface CalendarDay {
 }
 
 export default function AppointmentsDashboard() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: mostRecentAppointments } =
@@ -96,10 +98,10 @@ export default function AppointmentsDashboard() {
 
   const filteredTodaysAppointments = mostRecentAppointments.filter(
     (appointment: MostRecentAppointments) =>
-      appointment.user.firstName
+      (appointment.user?.firstName ?? "")
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      appointment.user.lastName
+      (appointment.user?.lastName ?? "")
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
   );
@@ -117,6 +119,13 @@ export default function AppointmentsDashboard() {
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="flex flex-col md:flex-row justify-end items-start md:items-center mb-6 gap-4">
+        <Button
+          className="bg-green-700 hover:bg-green-800 w-full md:w-auto"
+          onClick={() => navigate("/lab_technician/availability")}
+        >
+          <CalendarClock className="h-4 w-4 mr-2" />
+          Set Availability
+        </Button>
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
@@ -138,6 +147,13 @@ export default function AppointmentsDashboard() {
                     Appointment's Schedule
                   </h2>
                   <div className="space-y-4">
+                    {paginatedAppointments.length === 0 && (
+                      <p className="text-sm text-gray-600 bg-white rounded-md p-4">
+                        No test appointments yet. Patients can book you once
+                        you have active diagnostic services; set your
+                        availability so they know when to come in.
+                      </p>
+                    )}
                     {paginatedAppointments.map((appointment) => (
                       <Card key={appointment.id} className="bg-white">
                         <CardContent className="p-4">
@@ -147,26 +163,34 @@ export default function AppointmentsDashboard() {
                                 <div className="font-semibold text-[#0A3A40]">
                                   {appointment.time}
                                 </div>
+                                {appointment.date && (
+                                  <div className="text-xs text-gray-500">
+                                    {format(
+                                      new Date(appointment.date),
+                                      "MMM d, yyyy"
+                                    )}
+                                  </div>
+                                )}
                               </div>
                               <Avatar className="h-12 w-12 border-2 border-[#E6F2F0]">
                                 <AvatarImage
                                   src={
-                                    appointment.user.profileImage ||
+                                    appointment.user?.profileImage ||
                                     "/placeholder.svg"
                                   }
-                                  alt={appointment.user.firstName}
+                                  alt={appointment.user?.firstName}
                                 />
                                 <AvatarFallback>
-                                  {`${appointment.user.firstName} ${appointment.user.lastName}`
+                                  {`${appointment.user?.firstName ?? ""} ${appointment.user?.lastName ?? ""}`
                                     ?.split(" ")
                                     ?.map((n) => n[0])
                                     ?.join("")}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <div className="font-semibold">{`${appointment.user.firstName} ${appointment.user.lastName}`}</div>
+                                <div className="font-semibold">{`${appointment.user?.firstName ?? ""} ${appointment.user?.lastName ?? ""}`}</div>
                                 <div className="text-sm text-gray-500">
-                                  {appointment.diagnosis.name}
+                                  {appointment.diagnosis?.name}
                                 </div>
                               </div>
                             </div>
@@ -193,12 +217,12 @@ export default function AppointmentsDashboard() {
                         Previous
                       </Button>
                       <span className="text-sm text-gray-600">
-                        Page {currentPage} of {totalPages}
+                        Page {currentPage} of {Math.max(totalPages, 1)}
                       </span>
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage >= totalPages}
                         onClick={() => setCurrentPage((prev) => prev + 1)}
                       >
                         Next

@@ -84,6 +84,7 @@ import PaymentDashboard from "@/pages/pharmacist/Payment";
 import ProductList from "@/pages/pharmacist/ProductList";
 import ProductCategory from "@/pages/pharmacist/ProductCategory";
 import PharmacyWallet from "@/pages/pharmacist/PharmacyWallet";
+import PharmacyAvailability from "@/pages/pharmacist/PharmacyAvailability";
 
 // Lab Technician imports
 import Dashboard from "@/pages/labTechnician/Dashboard";
@@ -93,6 +94,7 @@ import LabTechnicianWallet from "@/pages/labTechnician/LabTechnicianWallet";
 import LabTechnicianSettings from "@/pages/labTechnician/LabTechnicianSettings";
 import PatientListLab from "@/pages/labTechnician/PatientListLab";
 import PatientDetailLab from "@/pages/labTechnician/PatientDetailLab";
+import LabAvailability from "@/pages/labTechnician/LabAvailability";
 
 // Admin imports
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -270,6 +272,10 @@ function router() {
               element={<ProductCategory />}
             />
             <Route path="/pharmacy/wallet" element={<PharmacyWallet />} />
+            <Route
+              path="/pharmacy/availability"
+              element={<PharmacyAvailability />}
+            />
           </Route>
         </Route>
 
@@ -281,6 +287,10 @@ function router() {
             <Route
               path="/lab_technician/appointments"
               element={<AppointmentsDashboard />}
+            />
+            <Route
+              path="/lab_technician/availability"
+              element={<LabAvailability />}
             />
             <Route
               path="/lab_technician/wallet"

@@ -13,6 +13,8 @@ export default function Medications() {
   const [searchQuery, setSearchQuery] = useState("");
   const cartContext = useAuth().cartContext;
   const addItem = cartContext?.addItem;
+  const cartItems = cartContext?.items ?? [];
+  const updateItem = cartContext?.updateItem;
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -85,7 +87,18 @@ export default function Medications() {
 
         {/* Medications Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginatedMedications.map((medication: Medicines) => (
+          {paginatedMedications.map((medication: Medicines) => {
+            // Live stock from the server (not a copy saved at listing time).
+            const stock = Math.max(0, Number(medication.quantity) || 0);
+            const cartIndex = cartItems.findIndex(
+              (item) =>
+                item.service_type === "med" && item.product_id === medication.id
+            );
+            const inCart = cartIndex >= 0 ? cartItems[cartIndex].qty || 0 : 0;
+            const canAdd =
+              medication.status === "active" && stock > 0 && inCart < stock;
+
+            return (
             <Card
               key={medication.id}
               className="bg-green-100 border-0 overflow-hidden"
@@ -102,6 +115,22 @@ export default function Medications() {
                 <p className="text-gray-600 text-sm">{medication.volume}</p>
                 <p className="text-gray-700 text-sm mt-1">
                   {medication.details}
+                </p>
+                {medication.pharmacy && (
+                  <p className="text-gray-600 text-xs mt-1">
+                    Sold by {medication.pharmacy.firstName}{" "}
+                    {medication.pharmacy.lastName}
+                  </p>
+                )}
+                <p className="text-gray-800 text-sm font-semibold mt-1">
+                  ₦{Number(medication.price).toLocaleString()}
+                </p>
+                <p
+                  className={`text-xs mt-1 ${
+                    stock > 0 ? "text-green-800" : "text-red-600"
+                  }`}
+                >
+                  {stock > 0 ? `In stock: ${stock}` : "Out of stock"}
                 </p>
                 <div className="mt-2">
                   <Badge
@@ -120,30 +149,47 @@ export default function Medications() {
                 <Button
                   size="sm"
                   onClick={() => {
-                    if (addItem) {
+                    if (!addItem || !canAdd) return;
+
+                    if (cartIndex >= 0 && updateItem) {
+                      // Already in the cart: add one more, never above stock.
+                      updateItem(cartIndex, {
+                        qty: Math.min(inCart + 1, stock),
+                        price: medication.price,
+                        stock,
+                      });
+                    } else {
                       addItem({
                         service_type: "med",
                         product_id: medication.id,
                         qty: 1,
                         price: medication.price,
                         name: medication.name,
+                        stock,
                       });
-                      navigate("/user/cart");
                     }
+                    navigate("/user/cart");
                   }}
                   className={`${
                     medication.status === "active"
                       ? "bg-green-700 hover:bg-green-800"
                       : "bg-green-600 hover:bg-green-700"
                   } text-white rounded-md flex items-center gap-1`}
-                  disabled={medication.status !== "active" || !addItem}
+                  disabled={!canAdd || !addItem}
                 >
                   <ShoppingCart className="h-4 w-4" />
-                  <span>Add to Cart</span>
+                  <span>
+                    {stock <= 0
+                      ? "Out of Stock"
+                      : inCart >= stock
+                      ? "Max in Cart"
+                      : "Add to Cart"}
+                  </span>
                 </Button>
               </CardFooter>
             </Card>
-          ))}
+            );
+          })}
         </div>
 
         {totalPages > 1 && (

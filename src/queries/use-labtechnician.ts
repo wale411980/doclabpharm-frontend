@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   LabTechnician,
   DiagnosticService,
@@ -19,6 +19,24 @@ import type {
 } from "@/types";
 import api from "@/lib/axios";
 import URIS from "@/queries/uris.json";
+
+// Services, categories, reports and the dashboard figures all derive from the
+// same data: refresh them together after any change so nothing is shown stale.
+const useRefreshLabData = () => {
+  const queryClient = useQueryClient();
+
+  return () => {
+    [
+      "getAllDiagnosisList",
+      "getDiagnosisByCategories",
+      "getDiagnosisByCategoryId",
+      "labTechnicianPatientReports",
+      "labTechnicianPatientReportById",
+      "labTechnicianRecentAppointments",
+      "labTechnicianStats",
+    ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+  };
+};
 
 export const useGetLabTechnicianProfile = () => {
   return useQuery<LabTechnician>({
@@ -43,6 +61,23 @@ export const useUpdateLabTechnicianProfileSettings = () => {
     }) => {
       const response = await api.put(
         `${URIS.labTechnician.updateLabTechnicianProfile}/${labTechnicianId}`,
+        data
+      );
+      return response.data;
+    },
+  });
+};
+
+// change the logged-in lab technician's own password
+export const useLabTechnicianUpdatePassword = () => {
+  return useMutation({
+    mutationFn: async ({
+      data,
+    }: {
+      data: { oldPassword: string; newPassword: string; confirmPassword: string };
+    }) => {
+      const response = await api.post(
+        URIS.labTechnician.labTechnicianUpdatePassword,
         data
       );
       return response.data;
@@ -189,6 +224,8 @@ export const useGetLabTechnicianAllDiagnosisLst = () => {
 
 // add lab technician diagnosis
 export const useAddLabTechnicianDiagnosis = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async (data: AddDiagnosticService) => {
       const response = await api.post(
@@ -197,11 +234,14 @@ export const useAddLabTechnicianDiagnosis = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
 // update lab technician diagnosis by id
 export const useUpdateLabTechnicianDiagnosis = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async ({
       id,
@@ -216,11 +256,14 @@ export const useUpdateLabTechnicianDiagnosis = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
 // delete lab technician diagnosis
 export const useDeleteLabTechnicianDiagnosis = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await api.delete(
@@ -228,6 +271,7 @@ export const useDeleteLabTechnicianDiagnosis = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
@@ -264,6 +308,8 @@ export const useGetLabTechnicianDiagnosisByCategoryId = (
 
 // add lab technician diagnosis by category
 export const useAddLabTechnicianDiagnosisByCategory = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async (data: AddDiagnosisCategory) => {
       const response = await api.post(
@@ -272,11 +318,14 @@ export const useAddLabTechnicianDiagnosisByCategory = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
 // update lab technician diagnosis by category id
 export const useUpdateLabTechnicianDiagnosisByCategory = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async ({
       id,
@@ -291,11 +340,14 @@ export const useUpdateLabTechnicianDiagnosisByCategory = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
 // delete lab technician diagnosis by category
 export const useDeleteLabTechnicianDiagnosisByCategory = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await api.delete(
@@ -303,10 +355,13 @@ export const useDeleteLabTechnicianDiagnosisByCategory = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
 export const useReportsUpdate = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async ({
       id,
@@ -321,10 +376,13 @@ export const useReportsUpdate = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
 export const useReportsDelete = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async ({ id }: { id: number }) => {
       const response = await api.delete(
@@ -332,11 +390,14 @@ export const useReportsDelete = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };
 
 // add lab reports
 export const useReportsAdd = () => {
+  const refreshLabData = useRefreshLabData();
+
   return useMutation({
     mutationFn: async ({ data }: { data: ReportsAdd }) => {
       const response = await api.post(
@@ -345,5 +406,6 @@ export const useReportsAdd = () => {
       );
       return response.data;
     },
+    onSuccess: refreshLabData,
   });
 };

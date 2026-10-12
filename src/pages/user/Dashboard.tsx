@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import {
   useGetUserAppointments,
   useGetUserReport,
-  useUserVitals,
+  useUpdateUserVitals,
   useGetUserVitals,
   useSendDeviceToken,
 } from "@/queries";
@@ -82,8 +82,12 @@ export default function HealthDashboard() {
   const [showDoctors] = useState(false);
   const [vitals, setVitals] = useState({
     bloodPressure: "",
-    heightCm: "",
-    weightKg: "",
+    pulse: "",
+    dailySteps: "",
+    stepsGoal: "",
+    waterIntakeL: "",
+    waterGoalL: "",
+    vitalsUpdatedAt: "",
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -185,17 +189,34 @@ export default function HealthDashboard() {
 
   useEffect(() => {
     if (getUserVitals) {
+      // pulse / activity fields come from the same profile payload
+      const details = getUserVitals as typeof getUserVitals & {
+        pulse?: number | string | null;
+        dailySteps?: number | string | null;
+        stepsGoal?: number | string | null;
+        waterIntakeL?: number | string | null;
+        waterGoalL?: number | string | null;
+        vitalsUpdatedAt?: string | null;
+      };
+      const asText = (value: number | string | null | undefined) =>
+        value === null || value === undefined ? "" : String(value);
+
       setVitals({
-        bloodPressure: getUserVitals.bloodPressure || "",
-        heightCm: getUserVitals.heightCm || "",
-        weightKg: getUserVitals.weightKg || "",
+        bloodPressure: details.bloodPressure || "",
+        pulse: asText(details.pulse),
+        dailySteps: asText(details.dailySteps),
+        stepsGoal: asText(details.stepsGoal),
+        waterIntakeL: asText(details.waterIntakeL),
+        waterGoalL: asText(details.waterGoalL),
+        vitalsUpdatedAt: details.vitalsUpdatedAt || "",
       });
     }
   }, [getUserVitals]);
 
   const { data: userAppointments, isLoading } = useGetUserAppointments();
   const { data: userReport } = useGetUserReport();
-  const { mutate: userVitals } = useUserVitals();
+  const { mutate: userVitals, isPending: isSavingVitals } =
+    useUpdateUserVitals();
 
   if (!userAppointments || !userReport) {
     return (
@@ -213,30 +234,107 @@ export default function HealthDashboard() {
     );
   }
 
+  const openVitalsModal = () => {
+    setEditedVitals({ ...vitals });
+    setIsEditModalOpen(true);
+  };
+
   const handleSaveVitals = () => {
+    const bloodPressure = editedVitals.bloodPressure.replace(/\s+/g, "");
+
+    if (bloodPressure && !/^\d{2,3}\/\d{2,3}$/.test(bloodPressure)) {
+      toast.error("Enter blood pressure like 120/80.", {
+        position: "top-right",
+      });
+      return;
+    }
+
+    const toNumber = (value: string) => {
+      if (value.trim() === "") return null;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : NaN;
+    };
+
+    const numbers = {
+      pulse: toNumber(editedVitals.pulse),
+      dailySteps: toNumber(editedVitals.dailySteps),
+      stepsGoal: toNumber(editedVitals.stepsGoal),
+      waterIntakeL: toNumber(editedVitals.waterIntakeL),
+      waterGoalL: toNumber(editedVitals.waterGoalL),
+    };
+
+    if (Object.values(numbers).some((value) => Number.isNaN(value))) {
+      toast.error("Please enter valid numbers.", { position: "top-right" });
+      return;
+    }
+
     userVitals(
       {
-        bloodPressure: editedVitals.bloodPressure,
-        heightCm: editedVitals.heightCm,
-        weightKg: editedVitals.weightKg,
+        bloodPressure: bloodPressure || null,
+        ...numbers,
       },
       {
         onSuccess: () => {
-          setVitals(editedVitals);
+          setVitals({
+            ...editedVitals,
+            bloodPressure,
+            vitalsUpdatedAt: new Date().toISOString(),
+          });
           setIsEditModalOpen(false);
           toast.success("Vitals updated successfully!", {
             position: "top-right",
           });
         },
-        onError: (error) => {
+        onError: (error: any) => {
           console.error("Failed to update vitals:", error);
-          toast.error("Failed to update vitals. Please try again.", {
-            position: "top-right",
-          });
+          const data = error?.response?.data;
+          const firstFieldError = data?.errors
+            ? (Object.values(data.errors)[0] as string[] | undefined)?.[0]
+            : undefined;
+          toast.error(
+            firstFieldError ||
+              data?.message ||
+              "Failed to update vitals. Please try again.",
+            { position: "top-right" }
+          );
         },
       }
     );
   };
+
+  // What the three vitals cards show
+  const lastMeasured = vitals.vitalsUpdatedAt
+    ? new Date(vitals.vitalsUpdatedAt).toLocaleDateString()
+    : "Not recorded yet";
+
+  const [systolic, diastolic] = vitals.bloodPressure
+    .split("/")
+    .map((part) => Number(part));
+  const bloodPressureLabel = !vitals.bloodPressure
+    ? "No data"
+    : systolic < 90 || diastolic < 60
+    ? "Low"
+    : systolic < 120 && diastolic < 80
+    ? "Normal"
+    : systolic < 140 && diastolic < 90
+    ? "Slightly elevated"
+    : "High";
+
+  const pulseValue = Number(vitals.pulse);
+  const pulseLabel = !vitals.pulse
+    ? "No data"
+    : pulseValue < 60
+    ? "Below resting range"
+    : pulseValue <= 100
+    ? "Normal"
+    : "Above resting range";
+
+  const steps = Number(vitals.dailySteps) || 0;
+  const stepsGoal = Number(vitals.stepsGoal) || 0;
+  const water = Number(vitals.waterIntakeL) || 0;
+  const waterGoal = Number(vitals.waterGoalL) || 0;
+  const progressOf = (value: number, goal: number) =>
+    goal > 0 ? Math.min(100, Math.round((value / goal) * 100)) : 0;
 
   const handleInputChange = (
     field: keyof typeof editedVitals,
@@ -284,6 +382,14 @@ export default function HealthDashboard() {
               Book Appointments
             </Button>
             <Button
+              variant="outline"
+              className="flex items-center gap-2 border-emerald-700 text-emerald-700 text-xl font-bold"
+              onClick={() => navigate("/lab/select")}
+            >
+              <Calendar className="h-4 w-4" />
+              Book a Lab Technician
+            </Button>
+            <Button
               className="bg-emerald-700 hover:bg-emerald-800 flex items-center gap-2 text-xl font-bold"
               onClick={() => navigate("/patient/booking/select-test")}
             >
@@ -300,17 +406,21 @@ export default function HealthDashboard() {
                 <h3 className="text-lg font-medium text-white">
                   Blood Pressure
                 </h3>
-                <p className="text-sm text-green-100">Last measured: Today</p>
+                <p className="text-sm text-green-100">
+                  Last measured: {lastMeasured}
+                </p>
               </CardHeader>
 
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-4xl font-bold">0/0</div>
+                    <div className="text-4xl font-bold">
+                      {vitals.bloodPressure || "--/--"}
+                    </div>
                     <div
                       className={cn("mt-1 text-sm font-medium text-green-700")}
                     >
-                      No data
+                      {bloodPressureLabel}
                     </div>
                   </div>
 
@@ -326,12 +436,15 @@ export default function HealthDashboard() {
                 </div>
               </CardContent>
 
-              <CardFooter className="flex items-center justify-between bg-slate-50 p-4">
+              <CardFooter className="flex items-center justify-end bg-slate-50 p-4">
                 <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full"
-                ></Button>
+                  size="sm"
+                  variant="outline"
+                  className="border-emerald-700 text-emerald-700 hover:bg-emerald-50"
+                  onClick={openVitalsModal}
+                >
+                  Update
+                </Button>
               </CardFooter>
             </Card>
           </motion.div>
@@ -340,17 +453,24 @@ export default function HealthDashboard() {
             <Card className="overflow-hidden">
               <CardHeader className={cn("pb-2 pt-4 bg-teal-900")}>
                 <h3 className="text-lg font-medium text-white">Pulse</h3>
-                <p className="text-sm text-green-100">Last measured: Today</p>
+                <p className="text-sm text-green-100">
+                  Last measured: {lastMeasured}
+                </p>
               </CardHeader>
 
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-4xl font-bold">0</div>
+                    <div className="text-4xl font-bold">
+                      {vitals.pulse || "--"}
+                      {vitals.pulse && (
+                        <span className="ml-1 text-base font-medium">bpm</span>
+                      )}
+                    </div>
                     <div
                       className={cn("mt-1 text-sm font-medium text-green-700")}
                     >
-                      No data
+                      {pulseLabel}
                     </div>
                   </div>
 
@@ -379,12 +499,15 @@ export default function HealthDashboard() {
                 </div>
               </CardContent>
 
-              <CardFooter className="flex items-center justify-between bg-slate-50 p-4">
+              <CardFooter className="flex items-center justify-end bg-slate-50 p-4">
                 <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full"
-                ></Button>
+                  size="sm"
+                  variant="outline"
+                  className="border-emerald-700 text-emerald-700 hover:bg-emerald-50"
+                  onClick={openVitalsModal}
+                >
+                  Update
+                </Button>
               </CardFooter>
             </Card>
           </motion.div>
@@ -403,29 +526,45 @@ export default function HealthDashboard() {
                   <div>
                     <div className="mb-1 flex items-center justify-between">
                       <span className="text-sm font-medium">Steps</span>
-                      <span className="text-sm font-medium">0 / 0</span>
+                      <span className="text-sm font-medium">
+                        {steps.toLocaleString()} / {stepsGoal.toLocaleString()}
+                      </span>
                     </div>
-                    <Progress value={0} className="h-2" />
+                    <Progress
+                      value={progressOf(steps, stepsGoal)}
+                      className="h-2"
+                    />
                   </div>
 
                   <div>
                     <div className="mb-1 flex items-center justify-between">
                       <span className="text-sm font-medium">Water intake</span>
-                      <span className="text-sm font-medium">0 / 0L</span>
+                      <span className="text-sm font-medium">
+                        {water} / {waterGoal}L
+                      </span>
                     </div>
-                    <Progress value={0} className="h-2" />
+                    <Progress
+                      value={progressOf(water, waterGoal)}
+                      className="h-2"
+                    />
                   </div>
                 </div>
               </CardContent>
 
               <CardFooter className="flex items-center justify-between bg-slate-50 p-4">
-                <span className="text-sm font-medium">Stable</span>
-                <span className="text-sm font-medium">History</span>
+                <span className="text-sm font-medium">
+                  {stepsGoal > 0 || waterGoal > 0
+                    ? "Today's activity"
+                    : "Set your daily goals"}
+                </span>
                 <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full"
-                ></Button>
+                  size="sm"
+                  variant="outline"
+                  className="border-emerald-700 text-emerald-700 hover:bg-emerald-50"
+                  onClick={openVitalsModal}
+                >
+                  Update
+                </Button>
               </CardFooter>
             </Card>
           </motion.div>
@@ -613,7 +752,8 @@ export default function HealthDashboard() {
                 <div className="flex items-center">
                   <div className="mr-4">
                     <div className="text-sm">
-                      Get information about your medications
+                      Choose a laboratory and book a test appointment at a
+                      time it is available.
                     </div>
                   </div>
                   <div className="ml-auto">
@@ -629,7 +769,7 @@ export default function HealthDashboard() {
                   size="icon"
                   variant="ghost"
                   className="rounded-full bg-emerald-600/50 hover:bg-emerald-600 text-white"
-                  onClick={() => navigate("/patient/booking/select-test")}
+                  onClick={() => navigate("/lab/select")}
                 >
                   <ArrowRight className="h-5 w-5" />
                 </Button>
@@ -678,13 +818,14 @@ export default function HealthDashboard() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl text-green-800">
-              Edit Current Vitals
+              Update Vitals & Activity
             </DialogTitle>
             <DialogDescription>
-              Update your current health measurements.
+              Record your latest blood pressure, pulse and today's activity.
+              Leave a field empty if you have nothing to record.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-6 py-4">
+          <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <label
                 htmlFor="bloodPressure"
@@ -694,38 +835,90 @@ export default function HealthDashboard() {
               </label>
               <Input
                 id="bloodPressure"
+                type="text"
+                placeholder="120/80"
                 value={editedVitals.bloodPressure}
-                onChange={(e) =>
-                  handleInputChange("bloodPressure", e.target.value)
-                }
+                onChange={(e) => handleInputChange("bloodPressure", e.target.value)}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label
-                htmlFor="heightCm"
+                htmlFor="pulse"
                 className="text-right font-medium text-green-800"
               >
-                Height (cm)
+                Pulse (bpm)
               </label>
               <Input
-                id="heightCm"
-                value={editedVitals.heightCm}
-                onChange={(e) => handleInputChange("heightCm", e.target.value)}
+                id="pulse"
+                type="number" min="0"
+                placeholder="72"
+                value={editedVitals.pulse}
+                onChange={(e) => handleInputChange("pulse", e.target.value)}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label
-                htmlFor="weightKg"
+                htmlFor="dailySteps"
                 className="text-right font-medium text-green-800"
               >
-                Weight (kg)
+                Steps today
               </label>
               <Input
-                id="weightKg"
-                value={editedVitals.weightKg}
-                onChange={(e) => handleInputChange("weightKg", e.target.value)}
+                id="dailySteps"
+                type="number" min="0"
+                placeholder="4500"
+                value={editedVitals.dailySteps}
+                onChange={(e) => handleInputChange("dailySteps", e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="stepsGoal"
+                className="text-right font-medium text-green-800"
+              >
+                Steps goal
+              </label>
+              <Input
+                id="stepsGoal"
+                type="number" min="0"
+                placeholder="8000"
+                value={editedVitals.stepsGoal}
+                onChange={(e) => handleInputChange("stepsGoal", e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="waterIntakeL"
+                className="text-right font-medium text-green-800"
+              >
+                Water today (L)
+              </label>
+              <Input
+                id="waterIntakeL"
+                type="number" min="0" step="0.1"
+                placeholder="1.5"
+                value={editedVitals.waterIntakeL}
+                onChange={(e) => handleInputChange("waterIntakeL", e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="waterGoalL"
+                className="text-right font-medium text-green-800"
+              >
+                Water goal (L)
+              </label>
+              <Input
+                id="waterGoalL"
+                type="number" min="0" step="0.1"
+                placeholder="3"
+                value={editedVitals.waterGoalL}
+                onChange={(e) => handleInputChange("waterGoalL", e.target.value)}
                 className="col-span-3"
               />
             </div>
@@ -742,8 +935,9 @@ export default function HealthDashboard() {
               type="button"
               className="bg-green-700 hover:bg-green-800 text-white"
               onClick={handleSaveVitals}
+              disabled={isSavingVitals}
             >
-              Save Changes
+              {isSavingVitals ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>

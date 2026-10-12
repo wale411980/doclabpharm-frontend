@@ -12,8 +12,10 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { useGetLabAvailability } from "@/queries";
 
+// Used only for laboratories that have not published their availability yet.
 const timeSlots = [
   "10:00 AM",
   "10:30 AM",
@@ -53,6 +55,25 @@ export default function SelectDateTime() {
     description: searchParams.get("testDescription") || "",
     preparation: searchParams.get("testPreparation") || "",
   };
+
+  // The laboratory's published availability (dates) and, once a date is
+  // picked, the bookable times on that date.
+  const labIdNumber = Number.parseInt(labData.id, 10) || 0;
+  const { data: labSchedule } = useGetLabAvailability(labIdNumber);
+  const { data: labDay, isFetching: isFetchingDay } = useGetLabAvailability(
+    selectedDate ? labIdNumber : 0,
+    selectedDate || undefined
+  );
+
+  const hasSchedule = !!labSchedule?.hasSchedule;
+  const availableDates = hasSchedule
+    ? (labSchedule?.availabilities ?? []).map((entry) => parseISO(entry.date))
+    : undefined;
+  const availableTimes: string[] = hasSchedule
+    ? selectedDate
+      ? labDay?.slots ?? []
+      : []
+    : timeSlots;
 
   const renderProgressSteps = () => {
     const steps = [
@@ -131,6 +152,8 @@ export default function SelectDateTime() {
     const params = new URLSearchParams({
       // Lab data
       labId: labData.id,
+      labName: labData.name,
+      labAddress: labData.address,
       // Test data
       testId: testData.id,
       testName: testData.name,
@@ -180,10 +203,14 @@ export default function SelectDateTime() {
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
                   <DatePicker
                     selected={selectedDate ? new Date(selectedDate) : null}
-                    onChange={(date) =>
-                      setSelectedDate(format(date as Date, "yyyy-MM-dd"))
-                    }
+                    onChange={(date) => {
+                      if (!date) return;
+                      setSelectedDate(format(date as Date, "yyyy-MM-dd"));
+                      setSelectedTime("");
+                      setError("");
+                    }}
                     minDate={new Date()}
+                    includeDates={availableDates}
                     dateFormat="dd-MM-yyyy"
                     placeholderText="dd-mm-yyyy"
                     className="pl-10 w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-sm sm:text-base"
@@ -196,18 +223,36 @@ export default function SelectDateTime() {
                 <label className="block text-sm font-medium text-gray-700">
                   Appointment Time
                 </label>
-                <Select value={selectedTime} onValueChange={setSelectedTime}>
+                <Select
+                  value={selectedTime}
+                  onValueChange={setSelectedTime}
+                  disabled={availableTimes.length === 0}
+                >
                   <SelectTrigger className="w-full bg-white border-gray-300 text-sm sm:text-base">
                     <SelectValue placeholder="Select time" />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeSlots.map((time) => (
+                    {availableTimes.map((time) => (
                       <SelectItem key={time} value={time}>
                         {time}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {hasSchedule && !selectedDate && (
+                  <p className="text-xs text-gray-600">
+                    Pick one of the dates this laboratory is available to see
+                    its times.
+                  </p>
+                )}
+                {hasSchedule &&
+                  selectedDate &&
+                  !isFetchingDay &&
+                  availableTimes.length === 0 && (
+                    <p className="text-xs text-red-600">
+                      No times are left on this date. Please pick another date.
+                    </p>
+                  )}
               </div>
             </div>
 
@@ -242,6 +287,17 @@ export default function SelectDateTime() {
                         ₦{testData.price.toLocaleString()}
                       </p>
                     </div>
+                    {labData.name && (
+                      <div className="sm:col-span-2">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          Laboratory
+                        </p>
+                        <p className="text-sm sm:text-base text-gray-900">
+                          {labData.name}
+                          {labData.address ? ` - ${labData.address}` : ""}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

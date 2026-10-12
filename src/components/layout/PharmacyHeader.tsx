@@ -18,6 +18,7 @@ function PharmacyHeader({ onMenuClick }: HeaderProps) {
     "/pharmacy/products-list": "Products List",
     "/pharmacy/products-category": "Products Category",
     "/pharmacy/payments": "Payments",
+    "/pharmacy/availability": "Availability",
     "/pharmacy/wallet": "Wallet",
     "/pharmacy/settings": "Settings",
   };

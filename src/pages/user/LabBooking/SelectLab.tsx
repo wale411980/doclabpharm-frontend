@@ -41,7 +41,9 @@ export default function SelectLab() {
   const handleBookTest = (lab: any) => {
     const labData = {
       id: lab.id,
-      name: lab.businessName,
+      name:
+        lab.businessName ||
+        `${lab.firstName ?? ""} ${lab.lastName ?? ""}`.trim(),
       address: [lab.address, lab.city, lab.state].filter(Boolean).join(", ") || "Address not available",
       rating: 4.5,
       distance: "2.3 km away",
@@ -149,7 +151,22 @@ export default function SelectLab() {
             {/* Laboratory Cards Grid */}
             {activeView === "list" && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {userLabTechnician?.map((lab) => (
+                {(userLabTechnician ?? [])
+                  .filter((lab) => {
+                    const query = searchQuery.trim().toLowerCase();
+                    if (!query) return true;
+                    return [
+                      lab.businessName,
+                      lab.firstName,
+                      lab.lastName,
+                      lab.address,
+                      lab.city,
+                      lab.state,
+                    ]
+                      .filter(Boolean)
+                      .some((value) => value.toLowerCase().includes(query));
+                  })
+                  .map((lab) => (
                   <Card
                     key={lab.id}
                     className="bg-green-200/30 border-green-300 hover:shadow-lg transition-shadow"
@@ -164,7 +181,8 @@ export default function SelectLab() {
 
                       {/* Laboratory Name */}
                       <h3 className="text-lg font-semibold text-gray-900 mb-3 text-center">
-                        {lab.businessName}
+                        {lab.businessName ||
+                          `${lab.firstName ?? ""} ${lab.lastName ?? ""}`.trim()}
                       </h3>
 
                       {/* Address */}

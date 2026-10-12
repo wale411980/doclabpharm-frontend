@@ -55,6 +55,7 @@ import {
   useReportsUpdate,
   useReportsDelete,
   useReportsAdd,
+  useLabTechnicianMostRecentAppointments,
 } from "@/queries";
 import type {
   DiagnosisList,
@@ -71,13 +72,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ImageUpload from "@/components/ImageUpload";
 
-const categories = [
-  "All Categories",
-  "Blood Tests",
-  "Imaging",
-  "Microbiology",
-  "Urinalysis",
-];
+const ALL_CATEGORIES = "All Categories";
 
 export default function AdminDiagnosis() {
   const { data: PatientReports, refetch: patientReportsRefetch } =
@@ -100,6 +95,9 @@ export default function AdminDiagnosis() {
   const { mutate: reportsUpdate } = useReportsUpdate();
   const { mutate: reportsDelete } = useReportsDelete();
   const { mutate: addReport, isPending: isAddingReport } = useReportsAdd();
+  // Patients' test bookings with this laboratory (a report is added against one)
+  const { data: labBookings, refetch: refetchLabBookings } =
+    useLabTechnicianMostRecentAppointments();
 
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("services");
@@ -270,6 +268,28 @@ export default function AdminDiagnosis() {
     ).length;
   }, [PatientReports, reportSearchTerm, selectedStatus]);
 
+  // Every category, alphabetically (service filter + category dropdowns)
+  const allCategories = useMemo(
+    () =>
+      [...(LabTechnicianDiagnosisByCategories ?? [])].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+    [LabTechnicianDiagnosisByCategories]
+  );
+
+  // Bookings a report can be written for, newest first
+  const reportableBookings = useMemo(
+    () =>
+      [...(labBookings ?? [])]
+        .filter((booking) => booking.status !== "canceled")
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime()
+        ),
+    [labBookings]
+  );
+
   // Filter categories
   const paginatedCategories = useMemo(() => {
     if (!LabTechnicianDiagnosisByCategories) return [];
@@ -342,6 +362,7 @@ export default function AdminDiagnosis() {
         resetForm();
         setIsAddDialogOpen(false);
         refetch();
+        refetchCategories();
         toast.success("Service added successfully");
         setIsLoading(false); // Stop loading
         console.log("Service added successfully:", data);
@@ -429,6 +450,7 @@ export default function AdminDiagnosis() {
           resetForm();
           setIsEditDialogOpen(false);
           refetch();
+          refetchCategories();
           toast.success("Service updated successfully");
           setIsLoading(false); // Stop loading
           console.log("Service updated successfully:", data);
@@ -451,6 +473,7 @@ export default function AdminDiagnosis() {
     deleteDiagnosis(serviceId, {
       onSuccess: (data) => {
         refetch();
+        refetchCategories();
         toast.success("Service deleted successfully");
         setIsLoading(false); // Stop loading
         console.log("Service deleted successfully:", data);
@@ -586,7 +609,10 @@ export default function AdminDiagnosis() {
                       <DialogTitle>Filter by Category</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-2">
-                      {categories.map((category) => (
+                      {[
+                        ALL_CATEGORIES,
+                        ...allCategories.map((category) => category.name),
+                      ].map((category) => (
                         <Button
                           key={category}
                           variant={
@@ -710,7 +736,7 @@ export default function AdminDiagnosis() {
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {paginatedCategories.map((category) => (
+                            {allCategories.map((category) => (
                               <SelectItem
                                 key={category.id}
                                 value={String(category.id)}
@@ -739,6 +765,13 @@ export default function AdminDiagnosis() {
             </div>
 
             {/* Services Grid */}
+            {paginatedServices.length === 0 && (
+              <p className="text-sm text-gray-600 py-6 text-center">
+                {(LabTechnicianAllDiagnosisLst ?? []).length === 0
+                  ? "You have not added any diagnostic service yet. Patients can only book the services you add here."
+                  : "No services match your search."}
+              </p>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {paginatedServices.map((service) => (
                 <Card key={service.id} className="relative py-4">
@@ -753,10 +786,16 @@ export default function AdminDiagnosis() {
                         </p>
                       </div>
                       <Badge
-                        variant={service.status ? "default" : "secondary"}
-                        className="bg-green-100 text-green-800 text-xs flex-shrink-0"
+                        variant={
+                          service.status === "active" ? "default" : "secondary"
+                        }
+                        className={
+                          service.status === "active"
+                            ? "bg-green-100 text-green-800 text-xs flex-shrink-0"
+                            : "bg-gray-100 text-gray-700 text-xs flex-shrink-0"
+                        }
                       >
-                        Active
+                        {service.status === "active" ? "Active" : "Inactive"}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -919,6 +958,12 @@ export default function AdminDiagnosis() {
                             <h3 className="font-semibold text-base sm:text-lg text-green-700 truncate">
                               {category.name}
                             </h3>
+                            <p className="text-xs text-gray-500">
+                              {(category.diagnoses ?? []).length} service
+                              {(category.diagnoses ?? []).length === 1
+                                ? ""
+                                : "s"}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -932,18 +977,63 @@ export default function AdminDiagnosis() {
                               Error loading services
                             </p>
                           )}
-                          <div
-                            key={LabTechnicianDiagnosisByCategoryId?.id}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <h4 className="font-medium text-sm sm:text-base truncate">
-                                {LabTechnicianDiagnosisByCategoryId?.name}
-                              </h4>
-                            </div>
-                          </div>
+                          {(() => {
+                            // Services of this category (fresh copy once the
+                            // category has been fetched, else the list copy)
+                            const categoryServices =
+                              (LabTechnicianDiagnosisByCategoryId?.id ===
+                              category.id
+                                ? LabTechnicianDiagnosisByCategoryId?.diagnoses
+                                : undefined) ??
+                              category.diagnoses ??
+                              [];
 
-                          <div className="flex gap-2">
+                            if (categoryServices.length === 0) {
+                              return isCategoryServicesLoading ? null : (
+                                <p className="text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
+                                  You have no diagnostic service in this
+                                  category yet. Add one from the Diagnostic
+                                  Services tab and choose this category.
+                                </p>
+                              );
+                            }
+
+                            return categoryServices.map((service) => (
+                              <div
+                                key={service.id}
+                                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="font-medium text-sm sm:text-base truncate">
+                                    {service.name}
+                                  </h4>
+                                  <p className="text-xs sm:text-sm text-gray-600">
+                                    ₦{Number(service.price ?? 0).toLocaleString()}
+                                    {service.turnaround
+                                      ? ` · Turnaround: ${service.turnaround}`
+                                      : ""}
+                                    {service.status !== "active"
+                                      ? " · Inactive"
+                                      : ""}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-shrink-0"
+                                  onClick={() => openEditDialog(service)}
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                              </div>
+                            ));
+                          })()}
+
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500">
+                              Category:
+                            </span>
                             {/* Edit Button */}
                             <Button
                               variant="outline"
@@ -980,8 +1070,9 @@ export default function AdminDiagnosis() {
                                   {
                                     onSuccess: () => {
                                       refetchCategories();
+                                      setExpandedCategoryId(null);
                                       toast.success(
-                                        "Service deleted successfully from category"
+                                        "Category deleted successfully"
                                       );
                                       setIsLoading(false); // Stop loading
                                     },
@@ -989,7 +1080,8 @@ export default function AdminDiagnosis() {
                                       const errMsg =
                                         error?.response?.data?.message;
                                       toast.error(
-                                        "Failed to delete service " + errMsg
+                                        "Failed to delete category. " +
+                                          (errMsg ?? "")
                                       );
                                       setIsLoading(false); // Stop loading on error
                                     },
@@ -1037,78 +1129,12 @@ export default function AdminDiagnosis() {
               </div>
 
               <Dialog
-                open={isEditDialogOpen}
-                onOpenChange={setIsEditDialogOpen}
-              >
-                <DialogContent className="w-[95vw] max-w-[500px] mx-auto">
-                  <DialogHeader>
-                    <DialogTitle>Edit Diagnosis Service</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Name</Label>
-                      <Input
-                        value={categoryFormData.name}
-                        onChange={(e) =>
-                          setCategoryFormData((prev) => ({
-                            ...prev,
-                            name: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2 pt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditDialogOpen(false)}
-                        className="flex-1"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          updateDiagnosisByCategory(
-                            {
-                              id: categoryFormData.id,
-                              data: {
-                                id: categoryFormData.id,
-                                name: categoryFormData.name,
-                              },
-                            },
-                            {
-                              onSuccess: () => {
-                                toast.success("Service updated successfully");
-                                setIsEditCategoryServiceDialogOpen(false);
-                                refetchCategories();
-                                setCategoryFormData({ id: 0, name: "" });
-                              },
-                              onError: (error: any) => {
-                                const errMsg = error?.response?.data?.message;
-                                toast.error(
-                                  "Failed to update service " + errMsg
-                                );
-                              },
-                            }
-                          );
-                        }}
-                        className="flex-1 bg-green-700 hover:bg-green-700"
-                      >
-                        Save Changes
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog
                 open={isEditCategoryServiceDialogOpen}
                 onOpenChange={setIsEditCategoryServiceDialogOpen}
               >
                 <DialogContent className="w-[95vw] max-w-[500px] mx-auto">
                   <DialogHeader>
-                    <DialogTitle>
-                      Edit Diagnosis Service in Category
-                    </DialogTitle>
+                    <DialogTitle>Edit Category</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
@@ -1147,7 +1173,7 @@ export default function AdminDiagnosis() {
 
                             {
                               onSuccess: () => {
-                                toast.success("Service updated successfully");
+                                toast.success("Category updated successfully");
                                 setIsLoading(false); // Stop loading
                                 setIsEditCategoryServiceDialogOpen(false);
                                 setCategoryFormData({ id: 0, name: "" });
@@ -1156,7 +1182,7 @@ export default function AdminDiagnosis() {
                               onError: (error: any) => {
                                 const errMsg = error?.response?.data?.message;
                                 toast.error(
-                                  "Failed to update service " + errMsg
+                                  "Failed to update category. " + (errMsg ?? "")
                                 );
                                 setIsLoading(false); // Stop loading on error
                               },
@@ -1204,6 +1230,24 @@ export default function AdminDiagnosis() {
                     <SelectItem value="pending">Pending</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button
+                  className="bg-green-700 hover:bg-green-700 w-full sm:w-auto"
+                  onClick={() => {
+                    setNewReportData({
+                      userId: 0,
+                      diagnosisId: 0,
+                      bookingId: 0,
+                      status: "normal",
+                      imageUrl: "",
+                      summary: "",
+                    });
+                    refetchLabBookings();
+                    setIsAddReportDialogOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Report
+                </Button>
               </div>
             </div>
 
@@ -1222,6 +1266,17 @@ export default function AdminDiagnosis() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {paginatedReports.length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={4}
+                          className="text-center text-sm text-gray-600 py-8"
+                        >
+                          No reports yet. Use "Add Report" to upload the result
+                          of a patient's test booking.
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {paginatedReports.map((report) => (
                       <TableRow key={report.id}>
                         <TableCell className="font-medium">
@@ -1423,6 +1478,7 @@ export default function AdminDiagnosis() {
                                       );
                                       setIsLoading(false); // Stop loading
                                       setIsEditReportDialogOpen(false);
+                                      patientReportsRefetch();
                                     },
                                     onError: (error: any) => {
                                       const errMsg =
@@ -1461,6 +1517,60 @@ export default function AdminDiagnosis() {
                           <DialogTitle>Add Report</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
+                          <div>
+                            <Label>Patient test booking</Label>
+                            <Select
+                              value={
+                                newReportData.bookingId
+                                  ? String(newReportData.bookingId)
+                                  : ""
+                              }
+                              onValueChange={(value) => {
+                                const booking = reportableBookings.find(
+                                  (item) => String(item.id) === value
+                                );
+                                if (!booking) return;
+                                setNewReportData((prev) => ({
+                                  ...prev,
+                                  bookingId: booking.id,
+                                  userId: booking.userId,
+                                  diagnosisId: booking.diagnosisId,
+                                }));
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select the patient and test" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {reportableBookings.map((booking) => (
+                                  <SelectItem
+                                    key={booking.id}
+                                    value={String(booking.id)}
+                                  >
+                                    {`${booking.user?.firstName ?? ""} ${
+                                      booking.user?.lastName ?? ""
+                                    } - ${booking.diagnosis?.name ?? "Test"}${
+                                      booking.date
+                                        ? ` (${new Date(
+                                            booking.date
+                                          ).toLocaleDateString()})`
+                                        : ""
+                                    }${
+                                      booking.reportsCount
+                                        ? " - report already added"
+                                        : ""
+                                    }`}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {reportableBookings.length === 0 && (
+                              <p className="text-xs text-gray-600 mt-1">
+                                No patient has booked a test with you yet.
+                              </p>
+                            )}
+                          </div>
+
                           <div>
                             <Label>Status</Label>
                             <Select
@@ -1523,12 +1633,10 @@ export default function AdminDiagnosis() {
                           <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
                             <Button
                               onClick={() => {
-                                if (
-                                  !newReportData.userId ||
-                                  !newReportData.diagnosisId ||
-                                  !newReportData.bookingId
-                                ) {
-                                  toast.error("Missing required fields");
+                                if (!newReportData.bookingId) {
+                                  toast.error(
+                                    "Select the patient test booking this report is for"
+                                  );
                                   return;
                                 }
 
@@ -1541,12 +1649,14 @@ export default function AdminDiagnosis() {
                                       );
                                       setIsAddReportDialogOpen(false);
                                       patientReportsRefetch();
+                                      refetchLabBookings();
                                     },
                                     onError: (error: any) => {
                                       const errMsg =
-                                        error?.response?.data?.message;
+                                        error?.response?.data?.message ??
+                                        "Please try again.";
                                       toast.error(
-                                        "Failed to add report " + errMsg
+                                        "Failed to add report. " + errMsg
                                       );
                                       setIsLoading(false); // Stop loading on error
                                     },
@@ -1750,7 +1860,7 @@ export default function AdminDiagnosis() {
                       <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {paginatedCategories.map((category) => (
+                      {allCategories.map((category) => (
                         <SelectItem
                           key={category.id}
                           value={String(category.id)}
@@ -1817,14 +1927,17 @@ export default function AdminDiagnosis() {
                         Patient ID: {report.user?.id}
                       </p>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-600">
-                        Requested By
-                      </h4>
-                      <p className="font-medium">
-                        Dr. {report.doctor?.firstName} {report.doctor?.lastName}
-                      </p>
-                    </div>
+                    {report.doctor && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-600">
+                          Requested By
+                        </h4>
+                        <p className="font-medium">
+                          Dr. {report.doctor?.firstName}{" "}
+                          {report.doctor?.lastName}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -1847,11 +1960,17 @@ export default function AdminDiagnosis() {
                       Test Results
                     </h4>
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <img
-                        src={report.imageUrl || "/placeholder.svg"}
-                        alt="test result"
-                        className="w-full h-auto rounded"
-                      />
+                      {report.imageUrl ? (
+                        <img
+                          src={report.imageUrl}
+                          alt="test result"
+                          className="w-full h-auto rounded"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          No result image was attached.
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div>

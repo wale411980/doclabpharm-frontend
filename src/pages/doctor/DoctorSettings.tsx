@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,22 +19,25 @@ import {
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, Lock, Eye, EyeOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, htmlToPlainText } from "@/lib/utils";
 import {
   useUpdateProfileSettings,
   useDoctorUpdatePassword,
   useGetSpecializationList,
+  useGetDoctorProfile,
 } from "@/queries";
 import { useAuth } from "@/hooks/useAuth";
 import ImageUpload from "@/components/ImageUpload";
-import RichTextEditor from "./RichTextEditor";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function DoctorSettings() {
   const { data: specializationList } = useGetSpecializationList();
   const { mutate: updateProfile, isPending } = useUpdateProfileSettings();
   const { mutate: updatePassword, isPending: isPendingPassword } =
     useDoctorUpdatePassword();
+  const { data: profile } = useGetDoctorProfile();
+  const queryClient = useQueryClient();
   const { user, login } = useAuth(); // 👈 Get current user and login function
   const doctorId = user?.id;
 
@@ -68,6 +71,30 @@ export default function DoctorSettings() {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // Pre-fill the form once with the saved profile.
+  const [isPrefilled, setIsPrefilled] = useState(false);
+  useEffect(() => {
+    if (!profile || isPrefilled) return;
+    const saved = profile as any;
+    setProfileData((prev) => ({
+      ...prev,
+      firstName: saved.firstName ?? prev.firstName,
+      lastName: saved.lastName ?? prev.lastName,
+      email: saved.email ?? "",
+      phone: saved.phone ?? "",
+      address: htmlToPlainText(saved.address),
+      city: saved.city ?? "",
+      specializationId: saved.specializationId
+        ? String(saved.specializationId)
+        : "",
+      about: htmlToPlainText(saved.about),
+      certifications: htmlToPlainText(saved.certifications),
+      experience: htmlToPlainText(saved.experience),
+      profile_image: saved.profileImage ?? "",
+    }));
+    setIsPrefilled(true);
+  }, [profile, isPrefilled]);
 
   const toggleCollapsible = (id: string) => {
     setOpenCollapsible(openCollapsible === id ? null : id);
@@ -145,24 +172,27 @@ export default function DoctorSettings() {
         },
       },
       {
-        onSuccess: (updatedPassword: any) => {
-          // merge updated data into existing user
-          const updatedUser = { ...user, ...updatedPassword };
-          // update context + localStorage
-          login(updatedUser);
-
-          // Navigate to dashboard after successful update and notify
-          window.location.href = "/doctor/dashboard"; // 🔁 Hard reload of the page
+        onSuccess: () => {
+          setErrors({});
+          setPasswordData({
+            oldPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
+          setOpenCollapsible(null);
           toast.success("Password updated successfully!", {
             position: "top-right",
           });
         },
         onError: (error: any) => {
-          const errMsg = error?.response?.data?.message;
-          toast.error(
-            "Failed to update password. Please try again. " + errMsg,
-            { position: "top-right" }
-          );
+          const data = error?.response?.data;
+          const errMsg =
+            (typeof data?.message === "string" && data.message) ||
+            (typeof data?.error === "string" && data.error) ||
+            "Please check your current password and try again.";
+          toast.error("Failed to update password. " + errMsg, {
+            position: "top-right",
+          });
         },
       }
     );
@@ -190,18 +220,6 @@ export default function DoctorSettings() {
     }
 
     if (!profileData.phone.trim()) newErrors.phone = "Phone number is required";
-    if (!profileData.address.trim()) newErrors.address = "Address is required";
-    if (!profileData.specializationId)
-      newErrors.specializationId = "Specialization is required";
-    if (!profileData.about.trim())
-      newErrors.about = "Professional bio is required";
-    if (!profileData.certifications.trim())
-      newErrors.certifications = "Certifications are required";
-    if (!profileData.experience.trim())
-      newErrors.experience = "Experience is required";
-    if (!profileData.profile_image.trim())
-      newErrors.profile_image = "Profile Image is required";
-    if (!profileData.city.trim()) newErrors.city = "Profile Image is required";
 
     // If there are errors, show them and stop submission
     if (Object.keys(newErrors).length > 0) {
@@ -227,7 +245,9 @@ export default function DoctorSettings() {
               phone: profileData.phone,
               address: profileData.address,
               city: profileData.city,
-              specializationId: Number(profileData.specializationId),
+              ...(profileData.specializationId
+                ? { specializationId: Number(profileData.specializationId) }
+                : {}),
               about: profileData.about,
               certifications: profileData.certifications,
               experience: profileData.experience,
@@ -235,24 +255,24 @@ export default function DoctorSettings() {
             },
           },
           {
-            onSuccess: (updatedDoctor: any) => {
-              // merge updated data into existing user
-              const updatedUser = { ...user, ...updatedDoctor };
-              // update context + localStorage
-              login(updatedUser);
-
-              // Navigate to dashboard after successful update and notify
-              window.location.href = "/doctor/dashboard"; // 🔁 Hard reload of the page
+            onSuccess: (response: any) => {
+              // keep the signed-in user (header, greetings) in sync with the saved profile
+              if (response?.user) {
+                login({ ...user, ...response.user, userType: user.userType });
+              }
+              queryClient.invalidateQueries({ queryKey: ["doctorProfile"] });
               toast.success("Profile updated successfully!", {
                 position: "top-right",
               });
             },
             onError: (error: any) => {
-              const errMsg = error?.response?.data?.message;
-              toast.error(
-                "Failed to update profile. Please try again. " + errMsg,
-                { position: "top-right" }
-              );
+              const data = error?.response?.data;
+              const errMsg =
+                (typeof data?.message === "string" && data.message) ||
+                "Please try again.";
+              toast.error("Failed to update profile. " + errMsg, {
+                position: "top-right",
+              });
             },
           }
         );
@@ -456,14 +476,15 @@ export default function DoctorSettings() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="about" className="text-teal-800">
+                <Label htmlFor="experience" className="text-teal-800">
                   Experience
                 </Label>
-                <RichTextEditor
+                <Textarea
+                  id="experience"
+                  name="experience"
                   value={profileData.experience}
-                  onChange={(data: string) =>
-                    setProfileData({ ...profileData, experience: data })
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
                 />
                 {errors.experience && (
                   <p className="text-sm text-red-500">{errors.experience}</p>
@@ -474,17 +495,15 @@ export default function DoctorSettings() {
                 <Label htmlFor="certifications" className="text-teal-800">
                   Qualifications & Certifications
                 </Label>
-
-                <RichTextEditor
+                <Textarea
+                  id="certifications"
+                  name="certifications"
                   value={profileData.certifications}
-                  onChange={(data: string) =>
-                    setProfileData({ ...profileData, certifications: data })
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
                 />
                 {errors.certifications && (
-                  <p className="text-sm text-red-500">
-                    {errors.certifications}
-                  </p>
+                  <p className="text-sm text-red-500">{errors.certifications}</p>
                 )}
               </div>
             </div>
@@ -493,6 +512,13 @@ export default function DoctorSettings() {
               <Label htmlFor="profile_image" className="text-teal-800">
                 Profile Image
               </Label>
+              {profileData.profile_image && (
+                <img
+                  src={profileData.profile_image}
+                  alt="Current profile"
+                  className="h-20 w-20 rounded-full object-cover border my-2"
+                />
+              )}
               <ImageUpload
                 onUploadComplete={(url: string) => {
                   setProfileData((prev) => ({ ...prev, profile_image: url }));

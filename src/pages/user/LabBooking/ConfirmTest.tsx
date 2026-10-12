@@ -68,6 +68,8 @@ export default function ConfirmTest() {
   const handlePrevious = () => {
     const params = new URLSearchParams({
       labId: labId.toString(),
+      labName,
+      labAddress,
       testId: testId.toString(),
       testName,
       testPrice: testPrice.toString(),

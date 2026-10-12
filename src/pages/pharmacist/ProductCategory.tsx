@@ -26,6 +26,7 @@ import {
   useDeletePharmacyMedicineCategory,
 } from "@/queries";
 import type {
+  PharmacyMedicine,
   PharmacyMedicineCategory,
   AddPharmacyMedicineCategory,
   UpdatePharmacyMedicineCategory,
@@ -67,9 +68,14 @@ export default function ProductCategory() {
     data: PharmacyDiagnosisByCategoryId,
     isLoading: isCategoryServicesLoading,
     isError: isCategoryServicesError,
+    refetch: refetchCategoryProducts,
   } = useGetPharmacyMedicineCategoriesById(expandedCategoryId ?? 0, {
     enabled: expandedCategoryId !== null,
   });
+
+  // Products saved under the expanded category.
+  const categoryProducts: PharmacyMedicine[] =
+    PharmacyDiagnosisByCategoryId?.medicines ?? [];
 
   useEffect(() => {
     if (!expandedCategoryId || !PharmacyDiagnosisByCategoryId) return;
@@ -207,26 +213,60 @@ export default function ProductCategory() {
                         <h3 className="font-semibold text-lg text-green-700">
                           {category.name}
                         </h3>
+                        {typeof category.medicinesCount === "number" && (
+                          <p className="text-sm text-gray-500">
+                            {category.medicinesCount}{" "}
+                            {category.medicinesCount === 1 ? "drug" : "drugs"}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   {isExpanded && (
                     <div className="mt-4 pl-7 space-y-3">
-                      {isCategoryServicesLoading && <p>Loading services...</p>}
+                      {isCategoryServicesLoading && <p>Loading drugs...</p>}
                       {isCategoryServicesError && (
-                        <p className="text-red-600">Error loading services</p>
+                        <p className="text-red-600">Error loading drugs</p>
                       )}
-                      <div
-                        key={PharmacyDiagnosisByCategoryId?.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                      >
-                        <div>
-                          <h4 className="font-medium">
-                            {PharmacyDiagnosisByCategoryId?.name}
-                          </h4>
+                      {!isCategoryServicesLoading &&
+                        !isCategoryServicesError &&
+                        categoryProducts.length === 0 && (
+                          <p className="text-sm text-gray-500">
+                            No drugs have been added to this category yet.
+                          </p>
+                        )}
+                      {categoryProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        >
+                          <div>
+                            <h4 className="font-medium">{product.name}</h4>
+                            {product.volume && (
+                              <p className="text-sm text-gray-500">
+                                {product.volume}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right text-sm">
+                            <p className="font-medium text-green-700">
+                              ₦{Number(product.price).toLocaleString()}
+                            </p>
+                            <p
+                              className={
+                                Number(product.quantity) > 0
+                                  ? "text-gray-500"
+                                  : "text-red-600"
+                              }
+                            >
+                              {Number(product.quantity) > 0
+                                ? `In stock: ${product.quantity}`
+                                : "Out of stock"}
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      ))}
 
                       <div className="flex gap-2">
                         {/* Edit Button */}
@@ -429,6 +469,7 @@ export default function ProductCategory() {
                           setIsEditCategoryServiceDialogOpen(false);
                           setCategoryFormData({ id: 0, name: "" });
                           refetch();
+                          refetchCategoryProducts();
                         },
                         onError: (error: any) => {
                           const errMsg = error?.response?.data?.message;

@@ -70,6 +70,8 @@ export type CartItem =
       qty: number;
       price: number;
       name: string;
+      // units in stock when the item was added (the server re-checks at checkout)
+      stock?: number;
     };
 
 interface CartContextType {

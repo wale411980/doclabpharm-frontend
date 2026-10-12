@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,21 +12,25 @@ import {
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, Lock, Eye, EyeOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, htmlToPlainText } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import {
   useUpdatePharmacyProfileSettings,
-  useDoctorUpdatePassword,
+  usePharmacyUpdatePassword,
+  useGetPharmacyProfile,
 } from "@/queries";
 import { useAuth } from "@/hooks/useAuth";
 import ImageUpload from "@/components/ImageUpload";
-import RichTextEditor from "../doctor/RichTextEditor";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function PharmacySettings() {
   const { mutate: updateProfile, isPending } =
     useUpdatePharmacyProfileSettings();
   const { mutate: updatePassword, isPending: isPendingPassword } =
-    useDoctorUpdatePassword();
+    usePharmacyUpdatePassword();
+  const { data: profile } = useGetPharmacyProfile();
+  const queryClient = useQueryClient();
   const { user, login } = useAuth(); // 👈 Get current user and login function
   const pharmacyId = user?.id;
 
@@ -61,6 +65,29 @@ export default function PharmacySettings() {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // Pre-fill the form once with the saved profile.
+  const [isPrefilled, setIsPrefilled] = useState(false);
+  useEffect(() => {
+    if (!profile || isPrefilled) return;
+    const saved = profile as any;
+    setProfileData((prev) => ({
+      ...prev,
+      firstName: saved.firstName ?? prev.firstName,
+      lastName: saved.lastName ?? prev.lastName,
+      email: saved.email ?? "",
+      phoneNumber: saved.phone ?? "",
+      address: htmlToPlainText(saved.address),
+      city: saved.city ?? "",
+      state: saved.state ?? "",
+      about: htmlToPlainText(saved.about),
+      certifications: htmlToPlainText(saved.certifications),
+      experience: htmlToPlainText(saved.experience),
+      worktime: htmlToPlainText(saved.worktime),
+      profile_image: saved.profileImage ?? "",
+    }));
+    setIsPrefilled(true);
+  }, [profile, isPrefilled]);
 
   const toggleCollapsible = (id: string) => {
     setOpenCollapsible(openCollapsible === id ? null : id);
@@ -138,24 +165,27 @@ export default function PharmacySettings() {
         },
       },
       {
-        onSuccess: (updatedPassword: any) => {
-          // merge updated data into existing user
-          const updatedUser = { ...user, ...updatedPassword };
-          // update context + localStorage
-          login(updatedUser);
-
-          // Navigate to dashboard after successful update and notify
-          window.location.href = "/pgharmacy/dashboard"; // 🔁 Hard reload of the page
+        onSuccess: () => {
+          setErrors({});
+          setPasswordData({
+            oldPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
+          setOpenCollapsible(null);
           toast.success("Password updated successfully!", {
             position: "top-right",
           });
         },
         onError: (error: any) => {
-          const errMsg = error?.response?.data?.message;
-          toast.error(
-            "Failed to update password. Please try again. " + errMsg,
-            { position: "top-right" }
-          );
+          const data = error?.response?.data;
+          const errMsg =
+            (typeof data?.message === "string" && data.message) ||
+            (typeof data?.error === "string" && data.error) ||
+            "Please check your current password and try again.";
+          toast.error("Failed to update password. " + errMsg, {
+            position: "top-right",
+          });
         },
       }
     );
@@ -176,18 +206,7 @@ export default function PharmacySettings() {
     }
 
     if (!profileData.phoneNumber.trim())
-      newErrors.phoneNumber = "phoneNumber number is required";
-    if (!profileData.address.trim()) newErrors.address = "Address is required";
-    if (!profileData.certifications.trim())
-      newErrors.certifications = "Certifications are required";
-    if (!profileData.experience.trim())
-      newErrors.experience = "Experience is required";
-    if (!profileData.profile_image.trim())
-      newErrors.profile_image = "Profile Image is required";
-    if (!profileData.city.trim()) newErrors.city = "City is required";
-    if (!profileData.worktime.trim())
-      newErrors.worktime = "Work time is required";
-    if (!profileData.state.trim()) newErrors.state = "State is required";
+      newErrors.phoneNumber = "Phone number is required";
 
     // If there are errors, show them and stop submission
     if (Object.keys(newErrors).length > 0) {
@@ -216,30 +235,30 @@ export default function PharmacySettings() {
               certifications: profileData.certifications,
               experience: profileData.experience,
               profile_image: profileData.profile_image,
+              about: profileData.about,
               worktime: profileData.worktime,
               state: profileData.state,
             },
           },
           {
-            onSuccess: (updatedPharmacy: any) => {
-
-              // merge updated data into existing user
-              const updatedUser = { ...user, ...updatedPharmacy };
-              // update context + localStorage
-              login(updatedUser);
-
-              // Navigate to dashboard after successful update and notify
-              window.location.href = "/pharmacy/dashboard"; // 🔁 Hard reload of the page
+            onSuccess: (response: any) => {
+              // keep the signed-in user (header, greetings) in sync with the saved profile
+              if (response?.user) {
+                login({ ...user, ...response.user, userType: user.userType });
+              }
+              queryClient.invalidateQueries({ queryKey: ["pharmacyProfile"] });
               toast.success("Profile updated successfully!", {
                 position: "top-right",
               });
             },
             onError: (error: any) => {
-              const errMsg = error?.response?.data?.message;
-              toast.error(
-                "Failed to update profile. Please try again. " + errMsg,
-                { position: "top-right" }
-              );
+              const data = error?.response?.data;
+              const errMsg =
+                (typeof data?.message === "string" && data.message) ||
+                "Please try again.";
+              toast.error("Failed to update profile. " + errMsg, {
+                position: "top-right",
+              });
             },
           }
         );
@@ -349,7 +368,7 @@ export default function PharmacySettings() {
 
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber" className="text-teal-800">
-                  phoneNumber Number
+                  Phone Number
                 </Label>
                 <Input
                   id="phoneNumber"
@@ -396,13 +415,15 @@ export default function PharmacySettings() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="worktime">Address</Label>
-
-                <RichTextEditor
+                <Label htmlFor="address" className="text-teal-800">
+                  Address
+                </Label>
+                <Input
+                  id="address"
+                  name="address"
                   value={profileData.address}
-                  onChange={(value) =>
-                    setProfileData((prev) => ({ ...prev, address: value }))
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white"
                 />
                 {errors.address && (
                   <p className="text-sm text-red-500">{errors.address}</p>
@@ -410,14 +431,15 @@ export default function PharmacySettings() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="about" className="text-teal-800">
+                <Label htmlFor="experience" className="text-teal-800">
                   Experience
                 </Label>
-                <RichTextEditor
+                <Textarea
+                  id="experience"
+                  name="experience"
                   value={profileData.experience}
-                  onChange={(data: string) =>
-                    setProfileData({ ...profileData, experience: data })
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
                 />
                 {errors.experience && (
                   <p className="text-sm text-red-500">{errors.experience}</p>
@@ -428,38 +450,63 @@ export default function PharmacySettings() {
                 <Label htmlFor="certifications" className="text-teal-800">
                   Qualifications & Certifications
                 </Label>
-                <RichTextEditor
+                <Textarea
+                  id="certifications"
+                  name="certifications"
                   value={profileData.certifications}
-                  onChange={(data: string) =>
-                    setProfileData({ ...profileData, certifications: data })
-                  }
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
                 />
                 {errors.certifications && (
-                  <p className="text-sm text-red-500">
-                    {errors.certifications}
-                  </p>
+                  <p className="text-sm text-red-500">{errors.certifications}</p>
                 )}
               </div>
-            </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="worktime">Working Days & Hours</Label>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="about" className="text-teal-800">
+                  About
+                </Label>
+                <Textarea
+                  id="about"
+                  name="about"
+                  value={profileData.about}
+                  onChange={handleProfileChange}
+                  className="bg-white min-h-[100px]"
+                />
+                {errors.about && (
+                  <p className="text-sm text-red-500">{errors.about}</p>
+                )}
+              </div>
 
-              <RichTextEditor
-                value={profileData.worktime}
-                onChange={(value) =>
-                  setProfileData((prev) => ({ ...prev, worktime: value }))
-                }
-              />
-              {errors.worktime && (
-                <p className="text-sm text-red-500">{errors.worktime}</p>
-              )}
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="worktime" className="text-teal-800">
+                  Working Days & Hours
+                </Label>
+                <Textarea
+                  id="worktime"
+                  name="worktime"
+                  value={profileData.worktime}
+                  onChange={handleProfileChange}
+                  placeholder="e.g. Mon - Sat, 8:00am - 9:00pm"
+                  className="bg-white min-h-[80px]"
+                />
+                {errors.worktime && (
+                  <p className="text-sm text-red-500">{errors.worktime}</p>
+                )}
+              </div>
             </div>
 
             <div>
               <Label htmlFor="profile_image" className="text-teal-800">
                 Profile Image
               </Label>
+              {profileData.profile_image && (
+                <img
+                  src={profileData.profile_image}
+                  alt="Current profile"
+                  className="h-20 w-20 rounded-full object-cover border my-2"
+                />
+              )}
               <ImageUpload
                 onUploadComplete={(url: string) => {
                   setProfileData((prev) => ({ ...prev, profile_image: url }));

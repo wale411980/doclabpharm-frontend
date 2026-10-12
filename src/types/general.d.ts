@@ -1,5 +1,6 @@
 export type BankAccount = {
-  accountNumber: number;
+  // digits only, kept as a string so a leading 0 is not lost
+  accountNumber: string;
   bankCode: string;
   accountName: string;
   bankName: string;

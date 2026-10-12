@@ -23,7 +23,7 @@ export type UpdateDoctor = {
   lastName: string;
   phone: string;
   email: string;
-  specializationId: number;
+  specializationId?: number;
   certifications: string;
   experience: string;
   profile_image: string;

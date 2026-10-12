@@ -45,7 +45,13 @@ export default function PharmacistDashboard() {
           <div className={`flex text-white`}>
             <div className="flex-1 p-4">
               <h3 className="text-sm font-medium mb-1">Inventory Status</h3>
-              <p className="text-3xl font-bold mb-6">Good</p>
+              <p className="text-3xl font-bold mb-6">
+                {(stats.outOfStock ?? 0) > 0
+                  ? "Out of stock"
+                  : stats.medicineLow > 0
+                  ? "Low stock"
+                  : "Good"}
+              </p>
               <div className="border-t border-white/20 pt-4">
                 <Button
                   variant="link"
@@ -116,6 +122,12 @@ export default function PharmacistDashboard() {
           <div className={`flex text-white`}>
             <div className="flex-1 p-4">
               <h3 className="text-sm font-medium mb-1">Medicine Shortage</h3>
+              <p className="text-xs mb-1">
+                {stats.outOfStock ?? 0} out of stock
+                {typeof stats.lowStockThreshold === "number"
+                  ? `, low stock is ${stats.lowStockThreshold} or fewer`
+                  : ""}
+              </p>
               <p className="text-3xl font-bold mb-6">{stats.medicineLow}</p>
               <div className="border-t border-white/20 pt-4">
                 <Button

@@ -47,7 +47,11 @@
     "userReport": "/user/report",
     "userNotification": "/user/notification",
     "userVitalsDetails": "/user",
-    "getDoctorByIdPublic": "/doctors/show"
+    "getDoctorByIdPublic": "/doctors/show",
+    "userVitals": "/user/vitals",
+    "userDiagnosisList": "/user/diagnosis/list",
+    "userLabAvailability": "/user/lab/availability",
+    "userLabAppointments": "/user/lab-appointments"
   },
   "doctor": {
     "getDoctorProfile": "/doctor",
@@ -90,6 +94,7 @@
     "pharmacyOrderById": "/pharmacy/orders/detail",
     "pharmacyStats": "/pharmacy/stats",
     "pharmacyWallet": "/pharmacy/wallet",
+    "pharmacyUpdatePassword": "/pharmacy/password",
     "pharmacyMedicineCategories": "/pharmacy/categories/list",
     "pharmacyMedicineCategoriesById": "/pharmacy/categories",
     "addPharmacyMedicineCategory": "/pharmacy/categories/add",
@@ -102,7 +107,8 @@
     "updatePharmacyMedicineQuantity": "/pharmacy/medicine/quantity",
     "deletePharmacyMedicine": "/pharmacy/medicine",
     "approvePharmacyOrder": "/pharmacy/orders",
-    "approvePharmacyOrderIndividually": "/pharmacy/orders/item"
+    "approvePharmacyOrderIndividually": "/pharmacy/orders/item",
+    "pharmacyAvailability": "/pharmacy/availability"
   },
   "labTechnician": {
     "getLabTechnicianProfile": "/lab-technician",
@@ -113,6 +119,7 @@
     "addDiagnosis": "/lab-technician/diagnosis/add",
     "labTechnicianStats": "/lab-technician/stats",
     "labTechnicianWallet": "/lab-technician/wallet",
+    "labTechnicianUpdatePassword": "/lab-technician/password",
     "labTechnicianPatientReports": "/lab-technician/reports",
     "labTechnicianPatientReportById": "/lab-technician/reports",
     "deletePatientReport": "/lab-technician/reports",
@@ -129,7 +136,8 @@
     "deleteDiagnosisCategory": "/lab-technician/categories",
     "labTechnicianReportsDelete": "/lab-technician/reports",
     "labTechnicianReportsUpdate": "/lab-technician/reports",
-    "labTechnicianReportsAdd": "/lab-technician/reports/add"
+    "labTechnicianReportsAdd": "/lab-technician/reports/add",
+    "labTechnicianAvailability": "/lab-technician/availability"
   },
   "search": {
     "medicineSearch": "/medicine/search",
@@ -143,7 +151,8 @@
     "specializationList": "/specializations/list",
     "specializationsDoctorList": "/specializations/doctor",
     "diagnosisListPublic": "/diagnosis/list",
-    "diagnosisCategories": "/diagnosis/categories"
+    "diagnosisCategories": "/diagnosis/categories",
+    "labAvailabilityPublic": "/lab/availability"
   },
   "admin": {
     "adminStats": "/admin/stats",

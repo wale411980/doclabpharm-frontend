@@ -52,18 +52,23 @@ api.interceptors.request.use((config) => {
     return config;
   }
 
+  // Only the profile update (PUT /pharmacy/{id}) is sent as-is. Nested routes
+  // such as PUT /pharmacy/medicine/{id} must still be converted to snake_case.
   const isUpdatePharmacyById =
     config.method?.toLowerCase() === "put" &&
-    /^\/pharmacy\/\w+/.test(config.url || "");
+    /^\/pharmacy\/\d+\/?$/.test(config.url || "");
 
   if (isUpdatePharmacyById) {
     // Skip snake_case conversion for updatePharmacyProfile by ID
     return config;
   }
 
+  // Only the profile update (PUT /lab-technician/{id}) is sent as-is. Nested
+  // routes such as PUT /lab-technician/diagnosis/{id} (diagnosisCategoryId,
+  // groupType) must still be converted to snake_case or the API ignores them.
   const isUpdateLabTechnicianById =
     config.method?.toLowerCase() === "put" &&
-    /^\/lab-technician\/\w+/.test(config.url || "");
+    /^\/lab-technician\/\d+\/?$/.test(config.url || "");
 
   if (isUpdateLabTechnicianById) {
     // Skip snake_case conversion for updateLabTechnicianProfile by ID

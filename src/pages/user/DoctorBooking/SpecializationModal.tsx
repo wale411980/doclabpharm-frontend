@@ -16,11 +16,16 @@ import { useGetSpecializationList } from "@/queries";
 interface SpecializationModalProps {
   open: boolean;
   onSelect: (specializationId: number) => void;
+  // Called when the modal is dismissed (X button, Escape or clicking outside)
+  onClose?: () => void;
+  selectedId?: number | null;
 }
 
 export function SpecializationModal({
   open,
   onSelect,
+  onClose,
+  selectedId,
 }: SpecializationModalProps) {
   const {
     data: specializations,
@@ -29,7 +34,12 @@ export function SpecializationModal({
   } = useGetSpecializationList();
 
   return (
-    <Dialog open={open}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose?.();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Select a Specialization</DialogTitle>
@@ -39,7 +49,10 @@ export function SpecializationModal({
         {error && <p>Failed to load specializations.</p>}
 
         {!isLoading && !error && (
-          <Select onValueChange={(value) => onSelect(Number(value))}>
+          <Select
+            value={selectedId ? String(selectedId) : undefined}
+            onValueChange={(value) => onSelect(Number(value))}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Choose a specialization..." />
             </SelectTrigger>

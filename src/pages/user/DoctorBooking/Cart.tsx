@@ -10,7 +10,7 @@ import {
   Minus,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUserCheckout } from "@/queries";
+import { useUserCheckout, useGetMedicines } from "@/queries";
 import { toast } from "react-toastify";
 
 export default function Cart() {
@@ -23,6 +23,20 @@ export default function Cart() {
 
   const { mutate: checkout, isPending } = useUserCheckout();
 
+  // Current stock of the medicines in the cart (the cart only keeps a snapshot).
+  const hasMedicines = items.some((item) => item.service_type === "med");
+  const { data: medicines } = useGetMedicines({ enabled: hasMedicines });
+  const stockFor = (item: (typeof items)[number]): number | null => {
+    if (item.service_type !== "med") return null;
+    const live = medicines?.find((m) => m.id === item.product_id);
+    if (live) return Math.max(0, Number(live.quantity) || 0);
+    return typeof item.stock === "number" ? item.stock : null;
+  };
+  const overStockItem = items.find((item) => {
+    const stock = stockFor(item);
+    return stock !== null && (item.qty || 1) > stock;
+  });
+
   const totalPrice = items.reduce(
     (acc, item) => acc + item.price * (item.qty || 1),
     0
@@ -31,6 +45,19 @@ export default function Cart() {
   const [error, setError] = useState("");
 
   const handleCheckout = () => {
+    if (overStockItem) {
+      const stock = stockFor(overStockItem) ?? 0;
+      const message =
+        stock > 0
+          ? `Only ${stock} unit(s) of ${overStockItem.name} left in stock. Please reduce the quantity.`
+          : `${overStockItem.name} is out of stock. Please remove it from your cart.`;
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    setError("");
+
     const payload = {
       items: items.map((item) => ({ ...item, qty: item.qty || 1 })),
       paymentMethod: "wallet",
@@ -155,9 +182,26 @@ export default function Cart() {
                     onClick={() =>
                       updateItem(index, { qty: (item.qty || 1) + 1 })
                     }
+                    disabled={
+                      stockFor(item) !== null &&
+                      (item.qty || 1) >= (stockFor(item) as number)
+                    }
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
+                  {stockFor(item) !== null && (
+                    <span
+                      className={`text-xs ${
+                        (item.qty || 1) > (stockFor(item) as number)
+                          ? "text-red-600"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {(stockFor(item) as number) > 0
+                        ? `${stockFor(item)} in stock`
+                        : "Out of stock"}
+                    </span>
+                  )}
                 </div>
               ) : (
                 <div className="text-gray-700 font-medium">

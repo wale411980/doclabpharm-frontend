@@ -97,13 +97,19 @@ export const useGetConsultations = () => {
   });
 };
 
-export const useGetMedicines = () => {
+export const useGetMedicines = (options?: { enabled?: boolean }) => {
   return useQuery<Medicines[]>({
     queryKey: ["medicines"],
     queryFn: async () => {
       const response = await api.get(`${URIS.user.medicine}`);
       return response.data;
     },
+    // Stock changes as pharmacies sell and restock: always refetch when a page
+    // showing medicines is opened or the tab regains focus.
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    ...options,
   });
 };
 
@@ -375,7 +381,7 @@ export const useGetUserLabTechnician = () => {
 };
 
 // get user lab technician by id
-export const useGetUserLabTechnicianById = (id: 1) => {
+export const useGetUserLabTechnicianById = (id: number) => {
   return useQuery<SelectTest[]>({
     queryKey: ["userLabTechnicianById", id],
     queryFn: async () => {
@@ -437,6 +443,93 @@ export const useGetUserPrescriptions = () => {
     queryFn: async () => {
       const response = await api.get(URIS.user.getUserPrescriptions);
       return response.data;
+    },
+  });
+};
+
+// A bookable test together with the laboratory that provides it
+export type BookableTest = SelectTest & {
+  labTechnician?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    businessName: string | null;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    profileImage: string | null;
+  } | null;
+};
+
+// every active test of every laboratory (each test belongs to one laboratory)
+export const useGetAllBookableTests = (enabled = true) => {
+  return useQuery<BookableTest[]>({
+    queryKey: ["allBookableTests"],
+    queryFn: async () => {
+      const response = await api.post(URIS.user.userDiagnosisList, {});
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    enabled,
+  });
+};
+
+export type UserVitalsPayload = {
+  bloodPressure?: string | null;
+  pulse?: number | null;
+  dailySteps?: number | null;
+  stepsGoal?: number | null;
+  waterIntakeL?: number | null;
+  waterGoalL?: number | null;
+  heightCm?: number | null;
+  weightKg?: number | null;
+};
+
+// record / update the vitals shown on the patient dashboard
+export const useUpdateUserVitals = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: UserVitalsPayload) => {
+      const response = await api.post(URIS.user.userVitals, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userVitals"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    },
+  });
+};
+
+export type UserLabAppointment = {
+  id: number;
+  userId: number;
+  diagnosisId: number;
+  orderId: number;
+  labTechnicianId: number | null;
+  status: "scheduled" | "rescheduled" | "completed" | "cancelled";
+  date: string | null;
+  time: string | null;
+  reportsCount: number;
+  diagnosis: { id: number; name: string; price: number } | null;
+  labTechnician: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    businessName: string | null;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    phone: string | null;
+  } | null;
+};
+
+// the patient's own lab test appointments
+export const useGetUserLabAppointments = () => {
+  return useQuery<UserLabAppointment[]>({
+    queryKey: ["userLabAppointments"],
+    queryFn: async () => {
+      const response = await api.get(URIS.user.userLabAppointments);
+      return Array.isArray(response.data) ? response.data : [];
     },
   });
 };
