@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, LogOut, Menu, ShieldCheck, UserRound, X } from "lucide-react";
+import { Ambulance, Banknote, LayoutDashboard, LifeBuoy, LogOut, Menu, Receipt, Route, ShieldCheck, Siren, UserRound, X } from "lucide-react";
+import { FleetLocationProvider, OfferBanner } from "@/screens/ambulanceOperator/FleetLocation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/ambulance_operator/dashboard" },
+  { icon: Siren, label: "Dispatch", href: "/ambulance_operator/dispatch" },
+  { icon: Ambulance, label: "Vehicles", href: "/ambulance_operator/vehicles" },
+  { icon: Route, label: "Trips", href: "/ambulance_operator/trips" },
+  { icon: Receipt, label: "Fares", href: "/ambulance_operator/fares" },
+  { icon: Banknote, label: "Earnings", href: "/ambulance_operator/earnings" },
+  { icon: LifeBuoy, label: "Support inbox", href: "/ambulance_operator/support" },
   { icon: ShieldCheck, label: "Verification", href: "/ambulance_operator/verification" },
   { icon: UserRound, label: "Profile", href: "/ambulance_operator/profile" },
 ];
@@ -32,7 +39,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <nav aria-label="Ambulance operator" className="flex h-full flex-col gap-1 p-4">
+    <nav aria-label="Ambulance operator" className="flex h-full flex-col gap-1 overflow-y-auto p-4">
       <ul className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ icon: Icon, label, href }) => (
           <li key={href}>
@@ -72,6 +79,7 @@ export default function AmbulanceOperatorLayout() {
   useEffect(() => setMenuOpen(false), [pathname]);
 
   return (
+    <FleetLocationProvider>
     <div className="flex h-screen overflow-hidden bg-sand">
       <aside className="hidden w-72 shrink-0 flex-col border-r border-brand-100 bg-white md:flex">
         <div className="px-6 pb-2 pt-5">
@@ -119,9 +127,11 @@ export default function AmbulanceOperatorLayout() {
           </button>
         </header>
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
+          <OfferBanner />
           <Outlet />
         </main>
       </div>
     </div>
+    </FleetLocationProvider>
   );
 }

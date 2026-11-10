@@ -87,6 +87,9 @@ function DetailBody({ basePath, type, id, detail }: { basePath: string; type: Pr
           <h1 className="text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">{name}</h1>
           <Pill tone={copy.tone}>{copy.label}</Pill>
         </div>
+        <Link to={`${basePath}/providers/${type}/${id}`} className="inline-flex min-h-11 items-center gap-2 self-start font-bold text-brand-700 underline-offset-4 hover:underline">
+          Account, support record, ban{basePath === "/super-admin" ? " and commission" : ""}
+        </Link>
         {provider.verificationNote && (
           <p className="max-w-3xl rounded-2xl bg-sand p-4 text-ink-700">
             <span className="font-bold">Note shown to the provider: </span>

@@ -16,6 +16,10 @@ import {
   ShoppingBag,
   FileVideo,
   Settings,
+  Gauge,
+  Activity,
+  LifeBuoy,
+  Percent,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -34,6 +38,10 @@ export function SuperAdminSidebar({ onClose }: SidebarProps) {
       label: "Dashboard",
       href: "/super-admin/dashboard",
     },
+    { icon: Gauge, label: "Overview", href: "/super-admin/overview" },
+    { icon: Activity, label: "Live operations", href: "/super-admin/operations" },
+    { icon: LifeBuoy, label: "Support tickets", href: "/super-admin/support" },
+    { icon: Percent, label: "Commission", href: "/super-admin/commission" },
     { icon: ShieldCheck, label: "Provider verification", href: "/super-admin/verifications" },
     { icon: Flag, label: "Provider reports", href: "/super-admin/provider-reports" },
     { icon: User, label: "Patients", href: "/super-admin/patients" },

@@ -99,7 +99,7 @@ const pillClass: Record<PillTone, string> = {
 
 export function Pill({ tone = "neutral", children }: { tone?: PillTone; children: ReactNode }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold", pillClass[tone])}>
+    <span className={cn("inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold", pillClass[tone])}>
       {children}
     </span>
   );

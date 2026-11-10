@@ -12,6 +12,11 @@ import {
   FlaskRoundIcon as Flask,
   FileText,
   HelpCircle,
+  Zap,
+  Package,
+  Ambulance,
+  LifeBuoy,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -27,6 +32,10 @@ export function UserSidebar({ onClose }: SidebarProps) {
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/user/dashboard" },
     { icon: User, label: "My Profile", href: "/user/profile" },
+    { icon: Zap, label: "See a doctor now", href: "/user/see-doctor-now" },
+    { icon: Ambulance, label: "Ambulance", href: "/user/ambulance" },
+    { icon: MapPin, label: "Medicines near me", href: "/user/medicines/near-me" },
+    { icon: Package, label: "My orders", href: "/user/deliveries" },
     { icon: Calendar, label: "Appointments", href: "/user/appointments" },
     {
       icon: MessageSquare,
@@ -39,7 +48,8 @@ export function UserSidebar({ onClose }: SidebarProps) {
     { icon: Pill, label: "Medicines", href: "/user/medicines" },
     { icon: Pill, label: "Prescriptions", href: "/user/prescriptions" },
     { icon: Flask, label: "Tests", href: "/patient/booking/select-test" },
-    { icon: FileText, label: "Results", href: "/user/results" },
+    { icon: FileText, label: "Lab results", href: "/user/lab-results" },
+    { icon: LifeBuoy, label: "Help & support", href: "/user/support" },
   ];
 
   const itemVariants = {
@@ -65,7 +75,7 @@ export function UserSidebar({ onClose }: SidebarProps) {
 
   return (
     <aside
-      className="h-full w-64 bg-white text-white z-50 flex flex-col justify-between"
+      className="h-full w-64 overflow-y-auto bg-white text-white z-50 flex flex-col justify-between"
       style={{ backgroundColor: "#ecf3f9" }}
     >
       <div>
@@ -147,11 +157,11 @@ export function UserSidebar({ onClose }: SidebarProps) {
           transition={{ delay: 0.75, duration: 0.3 }}
         >
           <a
-            href="mailto:support@doclabpharm.com"
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100"
+            href="tel:112"
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-bold transition-colors text-red-700 hover:bg-red-50"
           >
-            <HelpCircle className="h-5 w-5" color="rgba(58, 150, 108, 0.7)" strokeWidth={2} />
-            <span style={{ color: "rgba(58, 150, 108, 0.7)" }}>Help & Support</span>
+            <HelpCircle className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
+            <span>Emergency? Call 112</span>
           </a>
         </motion.div>
         <motion.div

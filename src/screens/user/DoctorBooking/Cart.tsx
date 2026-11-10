@@ -10,7 +10,7 @@ import {
   Minus,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUserCheckout, useGetMedicines } from "@/queries";
+import { useGetMedicines } from "@/queries";
 import { toast } from "react-toastify";
 
 export default function Cart() {
@@ -21,7 +21,6 @@ export default function Cart() {
   const clearCart = cartContext?.clearCart ?? (() => {});
   const navigate = useNavigate();
 
-  const { mutate: checkout, isPending } = useUserCheckout();
 
   // Current stock of the medicines in the cart (the cart only keeps a snapshot).
   const hasMedicines = items.some((item) => item.service_type === "med");
@@ -57,25 +56,9 @@ export default function Cart() {
     }
 
     setError("");
-
-    const payload = {
-      items: items.map((item) => ({ ...item, qty: item.qty || 1 })),
-      paymentMethod: "wallet",
-    };
-
-    checkout(payload, {
-      onSuccess: () => {
-        toast.success("Checkout successful");
-        clearCart();
-        localStorage.removeItem("testBooking");
-        navigate("/user/checkout-success");
-      },
-      onError: (error: any) => {
-        const errMsg = error?.response?.data?.message || "Checkout failed";
-        setError(errMsg);
-        toast.error("Checkout failed");
-      },
-    });
+    // PHASE4_CHECKOUT_V1: delivery, sample collection, consultation time and
+    // payment (wallet or card) are chosen on the checkout page.
+    navigate("/user/checkout");
   };
 
   const renderIcon = (type: string) => {
@@ -238,9 +221,8 @@ export default function Cart() {
           <Button
             className="bg-green-700 text-white w-full sm:w-auto"
             onClick={handleCheckout}
-            disabled={isPending}
           >
-            {isPending ? "Processing..." : "Checkout"}
+            Continue to checkout
           </Button>
           {error && (
             <div style={{ color: "red", marginTop: "10px" }}>{error}</div>
