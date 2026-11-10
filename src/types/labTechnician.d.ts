@@ -181,7 +181,7 @@ export type MostRecentAppointments = {
         diagnosisId: number;
         orderId: number;
         labTechnicianId: number;
-        status: "scheduled" | "rescheduled" | "completed" | "canceled";
+        status: "scheduled" | "rescheduled" | "completed" | "cancelled";
         // how many reports have been issued for this booking
         reportsCount?: number;
         date: string;

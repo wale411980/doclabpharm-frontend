@@ -139,7 +139,7 @@
     "labTechnicianReportsUpdate": "/lab-technician/reports",
     "labTechnicianReportsAdd": "/lab-technician/reports/add",
     "labTechnicianAvailability": "/lab-technician/availability",
-    "cancelBooking": "/lab-technician/bookings"
+    "cancelBooking": "/lab-technician/diagnosis/bookings"
   },
   "search": {
     "medicineSearch": "/medicine/search",
@@ -187,7 +187,7 @@
     "adminPharmacyUpdate": "/admin/pharmacy_update",
     "adminPharmacyDelete": "/admin/pharmacy_delete",
     "adminPatientList": "/admin/patient_list",
-    "adminPatientUpdate": "/admin/patient_update",
+    "adminPatientUpdate": "/admin/patient",
     "adminPatientDelete": "/admin/patient_delete",
     "adminPatientStats": "/admin/patient_stat",
     "adminConsultationList": "/user/consultations",
@@ -248,7 +248,7 @@
     "superAdminPharmacyUpdate": "/admin/pharmacy_update",
     "superAdminPharmacyDelete": "/admin/pharmacy_delete",
     "superAdminPatientList": "/admin/patient_list",
-    "superAdminPatientUpdate": "/admin/patient_update",
+    "superAdminPatientUpdate": "/admin/patient",
     "superAdminPatientDelete": "/admin/patient_delete",
     "superAdminPatientStats": "/admin/patient_stat",
     "superAdminConsultationList": "/user/consultations",

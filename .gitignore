@@ -6,3 +6,10 @@ dist/
 *.log
 *.zip
 New folder/
+.next
+out
+.env.local
+next-env.d.ts
+*.tsbuildinfo
+!.env.example
+.well-known/

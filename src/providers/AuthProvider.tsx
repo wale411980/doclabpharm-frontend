@@ -5,6 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import api from "@/lib/axios";
 
 // Define the different possible user types
 type BaseUser = {
@@ -167,6 +168,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    // Revoke the token on the server too; clearing it locally is not enough.
+    // The token is passed explicitly: it is removed below before the API
+    // client's interceptor would read it.
+    const token = localStorage.getItem("token");
+    if (token) {
+      api
+        .post("/logout", null, { headers: { Authorization: `Bearer ${token}` } })
+        .catch(() => undefined);
+    }
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");

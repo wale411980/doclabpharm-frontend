@@ -1,8 +1,12 @@
-import { getToken } from "firebase/messaging";
-import { messaging } from "./firebase";
+import { getMessagingSafe, getToken } from "./firebase";
 
 export async function requestDeviceToken(): Promise<string | null> {
   try {
+    const messaging = await getMessagingSafe();
+    if (!messaging || !("Notification" in window) || !("serviceWorker" in navigator)) {
+      return null;
+    }
+
     if (Notification.permission !== "granted") {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
@@ -18,13 +22,13 @@ export async function requestDeviceToken(): Promise<string | null> {
     const swRegistration = await navigator.serviceWorker.ready;
 
     const token = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
       serviceWorkerRegistration: swRegistration,
     });
 
     if (token) {
       localStorage.setItem("deviceToken", token);
-      localStorage.setItem("deviceType:", "web");
+      localStorage.setItem("deviceType", "web");
       return token;
     } else {
       return null;

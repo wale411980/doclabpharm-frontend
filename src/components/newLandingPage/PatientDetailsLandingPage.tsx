@@ -53,7 +53,7 @@ export default function PatientDetailsLandingPage() {
               });
 
               localStorage.setItem("deviceToken", token);
-              localStorage.setItem("deviceType:", "web");
+              localStorage.setItem("deviceType", "web");
               toast.success("Push notifications enabled!", {
                 position: "top-right",
               });
@@ -103,7 +103,7 @@ export default function PatientDetailsLandingPage() {
           deviceType: "web",
         });
         localStorage.setItem("deviceToken", token);
-        localStorage.setItem("deviceType:", "web");
+        localStorage.setItem("deviceType", "web");
         toast.success("Push notifications enabled!", { position: "top-right" });
       } else {
         toast.info("Notification permission was denied.", {
