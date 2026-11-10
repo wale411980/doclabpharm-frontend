@@ -13,7 +13,7 @@ export const VERIFICATION_STATUS: Record<VerificationStatus, StatusCopy> = {
     label: "Not yet submitted",
     tone: "neutral",
     explanation:
-      "Upload the documents below, then submit them for review. Patients cannot see you or order from you until our team has checked your licence.",
+      "Upload your licence documents, then submit them for review. Patients cannot see you or order from you until our team has checked your licence.",
   },
   submitted: {
     label: "Submitted",
@@ -25,25 +25,25 @@ export const VERIFICATION_STATUS: Record<VerificationStatus, StatusCopy> = {
     label: "Under review",
     tone: "blue",
     explanation:
-      "Our team is reviewing your account. You are hidden from patients until this is done. Make sure every required document below is uploaded and current, then submit them for review.",
+      "Our team is reviewing your account, and you are hidden from patients until this is done. Make sure every required document is uploaded and current, then submit them for review.",
   },
   approved: {
     label: "Approved",
     tone: "brand",
     explanation:
-      "You are verified. Patients can find you and place orders. When you renew your licence, upload the new document here: you stay live while we check it.",
+      "You are verified. Patients can find you and place orders. When you renew your licence, upload the new document on the Verification page: you stay live while we check it.",
   },
   rejected: {
     label: "Not approved",
     tone: "red",
     explanation:
-      "Our team could not approve your application. Read the reason below, replace the documents it mentions, and submit again.",
+      "Our team could not approve your application. Read their reason, replace the documents it mentions, and submit again.",
   },
   suspended: {
     label: "Suspended",
     tone: "red",
     explanation:
-      "Your account has been taken off DocLabPharm, so patients cannot see you or order from you. Read the reason below and contact support to resolve it.",
+      "Your account has been taken off DocLabPharm, so patients cannot see you or order from you. Read the reason from our team and contact support to resolve it.",
   },
   expired: {
     label: "Licence expired",

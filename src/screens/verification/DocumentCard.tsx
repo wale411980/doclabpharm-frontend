@@ -40,6 +40,7 @@ export function DocumentCard({
   const [documentNumber, setDocumentNumber] = useState(document?.documentNumber ?? "");
   const [fileError, setFileError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [replacing, setReplacing] = useState(false);
   const upload = useUploadVerificationDocument(role);
   const remove = useDeleteVerificationDocument(role);
 
@@ -69,6 +70,7 @@ export function DocumentCard({
       await upload.mutateAsync({ type: requirement.type, file, documentNumber: documentNumber.trim() || undefined });
       toast.success(`${requirement.label}: uploaded.`);
       setFile(null);
+      setReplacing(false);
       if (fileInput.current) fileInput.current.value = "";
     } catch (error) {
       setFileError(apiErrorMessage(error, "The upload failed. Please try again."));
@@ -97,6 +99,15 @@ export function DocumentCard({
   };
 
   const status = document ? DOCUMENT_STATUS[document.status] : null;
+  // The upload form is open when something is needed; a document on file
+  // that is fine is replaced on request.
+  const showForm = canChange && (!document || document.status === "rejected" || replacing);
+
+  const cancelReplace = () => {
+    setReplacing(false);
+    setFile(null);
+    setFileError("");
+  };
 
   return (
     <li className="flex flex-col gap-4 rounded-3xl bg-white p-5 ring-1 ring-brand-100 sm:p-6">
@@ -125,6 +136,12 @@ export function DocumentCard({
               <Eye className="h-4 w-4" aria-hidden="true" />
               View
             </Button>
+            {canChange && !showForm && (
+              <Button variant="secondary" onClick={() => setReplacing(true)}>
+                <Upload className="h-4 w-4" aria-hidden="true" />
+                Replace
+              </Button>
+            )}
             {canDelete && document.status !== "accepted" && (
               <Button variant="ghost" className="text-red-700 hover:bg-red-50" onClick={() => setConfirmDelete(true)}>
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -143,13 +160,13 @@ export function DocumentCard({
       )}
 
       {document?.status === "accepted" && (
-        <p className="flex items-center gap-2 text-sm text-brand-800">
-          <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+        <p className="flex items-start gap-2 text-sm text-brand-800">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           Checked by our team. It stays on your record; uploading a new one sends it for review.
         </p>
       )}
 
-      {canChange && (
+      {showForm && (
         <form onSubmit={handleUpload} className="flex flex-col gap-3 border-t border-brand-100 pt-4">
           <Field
             id={`${id}-file`}
@@ -184,11 +201,16 @@ export function DocumentCard({
               {fileError}
             </p>
           )}
-          <div>
+          <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={!file} loading={upload.isPending}>
               <Upload className="h-4 w-4" aria-hidden="true" />
               {document ? "Upload replacement" : "Upload"}
             </Button>
+            {replacing && (
+              <Button variant="ghost" onClick={cancelReplace} disabled={upload.isPending}>
+                Cancel
+              </Button>
+            )}
           </div>
         </form>
       )}

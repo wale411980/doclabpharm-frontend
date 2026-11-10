@@ -101,7 +101,7 @@ function DetailBody({ basePath, type, id, detail }: { basePath: string; type: Pr
           <AuditTrail events={detail.events} />
         </div>
 
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="order-first flex min-w-0 flex-col gap-6 lg:order-none">
           <Card className="flex flex-col gap-4">
             <h2 className="text-lg font-bold text-ink-900">Decision</h2>
             {!ready && (
@@ -117,7 +117,7 @@ function DetailBody({ basePath, type, id, detail }: { basePath: string; type: Pr
             )}
             <Button onClick={() => setDialog("approve")} disabled={!ready}>
               <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-              {status === "approved" ? "Approve renewal" : status === "suspended" ? "Reinstate (approve)" : "Approve"}
+              {approveLabel(status, hasPending)}
             </Button>
             {REJECTABLE.includes(status) && (
               <Button variant="secondary" onClick={() => setDialog("reject")}>
@@ -142,7 +142,7 @@ function DetailBody({ basePath, type, id, detail }: { basePath: string; type: Pr
         onOpenChange={(open) => !open && setDialog(null)}
         providerName={name}
         suggestedDate={suggestedDate}
-        renewal={status === "approved"}
+        title={approveLabel(status, hasPending)}
         loading={decide.isPending}
         onConfirm={(licenceExpiresAt, note) => run({ action: "approve", licenceExpiresAt, note })}
       />
@@ -170,7 +170,7 @@ function DetailBody({ basePath, type, id, detail }: { basePath: string; type: Pr
         title="Reject document"
         description={
           typeof dialog === "object" && dialog
-            ? `${dialog.document.label}: the provider will see this reason on their verification page and must upload a replacement.`
+            ? rejectDocumentDescription(detail, dialog.document)
             : ""
         }
         confirmLabel="Reject document"
@@ -181,6 +181,20 @@ function DetailBody({ basePath, type, id, detail }: { basePath: string; type: Pr
       />
     </>
   );
+}
+
+function rejectDocumentDescription(detail: Detail, document: AdminProviderDocument): string {
+  const base = `${document.label}: the provider will see this reason on their verification page and must upload a replacement.`;
+  const required = detail.requiredDocuments[toCamelCase(document.type)]?.required;
+  return detail.provider.verificationStatus === "approved" && required
+    ? `${base} Because it is a required document, the provider goes back under review and is hidden from patients until it is fixed.`
+    : base;
+}
+
+function approveLabel(status: Detail["provider"]["verificationStatus"], hasPending: boolean): string {
+  if (status === "suspended") return "Reinstate (approve)";
+  if (status !== "approved") return "Approve";
+  return hasPending ? "Approve renewal" : "Change licence date";
 }
 
 function labelFor(detail: Detail, type: string): string {

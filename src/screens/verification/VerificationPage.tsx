@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import { Send } from "lucide-react";
+import { AlertTriangle, Send } from "lucide-react";
 import { Button, Card, ErrorState, LoadingState, PageHeader } from "@/components/dashboard/ui";
 import { apiErrorMessage } from "@/lib/apiError";
 import type { ProviderRole } from "@/lib/providerTypes";
@@ -32,6 +32,7 @@ export default function VerificationPage({ role }: { role: ProviderRole }) {
       {data && (
         <>
           <StatusSummary verification={data} />
+          <RejectedDocumentsNotice verification={data} />
           <section aria-labelledby="documents-heading" className="flex flex-col gap-4">
             <h2 id="documents-heading" className="text-xl font-extrabold text-ink-900">
               Your documents
@@ -111,5 +112,21 @@ function SubmitPanel({ role, verification }: { role: ProviderRole; verification:
         </Button>
       </div>
     </Card>
+  );
+}
+
+function RejectedDocumentsNotice({ verification }: { verification: ProviderVerification }) {
+  const rejected = verification.documents.filter((doc) => doc.document?.status === "rejected");
+  if (rejected.length === 0) return null;
+  return (
+    <div role="alert" className="flex items-start gap-3 rounded-3xl bg-red-50 p-5 text-red-800 ring-1 ring-red-200">
+      <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+      <p>
+        <span className="font-bold">
+          {rejected.length === 1 ? "One document needs replacing: " : `${rejected.length} documents need replacing: `}
+        </span>
+        {rejected.map((doc) => doc.label).join("; ")}. The reason is shown with each one below.
+      </p>
+    </div>
   );
 }

@@ -14,11 +14,11 @@ export function StatusSummary({ verification }: { verification: ProviderVerifica
   const status = verification.verificationStatus;
   const copy = VERIFICATION_STATUS[status];
   const Icon = iconFor(status);
-  const showReason = (status === "rejected" || status === "suspended") && verification.verificationNote;
+  const isReason = status === "rejected" || status === "suspended";
 
   return (
     <Card className="flex flex-col gap-5">
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
           <Icon className="h-6 w-6" aria-hidden="true" />
         </span>
@@ -31,9 +31,17 @@ export function StatusSummary({ verification }: { verification: ProviderVerifica
         </div>
       </div>
 
-      {showReason && (
-        <div className="rounded-2xl bg-red-50 p-4 text-red-800 ring-1 ring-red-200">
-          <p className="font-bold">{status === "suspended" ? "Reason for suspension" : "Reason from our team"}</p>
+      {verification.verificationNote && (
+        <div
+          className={
+            isReason
+              ? "rounded-2xl bg-red-50 p-4 text-red-800 ring-1 ring-red-200"
+              : "rounded-2xl bg-brand-50 p-4 text-ink-900 ring-1 ring-brand-200"
+          }
+        >
+          <p className="font-bold">
+            {status === "suspended" ? "Reason for suspension" : isReason ? "Reason from our team" : "Note from our team"}
+          </p>
           <p className="mt-1 whitespace-pre-line">{verification.verificationNote}</p>
         </div>
       )}

@@ -19,11 +19,17 @@ export function goToSite(path = "/") {
 
 /**
  * The forms call onClose both when dismissed and after signing in (when they
- * have already navigated to the dashboard). Only a dismissal leaves the app.
+ * have already navigated to the dashboard), and also just before switching
+ * to the other form ("Login" / "Create account"). Only a dismissal leaves
+ * the app: the check waits a tick so a switch, which changes the URL right
+ * after onClose, is not mistaken for one.
  */
 function closeTo(path: string) {
   return () => {
-    if (!localStorage.getItem("token")) goToSite(path);
+    const from = window.location.pathname;
+    setTimeout(() => {
+      if (!localStorage.getItem("token") && window.location.pathname === from) goToSite(path);
+    }, 0);
   };
 }
 

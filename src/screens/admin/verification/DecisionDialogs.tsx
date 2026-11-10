@@ -15,7 +15,7 @@ export function ApproveDialog({
   onOpenChange,
   providerName,
   suggestedDate,
-  renewal,
+  title,
   loading,
   onConfirm,
 }: {
@@ -23,7 +23,7 @@ export function ApproveDialog({
   onOpenChange: (open: boolean) => void;
   providerName: string;
   suggestedDate: string | null;
-  renewal: boolean;
+  title: string;
   loading: boolean;
   onConfirm: (licenceExpiresAt: string, note: string) => void;
 }) {
@@ -41,14 +41,14 @@ export function ApproveDialog({
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={renewal ? "Approve licence renewal" : "Approve provider"}
+      title={title}
       description={
         <>
           {providerName} will be shown to patients and can take orders until the licence date. Pending documents are
           marked accepted, and the provider is emailed.
         </>
       }
-      confirmLabel="Approve"
+      confirmLabel={title}
       loading={loading}
       onConfirm={() => onConfirm(date, note.trim())}
     >

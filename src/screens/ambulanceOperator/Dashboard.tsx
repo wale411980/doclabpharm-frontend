@@ -76,6 +76,12 @@ function StatusCard({ verification, profileComplete }: { verification: ProviderV
           <Pill tone={copy.tone}>{copy.label}</Pill>
         </div>
         <p className="leading-relaxed text-ink-700">{copy.explanation}</p>
+        {["rejected", "suspended"].includes(verification.verificationStatus) && verification.verificationNote && (
+          <p className="rounded-2xl bg-red-50 p-4 text-red-800 ring-1 ring-red-200">
+            <span className="font-bold">Reason from our team: </span>
+            {verification.verificationNote}
+          </p>
+        )}
       </div>
 
       <div>

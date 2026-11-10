@@ -148,10 +148,12 @@ export const useVerificationDecision = (type: ProviderRole, id: number) => {
           })).data;
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: detailKey(type, id) });
-      queryClient.invalidateQueries({ queryKey: ["admin-verifications"] });
-    },
+    // Returned so the caller's success message follows the refreshed file.
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: detailKey(type, id) }),
+        queryClient.invalidateQueries({ queryKey: ["admin-verifications"] }),
+      ]),
   });
 };
 

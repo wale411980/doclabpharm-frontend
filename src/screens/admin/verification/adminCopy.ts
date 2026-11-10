@@ -21,4 +21,5 @@ export const EVENT_ACTION: Record<string, string> = {
   document_rejected: "Document rejected",
   expired: "Licence expired",
   sent_for_review: "Sent back for review",
+  profile_changed: "Profile details changed",
 };

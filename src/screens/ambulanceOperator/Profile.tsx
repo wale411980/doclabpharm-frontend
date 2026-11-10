@@ -10,8 +10,15 @@ import {
 } from "@/queries/use-ambulance-operator";
 import type { AmbulanceOperatorProfile as Profile } from "@/types/verification";
 
-/** Statuses in which the API refuses changes to the business name and CAC number. */
-const IDENTITY_LOCKED = ["submitted", "approved", "suspended"];
+/**
+ * The API refuses changes to the business name and CAC number while they are
+ * being reviewed or an approval was based on them (including a previously
+ * approved provider who is back under review).
+ */
+function isIdentityLocked(profile: Profile): boolean {
+  if (["submitted", "approved", "suspended"].includes(profile.verificationStatus)) return true;
+  return profile.verificationStatus === "under_review" && profile.verifiedAt !== null;
+}
 
 const toForm = (profile: Profile): Record<keyof AmbulanceOperatorProfileInput, string> => ({
   businessName: profile.businessName ?? "",
@@ -45,7 +52,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const [form, setForm] = useState(() => toForm(profile));
   const [formError, setFormError] = useState("");
   const update = useUpdateAmbulanceOperatorProfile();
-  const identityLocked = IDENTITY_LOCKED.includes(profile.verificationStatus);
+  const identityLocked = isIdentityLocked(profile);
 
   const set = (field: keyof typeof form) => (event: { target: { value: string } }) =>
     setForm((current) => ({ ...current, [field]: event.target.value }));
@@ -82,8 +89,8 @@ function ProfileForm({ profile }: { profile: Profile }) {
           {identityLocked && (
             <p className="flex items-start gap-2 rounded-2xl bg-sand p-3 text-sm text-ink-700">
               <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              The business name and CAC number are locked while your verification is submitted or approved, because our
-              review was based on them. Contact support if they need to change.
+              The business name and CAC number are locked while our team is reviewing them or after an approval,
+              because the approval was based on them. Contact support if they need to change.
             </p>
           )}
           <Field id="businessName" label="Business name">

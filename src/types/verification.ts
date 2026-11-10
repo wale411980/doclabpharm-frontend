@@ -153,4 +153,5 @@ export type AmbulanceOperatorProfile = {
   city: string | null;
   state: string | null;
   verificationStatus: VerificationStatus;
+  verifiedAt: string | null;
 };
