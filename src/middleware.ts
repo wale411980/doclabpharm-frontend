@@ -20,6 +20,7 @@ export const config = {
     "/doctors/:path*",
     "/pharmacy/:path*",
     "/lab_technician/:path*",
+    "/ambulance_operator/:path*",
     "/lab/:path*",
     "/patient/:path*",
     "/admin/:path*",

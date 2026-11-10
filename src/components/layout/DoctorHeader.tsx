@@ -14,6 +14,7 @@ function DoctorHeader({ onMenuClick }: HeaderProps) {
 
   const routeTitleMap: Record<string, string> = {
     "/doctor/dashboard": "Dashboard",
+    "/doctor/verification": "Verification",
     "/doctor/patients": "Patients",
     "/doctor/doctor-appointments": "Doctor Appointments",
     "/doctor/lab-appointments": "Lab Appointments",

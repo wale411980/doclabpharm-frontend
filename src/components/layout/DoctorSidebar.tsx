@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
   User,
   Calendar,
   MessageSquare,
@@ -27,6 +28,7 @@ export function DoctorSidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/doctor/dashboard" },
+    { icon: ShieldCheck, label: "Verification", href: "/doctor/verification" },
     { icon: User, label: "Patients", href: "/doctor/patients" },
     { icon: Calendar, label: "Appointments", href: "/doctor/appointments" },
     {

@@ -5,17 +5,16 @@ import { cn } from "@/lib/utils";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useResetPasswordForCare } from "@/queries/use-auth";
 import { toast } from "react-toastify";
+import { isProviderRole } from "@/lib/providerTypes";
 
-const VALID_ROLES = ["doctor", "pharmacy", "lab_technician"] as const;
-type CareRole = (typeof VALID_ROLES)[number];
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const user_id = searchParams.get("userId");
   const roleParam = searchParams.get("role");
-  const role = VALID_ROLES.includes(roleParam as CareRole)
-    ? (roleParam as CareRole)
+  const role = isProviderRole(roleParam)
+    ? roleParam
     : null;
   const navigate = useNavigate();
   const { mutateAsync: resetPassword } = useResetPasswordForCare();

@@ -27,7 +27,7 @@ export type ResetPasswordRequest = {
 };
 
 export type ResetPasswordForCareRequest = ResetPasswordRequest & {
-  role: "doctor" | "pharmacy" | "lab_technician";
+  role: import("@/lib/providerTypes").ProviderRole;
 };
 
 export type RegisterDoctorRequest = {
@@ -40,7 +40,8 @@ export type RegisterDoctorRequest = {
   city: string;
   state: string;
   address: string;
-  specializationId: string;
+  specializationId?: string;
+  businessName?: string;
   role: string;
 };
 

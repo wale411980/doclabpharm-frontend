@@ -26,7 +26,11 @@ function SuperAdminHeader({ onMenuClick }: HeaderProps) {
     "/super-admin/settings": "Settings",
   };
 
-  const pageTitle = routeTitleMap[location.pathname] || "Dashboard";
+  const pageTitle =
+    routeTitleMap[location.pathname] ||
+    (location.pathname.startsWith("/super-admin/verifications") ? "Provider verification" : "") ||
+    (location.pathname === "/super-admin/provider-reports" ? "Provider reports" : "") ||
+    "Dashboard";
 
   return (
     <div className="">

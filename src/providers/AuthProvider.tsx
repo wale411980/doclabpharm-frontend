@@ -21,6 +21,7 @@ type BaseUser = {
     | "doctor"
     | "pharmacy"
     | "lab_technician"
+    | "ambulance_operator"
     | "super_admin"; // match your backend if needed
 };
 
@@ -33,6 +34,10 @@ type LabTechnician = BaseUser & {
   userType: "lab_technician";
   licenseId?: string;
 };
+type AmbulanceOperator = BaseUser & {
+  userType: "ambulance_operator";
+  businessName?: string;
+};
 
 export type AppUser =
   | GeneralUser
@@ -40,6 +45,7 @@ export type AppUser =
   | Doctor
   | Pharmacy
   | LabTechnician
+  | AmbulanceOperator
   | SuperAdmin
   | null;
 
