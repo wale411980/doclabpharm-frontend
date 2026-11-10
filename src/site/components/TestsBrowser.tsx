@@ -79,7 +79,7 @@ export function TestsBrowser({ categories, initialQuery = "" }: { categories: Ca
           <p className="text-xl font-extrabold text-ink-900">No test matches that yet</p>
           <p className="mt-2 text-ink-500">
             Try another word, or{" "}
-            <a href="/user/see-doctor-now" className="font-bold text-brand-700 underline underline-offset-4">
+            <a href="/see-a-doctor" className="font-bold text-brand-700 underline underline-offset-4">
               ask a doctor which test you need
             </a>
             .

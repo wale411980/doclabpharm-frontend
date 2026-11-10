@@ -56,7 +56,7 @@ export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
     intro:
       "Talk to a doctor by chat, voice or video, or book a time that suits you. Every doctor's Medical and Dental Council of Nigeria registration is checked first.",
     image: { src: "/images/doctor-smiling.webp", width: 1000, height: 666, alt: "A smiling doctor holding patient notes" },
-    cta: { label: "Find a doctor", href: "/doctors/available" },
+    cta: { label: "Find a doctor", href: "/see-a-doctor" },
     steps: [
       ["Choose a doctor or specialty", "See each doctor's specialty, experience and fee."],
       ["Book or start now", "Pick a time, or start a consultation with an available doctor."],

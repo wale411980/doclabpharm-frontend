@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     page("", 1, "weekly"),
     ...SERVICES.map((s) => page(s.href, 0.9)),
     page("/tests", 0.9, "weekly"),
+    page("/see-a-doctor", 0.8, "weekly"),
     ...catalogue.flatMap((group) => group.tests.map((test) => page(testPath(test), 0.7, "weekly"))),
     page("/partners", 0.8),
     page("/abuja", 0.8),

@@ -26,7 +26,7 @@ const TABS = [
     placeholder: "What is wrong? Fever, cough, rash, anything",
     button: "See a doctor now",
     quick: ["Fever", "Cough or cold", "Skin problem", "Stomach pain", "Women's health", "Child is sick"],
-    target: () => "/user/see-doctor-now",
+    target: () => "/see-a-doctor",
   },
   {
     key: "medicine",

@@ -180,7 +180,7 @@ export function TestsSection({ categories }: { categories: CatalogueCategory[] }
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] font-semibold text-ink-700">
           <Video className="h-5 w-5 text-brand-600" aria-hidden="true" />
           Not sure which test you need?{" "}
-          <Link href="/user/see-doctor-now" className="text-brand-700 underline underline-offset-4">
+          <Link href="/see-a-doctor" className="text-brand-700 underline underline-offset-4">
             Ask a doctor first
           </Link>
         </p>
@@ -204,7 +204,7 @@ export function ServicesBento() {
         <div className="grid gap-4 lg:grid-cols-12">
           {/* Doctor */}
           <Link
-            href="/user/see-doctor-now"
+            href="/see-a-doctor"
             className="group relative isolate flex min-h-[420px] flex-col justify-end overflow-hidden rounded-[32px] bg-night p-7 text-white lg:col-span-7"
           >
             <Image

@@ -65,7 +65,8 @@ export default function AvailableDoctorsLandingPage() {
 
   useEffect(() => {
     if (!specializationId) {
-      navigate("/"); // Or show modal
+      // No specialty chosen: show the doctors who are online instead of bouncing home.
+      window.location.replace("/see-a-doctor");
     }
   }, [specializationId, navigate]);
 

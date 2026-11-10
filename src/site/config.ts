@@ -24,7 +24,7 @@ export const APP_LINKS = {
   register: "/register",
   partnerLogin: "/partners/login",
   partnerRegister: "/partners/register",
-  findDoctor: "/doctors/available",
+  findDoctor: "/see-a-doctor",
 } as const;
 
 export const SERVICES = [
