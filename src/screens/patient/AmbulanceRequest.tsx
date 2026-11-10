@@ -56,7 +56,9 @@ export default function AmbulanceRequest() {
   }, []);
 
   useEffect(() => {
-    const phone = (profile as { phone?: string | null } | undefined)?.phone;
+    // GET /user wraps the profile in {status, data}.
+    const raw = profile as { phone?: string | null; data?: { phone?: string | null } } | undefined;
+    const phone = raw?.data?.phone ?? raw?.phone;
     if (!contactPhone && phone) setContactPhone(String(phone));
   }, [profile, contactPhone]);
 

@@ -37,7 +37,7 @@ export function Countdown({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-sm font-bold tabular-nums",
+        "inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-sm font-bold tabular-nums",
         left.total === 0 ? "bg-slate-100 text-ink-700" : urgent ? "bg-red-100 text-red-800" : "bg-warm-100 text-warm-900",
         className
       )}

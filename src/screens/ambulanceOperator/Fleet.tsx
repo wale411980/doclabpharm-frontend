@@ -44,10 +44,12 @@ export default function Fleet() {
       />
 
       {sharing.length > 0 && (
-        <p className="flex flex-wrap items-center gap-2 rounded-3xl bg-brand-50 p-4 font-bold text-brand-800" role="status">
-          <MapPin className="h-5 w-5 animate-pulse" aria-hidden="true" />
-          Sharing location for {sharing.length} {sharing.length === 1 ? "vehicle" : "vehicles"}
-          {lastSentAt ? ` · last sent ${new Date(lastSentAt).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit", second: "2-digit" })}` : ""}
+        <p className="flex items-start gap-2 rounded-3xl bg-brand-50 p-4 font-bold text-brand-800" role="status">
+          <MapPin className="mt-0.5 h-5 w-5 shrink-0 animate-pulse" aria-hidden="true" />
+          <span>
+            Sharing location for {sharing.length} {sharing.length === 1 ? "vehicle" : "vehicles"}
+            {lastSentAt ? ` · last sent ${new Date(lastSentAt).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit", second: "2-digit" })}` : ""}
+          </span>
         </p>
       )}
       <InlineError>{locationError}</InlineError>

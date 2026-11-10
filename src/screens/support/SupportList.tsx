@@ -191,15 +191,17 @@ export function DeadlineNote({ due, audience, large }: { due: string | null; aud
   return (
     <p
       className={cn(
-        "inline-flex flex-wrap items-center gap-1.5 font-bold",
+        "flex items-start gap-1.5 font-bold",
         large ? "rounded-2xl px-4 py-3 text-base" : "text-sm",
         overdue ? (large ? "bg-red-50 text-red-800 ring-1 ring-red-200" : "text-red-700") : large ? "bg-warm-50 text-warm-900 ring-1 ring-warm-100" : "text-warm-700"
       )}
     >
-      <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
-      {overdue
-        ? `Deadline missed ${relativeTime(due, now)} (${formatDate(due, true)})`
-        : `${whoReplies} by ${formatDate(due, true)} (${relativeTime(due, now)})`}
+      <Clock className={cn("h-4 w-4 shrink-0", large ? "mt-1" : "mt-0.5")} aria-hidden="true" />
+      <span>
+        {overdue
+          ? `Deadline missed ${relativeTime(due, now)} (${formatDate(due, true)})`
+          : `${whoReplies} by ${formatDate(due, true)} (${relativeTime(due, now)})`}
+      </span>
     </p>
   );
 }

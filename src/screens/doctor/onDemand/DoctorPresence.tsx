@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { BellRing } from "lucide-react";
-import { pingDoctorPresence, useDoctorPresence } from "@/queries/use-consults";
+import { pingDoctorPresence, useConsultRequests, useDoctorPresence } from "@/queries/use-consults";
 
 /**
  * Mounted in the doctor dashboard layout. While the doctor is online it pings
@@ -13,20 +13,19 @@ export function DoctorPresenceKeeper() {
   const { data } = useDoctorPresence();
   const queryClient = useQueryClient();
   const { pathname } = useLocation();
-  const [waiting, setWaiting] = useState(0);
   const online = data?.online ?? false;
+  // The request list (refreshed every 10 seconds and after each accept or
+  // decline) decides the banner, so it disappears as soon as a request is taken.
+  const requests = useConsultRequests(online);
+  const waiting = online ? requests.data?.data.length ?? 0 : 0;
 
   useEffect(() => {
-    if (!online) {
-      setWaiting(0);
-      return;
-    }
+    if (!online) return;
     let cancelled = false;
     const ping = async () => {
       try {
         const result = await pingDoctorPresence();
         if (cancelled) return;
-        setWaiting(result.waiting ?? 0);
         if (!result.online) {
           // The API took the doctor offline (for example after missed requests).
           queryClient.setQueryData(["doctor-presence"], { online: false });

@@ -12,6 +12,13 @@ import { SERVICE_LABEL } from "@/screens/shared/EarningsPage";
 import { ADMIN_STATUS } from "@/screens/admin/verification/adminCopy";
 import type { VerificationStatus } from "@/types/verification";
 
+const PLURAL: Record<string, string> = {
+  doctor: "Doctors",
+  pharmacy: "Pharmacies",
+  lab_technician: "Labs",
+  ambulance_operator: "Ambulance operators",
+};
+
 function formatSeconds(seconds: number | null): string {
   if (seconds === null) return "—";
   if (seconds < 60) return `${seconds} s`;
@@ -101,23 +108,23 @@ export default function AdminOverview({ basePath }: { basePath: string }) {
               <StatTile label="Unpaid ambulance fares" value={formatNaira(data.money.unpaidAmbulanceFares)} tone={data.money.unpaidAmbulanceFares ? "red" : "neutral"} />
             </div>
             <Card className="overflow-x-auto p-0">
-              <table className="w-full min-w-[28rem] text-left">
+              <table className="w-full text-left text-sm sm:text-base">
                 <caption className="sr-only">Gross and commission by service</caption>
                 <thead className="bg-brand-50 text-sm text-ink-700">
                   <tr>
-                    <th scope="col" className="px-4 py-3 font-bold">Service</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Items</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Patients paid</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Commission</th>
+                    <th scope="col" className="px-3 py-3 sm:px-4 font-bold">Service</th>
+                    <th scope="col" className="hidden px-3 py-3 text-right font-bold sm:table-cell sm:px-4">Items</th>
+                    <th scope="col" className="px-3 py-3 sm:px-4 text-right font-bold">Patients paid</th>
+                    <th scope="col" className="px-3 py-3 sm:px-4 text-right font-bold">Commission</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-100">
                   {Object.keys(SERVICE_LABEL).map((type) => (
                     <tr key={type}>
-                      <th scope="row" className="px-4 py-3 font-bold text-ink-900">{SERVICE_LABEL[type]}</th>
-                      <td className="px-4 py-3 text-right tabular-nums">{byService[type]?.items ?? 0}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{formatNaira(byService[type]?.gross ?? 0)}</td>
-                      <td className="px-4 py-3 text-right font-bold tabular-nums">{formatNaira(byService[type]?.commission ?? 0)}</td>
+                      <th scope="row" className="px-3 py-3 sm:px-4 font-bold text-ink-900">{SERVICE_LABEL[type]}</th>
+                      <td className="hidden px-3 py-3 text-right tabular-nums sm:table-cell sm:px-4">{byService[type]?.items ?? 0}</td>
+                      <td className="px-3 py-3 sm:px-4 text-right tabular-nums">{formatNaira(byService[type]?.gross ?? 0)}</td>
+                      <td className="px-3 py-3 sm:px-4 text-right font-bold tabular-nums">{formatNaira(byService[type]?.commission ?? 0)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -146,7 +153,7 @@ export default function AdminOverview({ basePath }: { basePath: string }) {
                 return (
                   <Card key={role.value} className="flex flex-col gap-3 p-4">
                     <Link to={`${basePath}/verifications?type=${role.value}&status=all`} className="flex items-center justify-between font-extrabold text-ink-900 hover:text-brand-700">
-                      {role.label}s <span className="tabular-nums">{total}</span>
+                      {PLURAL[role.value]} <span className="tabular-nums">{total}</span>
                     </Link>
                     <ul className="flex flex-col gap-1 text-sm">
                       {Object.entries(counts).map(([status, count]) => (

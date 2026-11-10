@@ -42,32 +42,32 @@ export default function CommissionReport() {
             <StatTile label="Card vs wallet" value={`${formatNaira(byMethod.card ?? 0)} / ${formatNaira(byMethod.wallet ?? 0)}`} hint="Commission by payment method" />
           </div>
           <Card className="overflow-x-auto p-0">
-            <table className="w-full min-w-[28rem] text-left">
+            <table className="w-full text-left text-sm sm:text-base">
               <caption className="sr-only">Commission by service</caption>
               <thead className="bg-brand-50 text-sm text-ink-700">
                 <tr>
-                  <th scope="col" className="px-4 py-3 font-bold">Service</th>
-                  <th scope="col" className="px-4 py-3 text-right font-bold">Items</th>
-                  <th scope="col" className="px-4 py-3 text-right font-bold">Patients paid</th>
-                  <th scope="col" className="px-4 py-3 text-right font-bold">Commission</th>
+                  <th scope="col" className="px-3 py-3 sm:px-4 font-bold">Service</th>
+                  <th scope="col" className="hidden px-3 py-3 text-right font-bold sm:table-cell sm:px-4">Items</th>
+                  <th scope="col" className="px-3 py-3 sm:px-4 text-right font-bold">Patients paid</th>
+                  <th scope="col" className="px-3 py-3 sm:px-4 text-right font-bold">Commission</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-100">
                 {Object.keys({ ...SERVICE_LABEL, ...byService }).map((type) => (
                   <tr key={type}>
-                    <th scope="row" className="px-4 py-3 font-bold text-ink-900">{SERVICE_LABEL[type] ?? humanize(type)}</th>
-                    <td className="px-4 py-3 text-right tabular-nums">{byService[type]?.items ?? 0}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{formatNaira(byService[type]?.gross ?? 0)}</td>
-                    <td className="px-4 py-3 text-right font-bold tabular-nums">{formatNaira(byService[type]?.commission ?? 0)}</td>
+                    <th scope="row" className="px-3 py-3 sm:px-4 font-bold text-ink-900">{SERVICE_LABEL[type] ?? humanize(type)}</th>
+                    <td className="hidden px-3 py-3 text-right tabular-nums sm:table-cell sm:px-4">{byService[type]?.items ?? 0}</td>
+                    <td className="px-3 py-3 sm:px-4 text-right tabular-nums">{formatNaira(byService[type]?.gross ?? 0)}</td>
+                    <td className="px-3 py-3 sm:px-4 text-right font-bold tabular-nums">{formatNaira(byService[type]?.commission ?? 0)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot className="bg-sand">
                 <tr>
-                  <th scope="row" className="px-4 py-3 font-extrabold">Total</th>
-                  <td />
-                  <td className="px-4 py-3 text-right font-bold tabular-nums">{formatNaira(data.gross)}</td>
-                  <td className="px-4 py-3 text-right font-extrabold tabular-nums">{formatNaira(data.commission)}</td>
+                  <th scope="row" className="px-3 py-3 sm:px-4 font-extrabold">Total</th>
+                  <td className="hidden sm:table-cell" />
+                  <td className="px-3 py-3 sm:px-4 text-right font-bold tabular-nums">{formatNaira(data.gross)}</td>
+                  <td className="px-3 py-3 sm:px-4 text-right font-extrabold tabular-nums">{formatNaira(data.commission)}</td>
                 </tr>
               </tfoot>
             </table>

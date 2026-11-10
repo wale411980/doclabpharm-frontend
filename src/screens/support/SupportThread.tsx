@@ -135,7 +135,8 @@ function Actions({ ticket, audience }: { ticket: Thread; audience: SupportAudien
   const isAdmin = audience === "admin";
   const closed = ticket.status === "closed";
   const resolved = ticket.status === "resolved";
-  const canReply = !closed && !(isPatient && resolved);
+  // Once resolved, only staff keep writing; the patient reopens instead.
+  const canReply = !closed && (!resolved || isAdmin);
   const canReopen = isPatient && resolved;
 
   const run = async (input: Parameters<typeof action.mutateAsync>[0], success: string) => {

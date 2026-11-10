@@ -74,7 +74,11 @@ const enforcementKey = (type: string, id: number) => ["admin-enforcement", type,
 export const useEnforcementHistory = (type: ProviderRole, id: number) =>
   useQuery<EnforcementHistory>({
     queryKey: enforcementKey(type, id),
-    queryFn: async () => (await api.get(`/admin/providers/${type}/${id}/enforcement`)).data,
+    queryFn: async () => {
+      const data = (await api.get(`/admin/providers/${type}/${id}/enforcement`)).data;
+      // The client's camel-casing leaves "_30" alone: breaches_last_30_days → breachesLast_30Days.
+      return { ...data, breachesLast30Days: Number(data.breachesLast30Days ?? data.breachesLast_30Days ?? 0) };
+    },
   });
 
 export const useBanProvider = (type: ProviderRole, id: number) => {

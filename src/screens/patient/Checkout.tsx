@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CreditCard, FlaskConical, Home, Pill, ShoppingCart, Stethoscope, Store, Truck, Wallet, Zap } from "lucide-react";
-import { Button, Card, Field, PageHeader, buttonStyles, inputStyles } from "@/components/dashboard/ui";
+import { Button, Card, Field, PageHeader, buttonStyles, formatDate, inputStyles } from "@/components/dashboard/ui";
 import { EmptyState, InlineError } from "@/components/dashboard/marketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { apiErrorMessage } from "@/lib/apiError";
@@ -192,7 +192,7 @@ export default function Checkout() {
                       <p className="font-bold text-ink-900">{formatNaira(item.price)}</p>
                     </div>
                     <p className="text-sm text-ink-500">
-                      {item.date} at {item.time}
+                      {formatDate(String(item.date))} at {item.time}
                     </p>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <ChoiceCard

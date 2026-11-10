@@ -19,6 +19,7 @@ const ACTION_LABEL: Record<string, string> = {
   sent_for_review: "Taken off DocLabPharm for review",
   banned: "Banned",
   unbanned: "Ban lifted",
+  reinstated: "Ban lifted",
 };
 
 const WHAT_BAN_DOES: Record<ProviderRole, string> = {
@@ -99,7 +100,7 @@ export default function ProviderAccount({ basePath }: { basePath: string }) {
                 {history.data.history.map((event) => (
                   <li key={event.id} className="flex flex-col gap-1 rounded-3xl bg-white p-4 ring-1 ring-brand-100">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Pill tone={event.action === "banned" || event.action === "sent_for_review" ? "red" : event.action === "unbanned" ? "brand" : "warm"}>
+                      <Pill tone={event.action === "banned" || event.action === "sent_for_review" ? "red" : event.action === "unbanned" || event.action === "reinstated" ? "brand" : "warm"}>
                         {ACTION_LABEL[event.action] ?? humanize(event.action)}
                       </Pill>
                       <span className="text-sm text-ink-500">
@@ -203,7 +204,12 @@ function CommissionPanel({ type, id }: { type: ProviderRole; id: number }) {
       setCurrent(result.commissionPercent === null ? "the standard rate" : `${result.commissionPercent}%`);
       if (percent === null) setValue("");
     } catch (e) {
-      setError(apiErrorMessage(e, "We could not change the commission."));
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      setError(
+        status === 419
+          ? "The API refused this change with a security (CSRF) error. The /super-admin/providers/* route needs to be added to the API's CSRF exemptions before rates can be changed here."
+          : apiErrorMessage(e, "We could not change the commission.")
+      );
     }
   };
 
