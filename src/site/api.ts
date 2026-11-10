@@ -69,3 +69,38 @@ export function slugify(text: string): string {
 export function packagePath(pkg: Pick<HealthPackage, "id" | "name">): string {
   return `/health-checks/${pkg.id}-${slugify(pkg.name)}`;
 }
+
+export type LabTestGroup = {
+  name: string;
+  tests: { id: number; name: string; price: number | null; lab: string | null }[];
+};
+
+type RawCategory = {
+  name?: string;
+  diagnoses?: {
+    id: number;
+    name: string;
+    price?: number | string | null;
+    lab_technician?: { business_name?: string | null; first_name?: string | null; last_name?: string | null } | null;
+  }[];
+};
+
+/** Tests listed by approved labs, grouped by category (empty until labs list tests). */
+export async function getLabTestGroups(): Promise<LabTestGroup[]> {
+  const categories = unwrap<RawCategory>(await getJson("/diagnosis/categories"));
+
+  return categories
+    .map((category) => ({
+      name: (category.name ?? "").trim(),
+      tests: (category.diagnoses ?? []).slice(0, 9).map((test) => ({
+        id: test.id,
+        name: test.name,
+        price: test.price === null || test.price === undefined ? null : Number(test.price),
+        lab:
+          test.lab_technician?.business_name ||
+          [test.lab_technician?.first_name, test.lab_technician?.last_name].filter(Boolean).join(" ") ||
+          null,
+      })),
+    }))
+    .filter((group) => group.name && group.tests.length > 0);
+}

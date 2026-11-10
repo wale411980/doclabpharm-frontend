@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/bricolage-grotesque";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -77,6 +78,12 @@
    Buttons with white text use brand-600 or darker (contrast >= 4.5:1). */
 @theme {
   --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  /* Headlines on the public website. */
+  --font-display: "Bricolage Grotesque Variable", "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-night: #06281f;
+  --color-lime: #c8f56a;
+  --color-siren: #ff5a3c;
 
   --color-brand-50: #f2f9f5;
   --color-brand-100: #e6f2ef;
@@ -149,4 +156,19 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Public website: the soft pulse behind "online now" dots and the hero glow. */
+@keyframes dlp-ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  80%, 100% { transform: scale(2.6); opacity: 0; }
+}
+@keyframes dlp-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.06); }
+}
+.dlp-ping { animation: dlp-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.dlp-breathe { animation: dlp-breathe 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .dlp-ping, .dlp-breathe { animation: none; }
 }

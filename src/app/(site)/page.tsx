@@ -3,30 +3,31 @@ import {
   AppSection,
   HealthChecksPreview,
   Hero,
-  NearestSection,
+  HowItWorks,
   PartnerCta,
-  Spotlights,
+  ServicesBento,
+  TestsSection,
   VerifiedSection,
 } from "@/site/components/home";
 import { Section, SectionHeading } from "@/site/components/ui";
-import { getHealthPackages } from "@/site/api";
+import { getHealthPackages, getLabTestGroups } from "@/site/api";
 import { HOME_FAQ } from "@/site/faq";
 
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const packages = await getHealthPackages();
+  const [packages, testGroups] = await Promise.all([getHealthPackages(), getLabTestGroups()]);
 
   return (
     <>
       <Hero />
-      <NearestSection />
-      <Spotlights />
+      <TestsSection groups={testGroups} />
+      <ServicesBento />
+      <HowItWorks />
       <VerifiedSection />
       <HealthChecksPreview packages={packages} />
       <PartnerCta />
-      <AppSection />
-      <Section>
+      <Section tone="sand">
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHeading
             title="Questions people ask"
@@ -35,6 +36,7 @@ export default async function HomePage() {
           <Faq items={HOME_FAQ} />
         </div>
       </Section>
+      <AppSection />
     </>
   );
 }

@@ -37,7 +37,9 @@ export function SiteHeader() {
           <ButtonLink href={APP_LINKS.login} variant="secondary">
             Log in
           </ButtonLink>
-          <ButtonLink href={APP_LINKS.register}>Sign up free</ButtonLink>
+          <ButtonLink href="/#tests" className="bg-night hover:bg-brand-900">
+            Book a test
+          </ButtonLink>
         </div>
 
         {/* Phone and tablet menu: a native disclosure, works without JavaScript. */}
