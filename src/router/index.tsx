@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "@/routes/ProtectedRoute";
-import Index from "@/pages/common/Index";
+import Index from "@/screens/common/Index";
 
 import { Login } from "@/components/authAdmin/Login";
 import { SuperAdminLogin } from "@/components/authSuperAdmin/Login";
@@ -13,17 +13,23 @@ import PharmacyLayout from "@/components/layout/PharmacyLayout";
 import LabTechnicianLayout from "@/components/layout/LabTechnicianLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
 import SuperAdminLayout from "@/components/layout/SuperAdminLayout";
-import VerifyEmailNoticePatient from "@/pages/VerifyEmailNoticePatient";
-import VerifyEmailNotice from "@/pages/VerifyEmailNotice";
-import EnterOTPPatient from "@/pages/EnterOTPPatient";
-import { EnterOTP } from "@/pages/EnterOTP";
-import Unauthorized from "@/pages/Unauthorized";
-import NotFoundPage from "@/pages/PageNotFound";
+import VerifyEmailNoticePatient from "@/screens/VerifyEmailNoticePatient";
+import VerifyEmailNotice from "@/screens/VerifyEmailNotice";
+import EnterOTPPatient from "@/screens/EnterOTPPatient";
+import { EnterOTP } from "@/screens/EnterOTP";
+import Unauthorized from "@/screens/Unauthorized";
+import NotFoundPage from "@/screens/PageNotFound";
+import {
+  PatientLoginPage,
+  PatientRegisterPage,
+  ProviderLoginPage,
+  ProviderRegisterPage,
+  SiteRedirect,
+} from "@/screens/auth/AuthPages";
 
 // COMING SOON PAGE
 // import IndexPage from "@/components/newLandingPage/ComingSoonPage";
 // MAIN LANDING PAGE
-import IndexPage from "@/components/newLandingPage/IndexPage";
 
 import AvailableDoctorsLandingPage from "@/components/newLandingPage/AvailableDoctorsLandingPage";
 import DoctorProfileLandingPage from "@/components/newLandingPage/DoctorProfileLandingPage";
@@ -33,107 +39,105 @@ import SelectDateTimeLandingPage from "@/components/newLandingPage/SelectDateTim
 import ConfirmTestLandingPage from "@/components/newLandingPage/ConfirmTestLandingPage";
 import CartLandingPage from "@/components/newLandingPage/CartLandingPage";
 import CartLoginPage from "@/components/newLandingPage/CartLoginPage";
-import PrivacyPolicy from "@/components/newLandingPage/PrivacyPolicy";
 
-import TermsAndConditions from "@/components/newLandingPage/TermsAndConditions";
 
 //Patient imports
 
-import UserDashboard from "@/pages/user/Dashboard";
-import DoctorProfile from "@/pages/user/DoctorBooking/DoctorProfile";
-import PatientProfile from "@/pages/user/PatientProfile";
-import PatientAppointment from "@/pages/user/PatientAppointment";
-import PatientOrder from "@/pages/user/PatientOrder";
-import PatientPharmacy from "@/pages/user/Pharmacy/PatientPharmacy";
-import PatientDetails from "@/pages/user/DoctorBooking/PatientDetails";
-import Consultation from "@/pages/user/DoctorBooking/Consultation";
-import TestBooking from "@/pages/user/TestBooking";
-import TestResults from "@/pages/user/TestResults";
-import FirstMessagePage from "@/pages/user/PatientMessages";
-import Cart from "@/pages/user/DoctorBooking/Cart";
-import Wallet from "@/pages/user/Wallet";
-import CheckoutSuccess from "@/pages/user/DoctorBooking/CheckoutSuccess";
-import Confirm from "@/pages/user/DoctorBooking/Confirm";
-import ConfirmAfterFundingWallet from "@/pages/user/DoctorBooking/ConfirmAfterFundingWallet";
-import AvailableDoctors from "@/pages/user/DoctorBooking/AvailableDoctors";
-import SelectLab from "@/pages/user/LabBooking/SelectLab";
-import ConfirmTest from "@/pages/user/LabBooking/ConfirmTest";
-import SelectDateTime from "@/pages/user/LabBooking/SelectDateTime";
-import SelectTest from "@/pages/user/LabBooking/SelectTest";
-import Notification from "@/pages/user/Notification";
+import UserDashboard from "@/screens/user/Dashboard";
+import DoctorProfile from "@/screens/user/DoctorBooking/DoctorProfile";
+import PatientProfile from "@/screens/user/PatientProfile";
+import PatientAppointment from "@/screens/user/PatientAppointment";
+import PatientOrder from "@/screens/user/PatientOrder";
+import PatientPharmacy from "@/screens/user/Pharmacy/PatientPharmacy";
+import PatientDetails from "@/screens/user/DoctorBooking/PatientDetails";
+import Consultation from "@/screens/user/DoctorBooking/Consultation";
+import TestBooking from "@/screens/user/TestBooking";
+import TestResults from "@/screens/user/TestResults";
+import FirstMessagePage from "@/screens/user/PatientMessages";
+import Cart from "@/screens/user/DoctorBooking/Cart";
+import Wallet from "@/screens/user/Wallet";
+import CheckoutSuccess from "@/screens/user/DoctorBooking/CheckoutSuccess";
+import Confirm from "@/screens/user/DoctorBooking/Confirm";
+import ConfirmAfterFundingWallet from "@/screens/user/DoctorBooking/ConfirmAfterFundingWallet";
+import AvailableDoctors from "@/screens/user/DoctorBooking/AvailableDoctors";
+import SelectLab from "@/screens/user/LabBooking/SelectLab";
+import ConfirmTest from "@/screens/user/LabBooking/ConfirmTest";
+import SelectDateTime from "@/screens/user/LabBooking/SelectDateTime";
+import SelectTest from "@/screens/user/LabBooking/SelectTest";
+import Notification from "@/screens/user/Notification";
 // USER_PRESCRIPTIONS_ROUTE_V1 — component existed but was never imported or routed
-import UserPrescriptions from "@/pages/user/UserPrescriptions";
+import UserPrescriptions from "@/screens/user/UserPrescriptions";
 // MEDICINES_ROUTE_V1: add medicines browser to user routes
-import MedicationBrowser from "@/pages/user/Medicines";
+import MedicationBrowser from "@/screens/user/Medicines";
 
 // Doctor imports
-import DoctorDashboard from "@/pages/doctor/Dashboard";
-import DoctorSettings from "@/pages/doctor/DoctorSettings";
-import DoctorAvailability from "@/pages/doctor/DoctorAvailability";
-import PatientList from "@/pages/doctor/PatientList";
-import PatientDetail from "@/pages/doctor/PatientDetail";
-import DoctorAppointment from "@/pages/doctor/DoctorAppointment";
-import DoctorPrescriptions from "@/pages/doctor/DoctorPrescriptions";
+import DoctorDashboard from "@/screens/doctor/Dashboard";
+import DoctorSettings from "@/screens/doctor/DoctorSettings";
+import DoctorAvailability from "@/screens/doctor/DoctorAvailability";
+import PatientList from "@/screens/doctor/PatientList";
+import PatientDetail from "@/screens/doctor/PatientDetail";
+import DoctorAppointment from "@/screens/doctor/DoctorAppointment";
+import DoctorPrescriptions from "@/screens/doctor/DoctorPrescriptions";
 // Lazy-loaded: pulls in recharts (~478KB) only when the analytics page is visited.
-const MedicalDashboard = lazy(() => import("@/pages/doctor/Analytics"));
-import DoctorWallet from "@/pages/doctor/DoctorWallet";
-import DoctorMessages from "@/pages/doctor/DoctorMessages";
-import DoctorCallRecordings from "@/pages/doctor/DoctorCallRecordings";
+const MedicalDashboard = lazy(() => import("@/screens/doctor/Analytics"));
+import DoctorWallet from "@/screens/doctor/DoctorWallet";
+import DoctorMessages from "@/screens/doctor/DoctorMessages";
+import DoctorCallRecordings from "@/screens/doctor/DoctorCallRecordings";
 
 // Pharmacist imports
-import PharmacistDashboard from "@/pages/pharmacist/Dashboard";
-import PharmacySettings from "@/pages/pharmacist/PharmacySettings";
-import OrderManagement from "@/pages/pharmacist/OrderManagement";
-import PaymentDashboard from "@/pages/pharmacist/Payment";
-import ProductList from "@/pages/pharmacist/ProductList";
-import ProductCategory from "@/pages/pharmacist/ProductCategory";
-import PharmacyWallet from "@/pages/pharmacist/PharmacyWallet";
-import PharmacyAvailability from "@/pages/pharmacist/PharmacyAvailability";
+import PharmacistDashboard from "@/screens/pharmacist/Dashboard";
+import PharmacySettings from "@/screens/pharmacist/PharmacySettings";
+import OrderManagement from "@/screens/pharmacist/OrderManagement";
+import PaymentDashboard from "@/screens/pharmacist/Payment";
+import ProductList from "@/screens/pharmacist/ProductList";
+import ProductCategory from "@/screens/pharmacist/ProductCategory";
+import PharmacyWallet from "@/screens/pharmacist/PharmacyWallet";
+import PharmacyAvailability from "@/screens/pharmacist/PharmacyAvailability";
 
 // Lab Technician imports
-import Dashboard from "@/pages/labTechnician/Dashboard";
-import Diagnosis from "@/pages/labTechnician/Diagnosis";
-import AppointmentsDashboard from "@/pages/labTechnician/Appointments";
-import LabTechnicianWallet from "@/pages/labTechnician/LabTechnicianWallet";
-import LabTechnicianSettings from "@/pages/labTechnician/LabTechnicianSettings";
-import PatientListLab from "@/pages/labTechnician/PatientListLab";
-import PatientDetailLab from "@/pages/labTechnician/PatientDetailLab";
-import LabAvailability from "@/pages/labTechnician/LabAvailability";
+import Dashboard from "@/screens/labTechnician/Dashboard";
+import Diagnosis from "@/screens/labTechnician/Diagnosis";
+import AppointmentsDashboard from "@/screens/labTechnician/Appointments";
+import LabTechnicianWallet from "@/screens/labTechnician/LabTechnicianWallet";
+import LabTechnicianSettings from "@/screens/labTechnician/LabTechnicianSettings";
+import PatientListLab from "@/screens/labTechnician/PatientListLab";
+import PatientDetailLab from "@/screens/labTechnician/PatientDetailLab";
+import LabAvailability from "@/screens/labTechnician/LabAvailability";
 
 // Admin imports
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminTransactions from "@/pages/admin/AdminTransactions";
-import AdminPayment from "@/pages/admin/AdminPayment";
+import AdminDashboard from "@/screens/admin/AdminDashboard";
+import AdminTransactions from "@/screens/admin/AdminTransactions";
+import AdminPayment from "@/screens/admin/AdminPayment";
 
-import AdminDoctorList from "@/pages/admin/AdminDoctorList";
-import AdminLabList from "@/pages/admin/AdminLabList";
-import AdminPharmacyList from "@/pages/admin/AdminPharmacyList";
-import AdminPatientList from "@/pages/admin/AdminPatientList";
-import AdminDoctorAppointments from "@/pages/admin/AdminDoctorAppointments";
-import AdminLabAppointments from "@/pages/admin/AdminLabAppointments";
+import AdminDoctorList from "@/screens/admin/AdminDoctorList";
+import AdminLabList from "@/screens/admin/AdminLabList";
+import AdminPharmacyList from "@/screens/admin/AdminPharmacyList";
+import AdminPatientList from "@/screens/admin/AdminPatientList";
+import AdminDoctorAppointments from "@/screens/admin/AdminDoctorAppointments";
+import AdminLabAppointments from "@/screens/admin/AdminLabAppointments";
 
-import AdminDiagnosis from "@/pages/admin/AdminDiagnosis";
-import AdminOrderHistories from "@/pages/admin/AdminOrderHistories";
-import AdminPharmacyCategory from "@/pages/admin/AdminPharmacyCategory";
+import AdminDiagnosis from "@/screens/admin/AdminDiagnosis";
+import AdminOrderHistories from "@/screens/admin/AdminOrderHistories";
+import AdminPharmacyCategory from "@/screens/admin/AdminPharmacyCategory";
 
 // Supeer Admin imports
-import SuperAdminDashboard from "@/pages/superAdmin/SuperAdminDashboard";
-import SuperAdminTransactions from "@/pages/superAdmin/SuperAdminTransactions";
-import SuperAdminPayment from "@/pages/superAdmin/SuperAdminPayment";
-import SuperAdminMessages from "@/pages/superAdmin/SuperAdminMessages";
-import SuperAdminDoctorList from "@/pages/superAdmin/SuperAdminDoctorList";
-import SuperAdminLabList from "@/pages/superAdmin/SuperAdminLabList";
-import SuperAdminAdminList from "@/pages/superAdmin/SuperAdminAdminList";
-import SuperAdminPharmacyList from "@/pages/superAdmin/SuperAdminPharmacyList";
-import SuperAdminPatientList from "@/pages/superAdmin/SuperAdminPatientList";
-import SuperAdminDoctorAppointments from "@/pages/superAdmin/SuperAdminDoctorAppointments";
-import SuperAdminLabAppointments from "@/pages/superAdmin/SuperAdminLabAppointments";
-import SuperAdminConsultation from "@/pages/superAdmin/SuperAdminConsultation";
-import SuperAdminDiagnosis from "@/pages/superAdmin/SuperAdminDiagnosis";
-import SuperAdminOrderHistories from "@/pages/superAdmin/SuperAdminOrderHistories";
-import SuperAdminPharmacyCategory from "@/pages/superAdmin/SuperAdminPharmacyCategory";
-import SuperAdminCallRecordings from "@/pages/superAdmin/SuperAdminCallRecordings";
-import SuperAdminSettings from "@/pages/superAdmin/SuperAdminSettings";
+import SuperAdminDashboard from "@/screens/superAdmin/SuperAdminDashboard";
+import SuperAdminTransactions from "@/screens/superAdmin/SuperAdminTransactions";
+import SuperAdminPayment from "@/screens/superAdmin/SuperAdminPayment";
+import SuperAdminMessages from "@/screens/superAdmin/SuperAdminMessages";
+import SuperAdminDoctorList from "@/screens/superAdmin/SuperAdminDoctorList";
+import SuperAdminLabList from "@/screens/superAdmin/SuperAdminLabList";
+import SuperAdminAdminList from "@/screens/superAdmin/SuperAdminAdminList";
+import SuperAdminPharmacyList from "@/screens/superAdmin/SuperAdminPharmacyList";
+import SuperAdminPatientList from "@/screens/superAdmin/SuperAdminPatientList";
+import SuperAdminDoctorAppointments from "@/screens/superAdmin/SuperAdminDoctorAppointments";
+import SuperAdminLabAppointments from "@/screens/superAdmin/SuperAdminLabAppointments";
+import SuperAdminConsultation from "@/screens/superAdmin/SuperAdminConsultation";
+import SuperAdminDiagnosis from "@/screens/superAdmin/SuperAdminDiagnosis";
+import SuperAdminOrderHistories from "@/screens/superAdmin/SuperAdminOrderHistories";
+import SuperAdminPharmacyCategory from "@/screens/superAdmin/SuperAdminPharmacyCategory";
+import SuperAdminCallRecordings from "@/screens/superAdmin/SuperAdminCallRecordings";
+import SuperAdminSettings from "@/screens/superAdmin/SuperAdminSettings";
 
 function router() {
   return (
@@ -154,7 +158,12 @@ function router() {
         <Route path="/user/enter-otp" element={<EnterOTPPatient />} />
         <Route path="/enter-otp" element={<EnterOTP />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/" element={<IndexPage />} />
+        {/* The public website (/, /privacy, /terms, ...) is served by Next.js. */}
+        <Route path="/" element={<SiteRedirect to="/" />} />
+        <Route path="/login" element={<PatientLoginPage />} />
+        <Route path="/register" element={<PatientRegisterPage />} />
+        <Route path="/partners/login" element={<ProviderLoginPage />} />
+        <Route path="/partners/register" element={<ProviderRegisterPage />} />
         <Route
           path="/doctors/available"
           element={<AvailableDoctorsLandingPage />}
@@ -172,9 +181,9 @@ function router() {
           element={<ConfirmTestLandingPage />}
         />
         <Route path="/patient/cart" element={<CartLandingPage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/privacy-policy" element={<SiteRedirect to="/privacy" />} />
 
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/terms-and-conditions" element={<SiteRedirect to="/terms" />} />
 
         {/* Protected pages wrapped in Layout (with sidebar & header) */}
 

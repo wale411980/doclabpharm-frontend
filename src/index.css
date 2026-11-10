@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource-variable/plus-jakarta-sans";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -70,6 +71,37 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* DocLabPharm brand palette and type, shared by the website and dashboards.
+   Buttons with white text use brand-600 or darker (contrast >= 4.5:1). */
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #f2f9f5;
+  --color-brand-100: #e6f2ef;
+  --color-brand-200: #c6e4d5;
+  --color-brand-300: #93cbb0;
+  --color-brand-400: #4fae84;
+  --color-brand-500: #2e9063;
+  --color-brand-600: #267a53;
+  --color-brand-700: #005e41;
+  --color-brand-800: #0c4a3a;
+  --color-brand-900: #0a3a40;
+
+  --color-ink-900: #10241e;
+  --color-ink-700: #2f4a42;
+  --color-ink-500: #52685f;
+  --color-ink-300: #a9bab3;
+
+  --color-warm-50: #fff5ed;
+  --color-warm-100: #ffe8d5;
+  --color-warm-300: #fdba74;
+  --color-warm-400: #fb923c;
+  --color-warm-700: #b43c0c;
+  --color-warm-900: #3a1404;
+
+  --color-sand: #f7faf8;
 }
 
 @theme inline {

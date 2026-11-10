@@ -1,54 +1,46 @@
-# React + TypeScript + Vite
+# DocLabPharm web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The DocLabPharm public website and the signed-in dashboards (patient, doctor, pharmacy, lab, admin, super admin), built with Next.js 14.
 
-Currently, two official plugins are available:
+## How it is organised
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `src/app/(site)/`: the public website. Pages are rendered on the server and cached as static HTML, so they load fast and search engines can read them.
+- `src/site/`: website content, components and server-side API reads.
+- `src/spa/` and `src/app/app-shell/`: the dashboards. `src/middleware.ts` sends dashboard and sign-in URLs (`/user/*`, `/doctor/*`, `/admin/*`, `/login`, ...) to one page that runs the dashboards app in the browser.
+- `src/screens/`, `src/components/`, `src/queries/`, `src/router/`: the dashboards app (React Router, TanStack Query).
+- `src/index.css`: Tailwind CSS and the DocLabPharm design tokens (brand colours, Plus Jakarta Sans).
 
-## Expanding the ESLint configuration
+## Run it locally
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+cp .env.example .env.local   # then set NEXT_PUBLIC_API_URL to your API
+yarn install
+yarn dev                     # http://localhost:3000
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Build and run in production
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+yarn typecheck
+yarn build
+yarn start                   # or: node .next/standalone/server.js
 ```
+
+`NEXT_PUBLIC_*` settings are built into the browser code, so set them before `yarn build`.
+
+With Docker:
+
+```bash
+docker build -t doclabpharm-web \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.doclabpharm.com \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://doclabpharm.com .
+docker run -d -p 3000:3000 --name doclabpharm-web doclabpharm-web
+```
+
+Put a reverse proxy (nginx, Caddy or Cloudflare) in front for HTTPS. Do not run `yarn dev` in production.
+
+## Search engines
+
+- `/sitemap.xml` and `/robots.txt` are generated. After going live, submit the sitemap in Google Search Console and Bing Webmaster Tools.
+- Dashboards and sign-in pages are excluded from search results.
+- Health guides at `/health-checks/...` come from the API's packages and refresh hourly.

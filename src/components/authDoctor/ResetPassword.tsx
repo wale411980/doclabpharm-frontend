@@ -26,7 +26,7 @@ export function ResetPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState
+  const [passwordStrength, setPasswordStrength] = useState<
     "weak" | "medium" | "strong" | null
   >(null);
 

@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { onMessage } from "firebase/messaging";
-import { messaging } from "@/lib/firebase";
+import { onForegroundMessage } from "@/lib/firebase";
 import { toast } from "react-toastify";
 
 type IncomingCallHandler = (data: any) => void;
@@ -17,7 +16,7 @@ export function useIncomingCallListener(
     audio.loop = true;
     audio.volume = 1.0;
 
-    const unsubscribe = onMessage(messaging, async (payload) => {
+    const unsubscribe = onForegroundMessage(async (payload) => {
       const data = payload.data;
 
       // ✅ Handle incoming call

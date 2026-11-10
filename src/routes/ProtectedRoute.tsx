@@ -5,11 +5,19 @@ type ProtectedRouteProps = {
   allowedRoles: Array<'user' | 'admin' | 'doctor' | 'pharmacy' | 'lab_technician' | 'super_admin'>;
 };
 
+/** The sign-in page for the kind of account a dashboard area belongs to. */
+function loginPathFor(roles: ProtectedRouteProps['allowedRoles']): string {
+  if (roles.includes('user')) return '/login';
+  if (roles.includes('super_admin')) return '/super-admin/login';
+  if (roles.includes('admin')) return '/admin/login';
+  return '/partners/login';
+}
+
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   const { user } = useAuth();
 
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={loginPathFor(allowedRoles)} replace />;
   }
 
   if (user.status === "unverified") {
