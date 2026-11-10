@@ -1,5 +1,5 @@
 import { useAuth } from '@/providers/AuthProvider';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 type ProtectedRouteProps = {
   allowedRoles: Array<'user' | 'admin' | 'doctor' | 'pharmacy' | 'lab_technician' | 'ambulance_operator' | 'super_admin'>;
@@ -15,8 +15,18 @@ function loginPathFor(roles: ProtectedRouteProps['allowedRoles']): string {
 
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   const { user } = useAuth();
+  const location = useLocation();
 
   if (!user) {
+    // Remember where a visitor was heading (for example checkout, after
+    // booking a test on the public site) so sign-in brings them back.
+    if (allowedRoles.includes('user')) {
+      try {
+        sessionStorage.setItem('returnTo', location.pathname + location.search);
+      } catch {
+        // Private browsing: they land on the dashboard instead.
+      }
+    }
     return <Navigate to={loginPathFor(allowedRoles)} replace />;
   }
 

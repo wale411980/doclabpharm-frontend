@@ -3,9 +3,9 @@ import Link from "next/link";
 import { BadgeCheck, Clock, FileCheck2, Home, MapPin, Pill, ShieldCheck, Siren, Smartphone, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { APP_LINKS } from "@/site/config";
-import { packagePath, type HealthPackage, type LabTestGroup } from "@/site/api";
+import { packagePath, type CatalogueCategory, type HealthPackage } from "@/site/api";
 import { BookingBar } from "./BookingBar";
-import { TestPicker, type PickerGroup } from "./TestPicker";
+import { TestCard } from "./TestCard";
 import { ButtonLink, Container, Section, SectionHeading } from "./ui";
 
 const display = "font-display font-extrabold tracking-[-0.03em]";
@@ -106,49 +106,22 @@ export function Hero() {
 /* Tests: real prices from labs when listed, popular tests otherwise.  */
 /* ------------------------------------------------------------------ */
 
-const POPULAR_TESTS: PickerGroup[] = [
-  {
-    name: "Most booked",
-    tests: [
-      { id: "malaria", name: "Malaria test", price: null, note: "Results the same day" },
-      { id: "typhoid", name: "Typhoid test", price: null, note: "Often booked with malaria" },
-      { id: "fbc", name: "Full blood count", price: null },
-      { id: "sugar", name: "Blood sugar test", price: null, note: "Checks for diabetes" },
-      { id: "pregnancy", name: "Pregnancy test", price: null, note: "Private and quick" },
-      { id: "full-body", name: "Full body check-up", price: null, note: "One visit, many tests" },
-    ],
-  },
-  {
-    name: "Sexual health",
-    tests: [
-      { id: "sti", name: "STI screen", price: null, note: "Discreet home collection" },
-      { id: "hiv", name: "HIV test", price: null, note: "Private result on your phone" },
-      { id: "hepb", name: "Hepatitis B test", price: null },
-      { id: "hvs", name: "High vaginal swab", price: null },
-    ],
-  },
-  {
-    name: "Before marriage",
-    tests: [
-      { id: "genotype", name: "Genotype test", price: null, note: "Know before you say yes" },
-      { id: "blood-group", name: "Blood group", price: null },
-      { id: "hiv-couple", name: "HIV test for two", price: null },
-      { id: "fertility", name: "Fertility hormones", price: null },
-    ],
-  },
-  {
-    name: "Heart and organs",
-    tests: [
-      { id: "lipid", name: "Cholesterol test", price: null },
-      { id: "kidney", name: "Kidney function test", price: null },
-      { id: "liver", name: "Liver function test", price: null },
-      { id: "psa", name: "Prostate test (PSA)", price: null, note: "For men over 40" },
-    ],
-  },
+const POPULAR_TESTS = [
+  "Malaria test",
+  "Typhoid test",
+  "Full blood count",
+  "Blood sugar test",
+  "Pregnancy test",
+  "Full body check-up",
+  "STI screen",
+  "Genotype test",
+  "Prostate test (PSA)",
 ];
 
-export function TestsSection({ groups }: { groups: LabTestGroup[] }) {
-  const listed = groups.length > 0;
+export function TestsSection({ categories }: { categories: CatalogueCategory[] }) {
+  const all = categories.flatMap((group) => group.tests);
+  const featured = all.filter((test) => test.featured);
+  const shown = (featured.length >= 6 ? featured : all).slice(0, 9);
 
   return (
     <section id="tests" className="bg-sand py-16 sm:py-24">
@@ -157,17 +130,52 @@ export function TestsSection({ groups }: { groups: LabTestGroup[] }) {
           <div className="flex max-w-2xl flex-col gap-3">
             <h2 className={cn(display, "text-4xl text-ink-900 sm:text-5xl")}>Pick a test. Book it now.</h2>
             <p className="text-lg leading-relaxed text-ink-500">
-              {listed
-                ? "Prices are set by licensed labs in Abuja. A collector comes to you, or you visit the lab."
-                : "Choose a test and we show you licensed labs near you with their prices. A collector comes to you, or you visit the lab."}
+              See the price before you book. A collector comes to your house, or you visit the lab. No sign-in until
+              you pay.
             </p>
           </div>
-          <ButtonLink href="/user/laboratories2" variant="secondary">
-            See all tests
+          <ButtonLink href="/tests" variant="secondary">
+            {all.length > 0 ? `See all ${all.length} tests` : "See all tests"}
           </ButtonLink>
         </div>
 
-        <TestPicker groups={listed ? groups : POPULAR_TESTS} />
+        {shown.length > 0 ? (
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {shown.map((test) => (
+              <li key={test.id}>
+                <TestCard test={test} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {POPULAR_TESTS.map((name) => (
+              <li key={name}>
+                <Link
+                  href={`/tests?q=${encodeURIComponent(name.split(" ")[0])}`}
+                  className="inline-flex min-h-12 items-center rounded-full bg-white px-5 text-base font-bold text-ink-900 ring-1 ring-inset ring-brand-200 hover:bg-brand-50"
+                >
+                  {name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {categories.length > 1 && (
+          <ul className="flex flex-wrap gap-2">
+            {categories.map((group) => (
+              <li key={group.name}>
+                <Link
+                  href={`/tests?q=${encodeURIComponent(group.name)}`}
+                  className="inline-flex min-h-11 items-center rounded-full bg-white px-5 text-[15px] font-bold text-ink-700 ring-1 ring-inset ring-brand-200 hover:bg-brand-50"
+                >
+                  {group.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] font-semibold text-ink-700">
           <Video className="h-5 w-5 text-brand-600" aria-hidden="true" />
@@ -225,7 +233,7 @@ export function ServicesBento() {
 
           {/* Lab at home */}
           <Link
-            href="#tests"
+            href="/tests"
             className="group relative isolate flex min-h-[420px] flex-col justify-end overflow-hidden rounded-[32px] bg-brand-800 p-7 text-white lg:col-span-5"
           >
             <Image
@@ -487,7 +495,7 @@ export function AppSection() {
             Create free account
           </Link>
           <Link
-            href="#tests"
+            href="/tests"
             className="inline-flex min-h-14 items-center rounded-full bg-white/10 px-8 text-lg font-extrabold text-white ring-1 ring-white/25 hover:bg-white/20"
           >
             Book a test

@@ -16,8 +16,8 @@ const TABS = [
     icon: FlaskConical,
     placeholder: "Which test? Try malaria, typhoid, full body check",
     button: "Book test",
-    quick: ["Malaria", "Typhoid", "Full body check", "Pregnancy", "STI screen", "Blood sugar"],
-    target: (q: string) => `/user/laboratories2${q ? `?q=${encodeURIComponent(q)}` : ""}`,
+    quick: ["Malaria", "Typhoid", "Full body", "Pregnancy", "STI", "Genotype"],
+    target: (q: string) => `/tests${q ? `?q=${encodeURIComponent(q)}` : ""}`,
   },
   {
     key: "doctor",

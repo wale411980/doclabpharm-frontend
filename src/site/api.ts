@@ -104,3 +104,62 @@ export async function getLabTestGroups(): Promise<LabTestGroup[]> {
     }))
     .filter((group) => group.name && group.tests.length > 0);
 }
+
+export type CatalogueTest = {
+  id: number;
+  name: string;
+  summary: string | null;
+  price: number;
+  category: string | null;
+  audience: "everyone" | "women" | "men" | "children";
+  featured: boolean;
+  includes: string[];
+  sample: string | null;
+  preparation: string | null;
+  turnaround: string | null;
+  lab: {
+    id: number;
+    name: string;
+    area: string | null;
+    city: string | null;
+    home_collection: boolean;
+    home_collection_fee: number | null;
+    sample_listing: boolean;
+  } | null;
+};
+
+export type CatalogueCategory = { name: string; tests: CatalogueTest[] };
+
+/** Every bookable test from approved labs, grouped by category. */
+const CATEGORY_ORDER = [
+  "full body checks",
+  "fever and infections",
+  "sexual health",
+  "getting married",
+  "women's health",
+  "men's health",
+  "children's health",
+  "work and home staff",
+  "single tests",
+  "scans",
+];
+
+export async function getTestCatalogue(): Promise<CatalogueCategory[]> {
+  const body = await getJson<{ categories?: CatalogueCategory[] }>("/tests");
+  const rank = (name: string) => {
+    const index = CATEGORY_ORDER.indexOf(name.toLowerCase());
+    return index === -1 ? CATEGORY_ORDER.length : index;
+  };
+
+  // The checks people book most come first; anything a lab adds later goes last.
+  return [...(body?.categories ?? [])].sort((a, b) => rank(a.name) - rank(b.name));
+}
+
+export async function getCatalogueTest(id: number): Promise<(CatalogueTest & { related: CatalogueTest[] }) | null> {
+  const body = await getJson<CatalogueTest & { related: CatalogueTest[] }>(`/tests/${id}`);
+  return body && typeof body === "object" && "id" in body ? body : null;
+}
+
+export function testPath(test: Pick<CatalogueTest, "id" | "name">): string {
+  return `/tests/${test.id}-${slugify(test.name)}`;
+}

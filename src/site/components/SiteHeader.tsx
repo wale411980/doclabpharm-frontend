@@ -7,7 +7,7 @@ import { ButtonLink, Container } from "./ui";
 const NAV = [
   { href: "/services/pharmacy", label: "Medicine" },
   { href: "/services/doctors", label: "Doctors" },
-  { href: "/services/lab-tests", label: "Lab tests" },
+  { href: "/tests", label: "Lab tests" },
   { href: "/services/ambulance", label: "Ambulance" },
   { href: "/partners", label: "For partners" },
 ];
@@ -37,7 +37,7 @@ export function SiteHeader() {
           <ButtonLink href={APP_LINKS.login} variant="secondary">
             Log in
           </ButtonLink>
-          <ButtonLink href="/#tests" className="bg-night hover:bg-brand-900">
+          <ButtonLink href="/tests" className="bg-night hover:bg-brand-900">
             Book a test
           </ButtonLink>
         </div>

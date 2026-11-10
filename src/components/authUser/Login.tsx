@@ -66,9 +66,20 @@ export function LoginModal({
       // ✅ Check for test booking
       const testBooking = localStorage.getItem("testBooking");
 
+      // Where they were heading before sign-in (set by ProtectedRoute).
+      let returnTo: string | null = null;
+      try {
+        returnTo = sessionStorage.getItem("returnTo");
+        sessionStorage.removeItem("returnTo");
+      } catch {
+        returnTo = null;
+      }
+
       // Redirect accordingly
       if (user?.status === "unverified") {
         navigate("/user/verify-email");
+      } else if (returnTo && returnTo.startsWith("/user/")) {
+        navigate(returnTo);
       } else if (pendingBookingConsultation) {
         navigate("/user/confirmation");
       } else if (pendingBooking) {

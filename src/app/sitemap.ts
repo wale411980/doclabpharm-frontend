@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SERVICES, SITE } from "@/site/config";
-import { getHealthPackages, packagePath } from "@/site/api";
+import { getHealthPackages, getTestCatalogue, packagePath, testPath } from "@/site/api";
 
 export const revalidate = 3600;
 
@@ -13,11 +13,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority,
   });
 
-  const packages = await getHealthPackages();
+  const [packages, catalogue] = await Promise.all([getHealthPackages(), getTestCatalogue()]);
 
   return [
     page("", 1, "weekly"),
     ...SERVICES.map((s) => page(s.href, 0.9)),
+    page("/tests", 0.9, "weekly"),
+    ...catalogue.flatMap((group) => group.tests.map((test) => page(testPath(test), 0.7, "weekly"))),
     page("/partners", 0.8),
     page("/abuja", 0.8),
     page("/health-checks", 0.7, "weekly"),

@@ -10,18 +10,18 @@ import {
   VerifiedSection,
 } from "@/site/components/home";
 import { Section, SectionHeading } from "@/site/components/ui";
-import { getHealthPackages, getLabTestGroups } from "@/site/api";
+import { getHealthPackages, getTestCatalogue } from "@/site/api";
 import { HOME_FAQ } from "@/site/faq";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 export default async function HomePage() {
-  const [packages, testGroups] = await Promise.all([getHealthPackages(), getLabTestGroups()]);
+  const [packages, catalogue] = await Promise.all([getHealthPackages(), getTestCatalogue()]);
 
   return (
     <>
       <Hero />
-      <TestsSection groups={testGroups} />
+      <TestsSection categories={catalogue} />
       <ServicesBento />
       <HowItWorks />
       <VerifiedSection />
