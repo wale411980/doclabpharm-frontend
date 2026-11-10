@@ -9,7 +9,7 @@ import {
   CheckCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,24 @@ export default function PatientMessages() {
   const [channelName, setChannelName] = useState("");
 
   const { data: allMessages, refetch } = useGetAllMessages();
+
+  // CONSULT_HANDOFF_V1: "see a doctor now" opens the chat at ?conversation=<id>.
+  // The conversation may be brand new, so the list is refreshed until it appears.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const conversationParam = searchParams.get("conversation");
+  useEffect(() => {
+    if (!conversationParam) return;
+    const found = allMessages?.some((m) => String(m.conversationId) === conversationParam);
+    if (found) {
+      setSelectedContact(conversationParam);
+      // Opened once; the patient or doctor can switch conversations afterwards.
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    const timer = window.setInterval(() => refetch(), 3000);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationParam, allMessages]);
 
   const { data: allConversationMessages, isLoading: isMessagesLoading } =
     useGetUserConversationMessages(Number(selectedContact));
