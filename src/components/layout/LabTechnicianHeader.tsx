@@ -14,6 +14,7 @@ function LabTechnicianHeader({ onMenuClick }: HeaderProps) {
 
   const routeTitleMap: Record<string, string> = {
     "/lab_technician/dashboard": "Dashboard",
+    "/lab_technician/verification": "Verification",
     "/lab_technician/patients": "Patients",
     "/lab_technician/appointments": "Appointments",
     "/lab_technician/availability": "Availability",

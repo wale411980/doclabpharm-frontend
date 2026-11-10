@@ -14,6 +14,7 @@ function PharmacyHeader({ onMenuClick }: HeaderProps) {
 
   const routeTitleMap: Record<string, string> = {
     "/pharmacy/dashboard": "Dashboard",
+    "/pharmacy/verification": "Verification",
     "/pharmacy/orders": "Orders",
     "/pharmacy/products-list": "Products List",
     "/pharmacy/products-category": "Products Category",

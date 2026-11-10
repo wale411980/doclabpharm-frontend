@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
+  Flag,
   User,
   ReceiptText,
   Calendar,
@@ -24,6 +26,8 @@ export function AdminSidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
+    { icon: ShieldCheck, label: "Provider verification", href: "/admin/verifications" },
+    { icon: Flag, label: "Provider reports", href: "/admin/provider-reports" },
     { icon: User, label: "Patients", href: "/admin/patients" },
     { icon: User, label: "Doctors", href: "/admin/doctors" },
     { icon: User, label: "Lab Technicians", href: "/admin/labs" },
@@ -122,7 +126,7 @@ export function AdminSidebar({ onClose }: SidebarProps) {
                 to={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  location.pathname === item.href
+                  location.pathname === item.href || location.pathname.startsWith(`${item.href}/`)
                     ? "bg-green-50 text-green-600"
                     : "text-slate-600 hover:bg-slate-100"
                 )}

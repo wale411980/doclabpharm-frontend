@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
+  Flag,
   User,
   ReceiptText,
   Calendar,
@@ -32,6 +34,8 @@ export function SuperAdminSidebar({ onClose }: SidebarProps) {
       label: "Dashboard",
       href: "/super-admin/dashboard",
     },
+    { icon: ShieldCheck, label: "Provider verification", href: "/super-admin/verifications" },
+    { icon: Flag, label: "Provider reports", href: "/super-admin/provider-reports" },
     { icon: User, label: "Patients", href: "/super-admin/patients" },
     { icon: User, label: "Doctors", href: "/super-admin/doctors" },
     { icon: User, label: "Admins", href: "/super-admin/admins" },
@@ -158,7 +162,7 @@ export function SuperAdminSidebar({ onClose }: SidebarProps) {
                 to={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  location.pathname === item.href
+                  location.pathname === item.href || location.pathname.startsWith(`${item.href}/`)
                     ? "bg-green-50 text-green-600"
                     : "text-slate-600 hover:bg-slate-100"
                 )}

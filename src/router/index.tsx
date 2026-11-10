@@ -13,6 +13,7 @@ import PharmacyLayout from "@/components/layout/PharmacyLayout";
 import LabTechnicianLayout from "@/components/layout/LabTechnicianLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
 import SuperAdminLayout from "@/components/layout/SuperAdminLayout";
+import AmbulanceOperatorLayout from "@/components/layout/AmbulanceOperatorLayout";
 import VerifyEmailNoticePatient from "@/screens/VerifyEmailNoticePatient";
 import VerifyEmailNotice from "@/screens/VerifyEmailNotice";
 import EnterOTPPatient from "@/screens/EnterOTPPatient";
@@ -103,6 +104,16 @@ import LabTechnicianSettings from "@/screens/labTechnician/LabTechnicianSettings
 import PatientListLab from "@/screens/labTechnician/PatientListLab";
 import PatientDetailLab from "@/screens/labTechnician/PatientDetailLab";
 import LabAvailability from "@/screens/labTechnician/LabAvailability";
+
+// Ambulance operator imports
+import AmbulanceOperatorDashboard from "@/screens/ambulanceOperator/Dashboard";
+import AmbulanceOperatorProfile from "@/screens/ambulanceOperator/Profile";
+
+// Provider verification (shared by every provider type) and its admin review
+import VerificationPage from "@/screens/verification/VerificationPage";
+import VerificationQueue from "@/screens/admin/verification/VerificationQueue";
+import VerificationDetail from "@/screens/admin/verification/VerificationDetail";
+import ProviderReports from "@/screens/admin/verification/ProviderReports";
 
 // Admin imports
 import AdminDashboard from "@/screens/admin/AdminDashboard";
@@ -249,6 +260,7 @@ function router() {
         <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
           <Route element={<DoctorLayout />}>
             <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor/verification" element={<VerificationPage role="doctor" />} />
             <Route path="/doctor/settings" element={<DoctorSettings />} />
             <Route
               path="/doctor/availability"
@@ -282,6 +294,7 @@ function router() {
               element={<PharmacistDashboard />}
             />
             <Route path="/pharmacy/settings" element={<PharmacySettings />} />
+            <Route path="/pharmacy/verification" element={<VerificationPage role="pharmacy" />} />
             <Route path="/pharmacy/orders" element={<OrderManagement />} />
             <Route path="/pharmacy/payments" element={<PaymentDashboard />} />
             <Route path="/pharmacy/products-list" element={<ProductList />} />
@@ -302,6 +315,10 @@ function router() {
           <Route element={<LabTechnicianLayout />}>
             <Route path="/lab_technician/dashboard" element={<Dashboard />} />
             <Route path="/lab_technician/diagnosis" element={<Diagnosis />} />
+            <Route
+              path="/lab_technician/verification"
+              element={<VerificationPage role="lab_technician" />}
+            />
             <Route
               path="/lab_technician/appointments"
               element={<AppointmentsDashboard />}
@@ -329,6 +346,24 @@ function router() {
           </Route>
         </Route>
 
+        {/* AMBULANCE OPERATOR ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["ambulance_operator"]} />}>
+          <Route element={<AmbulanceOperatorLayout />}>
+            <Route
+              path="/ambulance_operator/dashboard"
+              element={<AmbulanceOperatorDashboard />}
+            />
+            <Route
+              path="/ambulance_operator/verification"
+              element={<VerificationPage role="ambulance_operator" />}
+            />
+            <Route
+              path="/ambulance_operator/profile"
+              element={<AmbulanceOperatorProfile />}
+            />
+          </Route>
+        </Route>
+
         {/* ADMIN ROUTES */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route element={<AdminLayout />}>
@@ -352,6 +387,18 @@ function router() {
             <Route path="/admin/lab-diagnosis" element={<AdminDiagnosis />} />
             <Route path="/admin/orders" element={<AdminOrderHistories />} />
             <Route path="/admin/category" element={<AdminPharmacyCategory />} />
+            <Route
+              path="/admin/verifications"
+              element={<VerificationQueue basePath="/admin" />}
+            />
+            <Route
+              path="/admin/verifications/:type/:id"
+              element={<VerificationDetail basePath="/admin" />}
+            />
+            <Route
+              path="/admin/provider-reports"
+              element={<ProviderReports basePath="/admin" />}
+            />
           </Route>
         </Route>
 
@@ -422,6 +469,18 @@ function router() {
             <Route
               path="/super-admin/settings"
               element={<SuperAdminSettings />}
+            />
+            <Route
+              path="/super-admin/verifications"
+              element={<VerificationQueue basePath="/super-admin" />}
+            />
+            <Route
+              path="/super-admin/verifications/:type/:id"
+              element={<VerificationDetail basePath="/super-admin" />}
+            />
+            <Route
+              path="/super-admin/provider-reports"
+              element={<ProviderReports basePath="/super-admin" />}
             />
           </Route>
         </Route>

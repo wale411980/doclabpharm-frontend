@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
   ShoppingCart,
   Package,
   Settings,
@@ -25,6 +26,7 @@ export function PharmacySidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/pharmacy/dashboard" },
+    { icon: ShieldCheck, label: "Verification", href: "/pharmacy/verification" },
     { icon: ShoppingCart, label: "Orders", href: "/pharmacy/orders" },
     { icon: Columns4, label: "Products List", href: "/pharmacy/products-list" },
     {

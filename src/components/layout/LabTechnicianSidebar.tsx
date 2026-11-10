@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
   User,
   Calendar,
   CalendarClock,
@@ -29,6 +30,7 @@ export function LabTechnicianSidebar({ onClose }: SidebarProps) {
       label: "Dashboard",
       href: "/lab_technician/dashboard",
     },
+    { icon: ShieldCheck, label: "Verification", href: "/lab_technician/verification" },
     { icon: User, label: "Patients", href: "/lab_technician/patients" },
     {
       icon: Calendar,
