@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { HomeVerificationBanner } from "@/screens/verification/VerificationBanner";
+import { DoctorPresenceKeeper } from "@/screens/doctor/onDemand/DoctorPresence";
 import { DoctorSidebar } from "./DoctorSidebar";
 import Header from "./DoctorHeader";
 
@@ -32,6 +33,7 @@ const DoctorLayout = () => {
         {/* Main content area */}
         <main className="flex-1 p-4 overflow-auto">
           <HomeVerificationBanner role="doctor" />
+          <DoctorPresenceKeeper />
           <Outlet />
         </main>
       </div>

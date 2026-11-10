@@ -12,6 +12,9 @@ import {
   FileText,
   Wallet,
   ShoppingBag,
+  Gauge,
+  Activity,
+  LifeBuoy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -26,6 +29,9 @@ export function AdminSidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
+    { icon: Gauge, label: "Overview", href: "/admin/overview" },
+    { icon: Activity, label: "Live operations", href: "/admin/operations" },
+    { icon: LifeBuoy, label: "Support tickets", href: "/admin/support" },
     { icon: ShieldCheck, label: "Provider verification", href: "/admin/verifications" },
     { icon: Flag, label: "Provider reports", href: "/admin/provider-reports" },
     { icon: User, label: "Patients", href: "/admin/patients" },
@@ -72,7 +78,7 @@ export function AdminSidebar({ onClose }: SidebarProps) {
 
   return (
     <aside
-      className="h-full w-64 bg-white text-white z-50 flex flex-col justify-between"
+      className="h-full w-64 overflow-y-auto bg-white text-white z-50 flex flex-col justify-between"
       style={{ backgroundColor: "#ecf3f9" }}
     >
       <div>
