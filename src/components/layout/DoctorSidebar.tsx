@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
   User,
   Calendar,
   MessageSquare,
@@ -13,6 +14,9 @@ import {
   ChartLine,
   FileVideo,
   HelpCircle,
+  Zap,
+  Banknote,
+  LifeBuoy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -27,6 +31,8 @@ export function DoctorSidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/doctor/dashboard" },
+    { icon: ShieldCheck, label: "Verification", href: "/doctor/verification" },
+    { icon: Zap, label: "See patients now", href: "/doctor/see-now" },
     { icon: User, label: "Patients", href: "/doctor/patients" },
     { icon: Calendar, label: "Appointments", href: "/doctor/appointments" },
     {
@@ -44,6 +50,8 @@ export function DoctorSidebar({ onClose }: SidebarProps) {
     { icon: ChartLine, label: "Analytics", href: "/doctor/analytics" },
     { icon: Calendar, label: "Availability", href: "/doctor/availability" },
     { icon: Wallet, label: "Wallet", href: "/doctor/wallet" },
+    { icon: Banknote, label: "Earnings", href: "/doctor/earnings" },
+    { icon: LifeBuoy, label: "Support inbox", href: "/doctor/support" },
     { icon: Settings, label: "Settings", href: "/doctor/settings" },
   ];
 
@@ -70,7 +78,7 @@ export function DoctorSidebar({ onClose }: SidebarProps) {
 
   return (
     <aside
-      className="h-full w-64 bg-white text-white !z-50 flex flex-col justify-between"
+      className="h-full w-64 overflow-y-auto bg-white text-white !z-50 flex flex-col justify-between"
       style={{ backgroundColor: "#ecf3f9" }}
     >
       <div>

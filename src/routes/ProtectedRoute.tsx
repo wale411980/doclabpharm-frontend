@@ -2,7 +2,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { Navigate, Outlet } from 'react-router-dom';
 
 type ProtectedRouteProps = {
-  allowedRoles: Array<'user' | 'admin' | 'doctor' | 'pharmacy' | 'lab_technician' | 'super_admin'>;
+  allowedRoles: Array<'user' | 'admin' | 'doctor' | 'pharmacy' | 'lab_technician' | 'ambulance_operator' | 'super_admin'>;
 };
 
 /** The sign-in page for the kind of account a dashboard area belongs to. */
@@ -27,7 +27,7 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
 if (
   user &&
   !user.emailVerifiedAt &&
-  ['user', 'doctor', 'pharmacy', 'lab_technician'].includes(user.userType)
+  ['user', 'doctor', 'pharmacy', 'lab_technician', 'ambulance_operator'].includes(user.userType)
 ) {
   const redirectPath = user.userType === 'user' ? '/user/verify-email' : '/verify-email';
   return <Navigate to={redirectPath} />;

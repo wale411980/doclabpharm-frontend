@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import { HomeVerificationBanner } from "@/screens/verification/VerificationBanner";
 import { LabTechnicianSidebar } from "./LabTechnicianSidebar";
 import LabTechnicianHeader from "./LabTechnicianHeader";
 
@@ -24,12 +25,13 @@ const LabTechnicianLayout = () => {
         <LabTechnicianSidebar onClose={closeSidebar} />
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <LabTechnicianHeader onMenuClick={toggleSidebar} />
 
         {/* Main content area */}
         <main className="flex-1 p-4 overflow-auto">
+          <HomeVerificationBanner role="lab_technician" />
           <Outlet />
         </main>
       </div>

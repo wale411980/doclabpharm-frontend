@@ -21,7 +21,11 @@ function AdminHeader({ onMenuClick }: HeaderProps) {
     "/admin/orders": "Orders",
   };
 
-  const pageTitle = routeTitleMap[location.pathname] || "Dashboard";
+  const pageTitle =
+    routeTitleMap[location.pathname] ||
+    (location.pathname.startsWith("/admin/verifications") ? "Provider verification" : "") ||
+    (location.pathname === "/admin/provider-reports" ? "Provider reports" : "") ||
+    "Dashboard";
 
   return (
     <div className="">

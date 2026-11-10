@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
   User,
   Calendar,
   CalendarClock,
@@ -11,6 +12,10 @@ import {
   Settings,
   LogOut,
   HelpCircle,
+  FlaskConical,
+  Home,
+  Banknote,
+  LifeBuoy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -29,6 +34,9 @@ export function LabTechnicianSidebar({ onClose }: SidebarProps) {
       label: "Dashboard",
       href: "/lab_technician/dashboard",
     },
+    { icon: ShieldCheck, label: "Verification", href: "/lab_technician/verification" },
+    { icon: FlaskConical, label: "Tests and results", href: "/lab_technician/results" },
+    { icon: Home, label: "Home collection", href: "/lab_technician/home-collection" },
     { icon: User, label: "Patients", href: "/lab_technician/patients" },
     {
       icon: Calendar,
@@ -42,6 +50,8 @@ export function LabTechnicianSidebar({ onClose }: SidebarProps) {
     },
     { icon: FileText, label: "Diagnosis", href: "/lab_technician/diagnosis" },
     { icon: Wallet, label: "Wallet", href: "/lab_technician/wallet" },
+    { icon: Banknote, label: "Earnings", href: "/lab_technician/earnings" },
+    { icon: LifeBuoy, label: "Support inbox", href: "/lab_technician/support" },
     { icon: Settings, label: "Settings", href: "/lab_technician/settings" },
   ];
 
@@ -68,7 +78,7 @@ export function LabTechnicianSidebar({ onClose }: SidebarProps) {
 
   return (
     <aside
-      className="h-full w-64 bg-white text-white z-50 flex flex-col justify-between"
+      className="h-full w-64 overflow-y-auto bg-white text-white z-50 flex flex-col justify-between"
       style={{ backgroundColor: "#ecf3f9" }}
     >
       <div>

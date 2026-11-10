@@ -13,6 +13,7 @@ import PharmacyLayout from "@/components/layout/PharmacyLayout";
 import LabTechnicianLayout from "@/components/layout/LabTechnicianLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
 import SuperAdminLayout from "@/components/layout/SuperAdminLayout";
+import AmbulanceOperatorLayout from "@/components/layout/AmbulanceOperatorLayout";
 import VerifyEmailNoticePatient from "@/screens/VerifyEmailNoticePatient";
 import VerifyEmailNotice from "@/screens/VerifyEmailNotice";
 import EnterOTPPatient from "@/screens/EnterOTPPatient";
@@ -104,6 +105,16 @@ import PatientListLab from "@/screens/labTechnician/PatientListLab";
 import PatientDetailLab from "@/screens/labTechnician/PatientDetailLab";
 import LabAvailability from "@/screens/labTechnician/LabAvailability";
 
+// Ambulance operator imports
+import AmbulanceOperatorDashboard from "@/screens/ambulanceOperator/Dashboard";
+import AmbulanceOperatorProfile from "@/screens/ambulanceOperator/Profile";
+
+// Provider verification (shared by every provider type) and its admin review
+import VerificationPage from "@/screens/verification/VerificationPage";
+import VerificationQueue from "@/screens/admin/verification/VerificationQueue";
+import VerificationDetail from "@/screens/admin/verification/VerificationDetail";
+import ProviderReports from "@/screens/admin/verification/ProviderReports";
+
 // Admin imports
 import AdminDashboard from "@/screens/admin/AdminDashboard";
 import AdminTransactions from "@/screens/admin/AdminTransactions";
@@ -137,7 +148,36 @@ import SuperAdminDiagnosis from "@/screens/superAdmin/SuperAdminDiagnosis";
 import SuperAdminOrderHistories from "@/screens/superAdmin/SuperAdminOrderHistories";
 import SuperAdminPharmacyCategory from "@/screens/superAdmin/SuperAdminPharmacyCategory";
 import SuperAdminCallRecordings from "@/screens/superAdmin/SuperAdminCallRecordings";
-import SuperAdminSettings from "@/screens/superAdmin/SuperAdminSettings";
+
+// Phase 4–10 marketplace screens
+import Checkout from "@/screens/patient/Checkout";
+import CheckoutComplete from "@/screens/patient/CheckoutComplete";
+import NearbyMedicines from "@/screens/patient/NearbyMedicines";
+import MyDeliveries from "@/screens/patient/MyDeliveries";
+import SeeDoctorNow from "@/screens/patient/SeeDoctorNow";
+import ConsultWaiting from "@/screens/patient/ConsultWaiting";
+import LabResults from "@/screens/patient/LabResults";
+import AmbulanceRequest from "@/screens/patient/AmbulanceRequest";
+import AmbulanceTrip from "@/screens/patient/AmbulanceTrip";
+import SupportList from "@/screens/support/SupportList";
+import SupportThread from "@/screens/support/SupportThread";
+import NewTicket from "@/screens/support/NewTicket";
+import EarningsPage from "@/screens/shared/EarningsPage";
+import PharmacyDeliveries from "@/screens/pharmacist/orders/PharmacyDeliveries";
+import DeliverySettingsPage from "@/screens/pharmacist/orders/DeliverySettingsPage";
+import DoctorOnDemand from "@/screens/doctor/onDemand/DoctorOnDemand";
+import LabResultsManager from "@/screens/labTechnician/results/LabResultsManager";
+import HomeCollectionPage from "@/screens/labTechnician/results/HomeCollectionPage";
+import Fleet from "@/screens/ambulanceOperator/Fleet";
+import Fares from "@/screens/ambulanceOperator/Fares";
+import Dispatch from "@/screens/ambulanceOperator/Dispatch";
+import Trips from "@/screens/ambulanceOperator/Trips";
+import AdminOverview from "@/screens/admin/console/AdminOverview";
+import LiveOperations from "@/screens/admin/console/LiveOperations";
+import SupportScorecard from "@/screens/admin/console/SupportScorecard";
+import ProviderAccount from "@/screens/admin/console/ProviderAccount";
+import CommissionReport from "@/screens/superAdmin/console/CommissionReport";
+import MarketplaceSettingsPage from "@/screens/superAdmin/console/MarketplaceSettingsPage";
 
 function router() {
   return (
@@ -242,6 +282,18 @@ function router() {
               path="/user/confirm-consult"
               element={<ConfirmAfterFundingWallet />}
             />
+            <Route path="/user/checkout" element={<Checkout />} />
+            <Route path="/user/checkout/complete" element={<CheckoutComplete />} />
+            <Route path="/user/medicines/near-me" element={<NearbyMedicines />} />
+            <Route path="/user/deliveries" element={<MyDeliveries />} />
+            <Route path="/user/see-doctor-now" element={<SeeDoctorNow />} />
+            <Route path="/user/consults/:id" element={<ConsultWaiting />} />
+            <Route path="/user/lab-results" element={<LabResults />} />
+            <Route path="/user/ambulance" element={<AmbulanceRequest />} />
+            <Route path="/user/ambulance/:id" element={<AmbulanceTrip />} />
+            <Route path="/user/support" element={<SupportList audience="patient" basePath="/user/support" />} />
+            <Route path="/user/support/new" element={<NewTicket basePath="/user/support" />} />
+            <Route path="/user/support/:id" element={<SupportThread audience="patient" basePath="/user/support" />} />
           </Route>
         </Route>
 
@@ -249,6 +301,11 @@ function router() {
         <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
           <Route element={<DoctorLayout />}>
             <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor/verification" element={<VerificationPage role="doctor" />} />
+            <Route path="/doctor/see-now" element={<DoctorOnDemand />} />
+            <Route path="/doctor/earnings" element={<EarningsPage role="doctor" />} />
+            <Route path="/doctor/support" element={<SupportList audience="doctor" basePath="/doctor/support" />} />
+            <Route path="/doctor/support/:id" element={<SupportThread audience="doctor" basePath="/doctor/support" />} />
             <Route path="/doctor/settings" element={<DoctorSettings />} />
             <Route
               path="/doctor/availability"
@@ -282,6 +339,12 @@ function router() {
               element={<PharmacistDashboard />}
             />
             <Route path="/pharmacy/settings" element={<PharmacySettings />} />
+            <Route path="/pharmacy/verification" element={<VerificationPage role="pharmacy" />} />
+            <Route path="/pharmacy/deliveries" element={<PharmacyDeliveries />} />
+            <Route path="/pharmacy/delivery-settings" element={<DeliverySettingsPage />} />
+            <Route path="/pharmacy/earnings" element={<EarningsPage role="pharmacy" />} />
+            <Route path="/pharmacy/support" element={<SupportList audience="pharmacy" basePath="/pharmacy/support" />} />
+            <Route path="/pharmacy/support/:id" element={<SupportThread audience="pharmacy" basePath="/pharmacy/support" />} />
             <Route path="/pharmacy/orders" element={<OrderManagement />} />
             <Route path="/pharmacy/payments" element={<PaymentDashboard />} />
             <Route path="/pharmacy/products-list" element={<ProductList />} />
@@ -302,6 +365,15 @@ function router() {
           <Route element={<LabTechnicianLayout />}>
             <Route path="/lab_technician/dashboard" element={<Dashboard />} />
             <Route path="/lab_technician/diagnosis" element={<Diagnosis />} />
+            <Route
+              path="/lab_technician/verification"
+              element={<VerificationPage role="lab_technician" />}
+            />
+            <Route path="/lab_technician/results" element={<LabResultsManager />} />
+            <Route path="/lab_technician/home-collection" element={<HomeCollectionPage />} />
+            <Route path="/lab_technician/earnings" element={<EarningsPage role="lab_technician" />} />
+            <Route path="/lab_technician/support" element={<SupportList audience="lab_technician" basePath="/lab_technician/support" />} />
+            <Route path="/lab_technician/support/:id" element={<SupportThread audience="lab_technician" basePath="/lab_technician/support" />} />
             <Route
               path="/lab_technician/appointments"
               element={<AppointmentsDashboard />}
@@ -329,6 +401,31 @@ function router() {
           </Route>
         </Route>
 
+        {/* AMBULANCE OPERATOR ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["ambulance_operator"]} />}>
+          <Route element={<AmbulanceOperatorLayout />}>
+            <Route
+              path="/ambulance_operator/dashboard"
+              element={<AmbulanceOperatorDashboard />}
+            />
+            <Route
+              path="/ambulance_operator/verification"
+              element={<VerificationPage role="ambulance_operator" />}
+            />
+            <Route
+              path="/ambulance_operator/profile"
+              element={<AmbulanceOperatorProfile />}
+            />
+            <Route path="/ambulance_operator/dispatch" element={<Dispatch />} />
+            <Route path="/ambulance_operator/vehicles" element={<Fleet />} />
+            <Route path="/ambulance_operator/fares" element={<Fares />} />
+            <Route path="/ambulance_operator/trips" element={<Trips />} />
+            <Route path="/ambulance_operator/earnings" element={<EarningsPage role="ambulance_operator" />} />
+            <Route path="/ambulance_operator/support" element={<SupportList audience="ambulance_operator" basePath="/ambulance_operator/support" />} />
+            <Route path="/ambulance_operator/support/:id" element={<SupportThread audience="ambulance_operator" basePath="/ambulance_operator/support" />} />
+          </Route>
+        </Route>
+
         {/* ADMIN ROUTES */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route element={<AdminLayout />}>
@@ -352,6 +449,24 @@ function router() {
             <Route path="/admin/lab-diagnosis" element={<AdminDiagnosis />} />
             <Route path="/admin/orders" element={<AdminOrderHistories />} />
             <Route path="/admin/category" element={<AdminPharmacyCategory />} />
+            <Route
+              path="/admin/verifications"
+              element={<VerificationQueue basePath="/admin" />}
+            />
+            <Route
+              path="/admin/verifications/:type/:id"
+              element={<VerificationDetail basePath="/admin" />}
+            />
+            <Route
+              path="/admin/provider-reports"
+              element={<ProviderReports basePath="/admin" />}
+            />
+            <Route path="/admin/overview" element={<AdminOverview basePath="/admin" />} />
+            <Route path="/admin/operations" element={<LiveOperations />} />
+            <Route path="/admin/support" element={<SupportList audience="admin" basePath="/admin/support" />} />
+            <Route path="/admin/support/scorecard" element={<SupportScorecard basePath="/admin" />} />
+            <Route path="/admin/support/:id" element={<SupportThread audience="admin" basePath="/admin/support" />} />
+            <Route path="/admin/providers/:type/:id" element={<ProviderAccount basePath="/admin" />} />
           </Route>
         </Route>
 
@@ -421,8 +536,27 @@ function router() {
             />
             <Route
               path="/super-admin/settings"
-              element={<SuperAdminSettings />}
+              element={<MarketplaceSettingsPage />}
             />
+            <Route
+              path="/super-admin/verifications"
+              element={<VerificationQueue basePath="/super-admin" />}
+            />
+            <Route
+              path="/super-admin/verifications/:type/:id"
+              element={<VerificationDetail basePath="/super-admin" />}
+            />
+            <Route
+              path="/super-admin/provider-reports"
+              element={<ProviderReports basePath="/super-admin" />}
+            />
+            <Route path="/super-admin/overview" element={<AdminOverview basePath="/super-admin" />} />
+            <Route path="/super-admin/operations" element={<LiveOperations />} />
+            <Route path="/super-admin/support" element={<SupportList audience="admin" basePath="/super-admin/support" />} />
+            <Route path="/super-admin/support/scorecard" element={<SupportScorecard basePath="/super-admin" />} />
+            <Route path="/super-admin/support/:id" element={<SupportThread audience="admin" basePath="/super-admin/support" />} />
+            <Route path="/super-admin/providers/:type/:id" element={<ProviderAccount basePath="/super-admin" />} />
+            <Route path="/super-admin/commission" element={<CommissionReport />} />
           </Route>
         </Route>
 

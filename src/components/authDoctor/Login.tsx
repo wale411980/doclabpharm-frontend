@@ -1,4 +1,5 @@
 import type React from "react";
+import { PROVIDER_ROLES } from "@/lib/providerTypes";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useDoctorLogin, useForgotPassword } from "@/queries/use-auth";
@@ -207,11 +208,11 @@ export function Login({
                       <SelectValue placeholder="Select Profession" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="doctor">Doctor</SelectItem>
-                      <SelectItem value="lab_technician">
-                        Lab Technician
-                      </SelectItem>
-                      <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                      {PROVIDER_ROLES.map((r) => (
+                        <SelectItem key={r.value} value={r.value}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">

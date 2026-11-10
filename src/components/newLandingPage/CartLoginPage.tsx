@@ -10,7 +10,6 @@ import {
   Minus,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUserCheckout } from "@/queries";
 import { toast } from "react-toastify";
 import { requestDeviceToken } from "@/lib/getDeviceToken";
 import { useSendDeviceToken } from "@/queries";
@@ -31,7 +30,6 @@ export default function CartLoginPage() {
   const clearCart = cartContext?.clearCart ?? (() => {});
   const navigate = useNavigate();
 
-  const { mutate: checkout, isPending } = useUserCheckout();
   const { mutate: sendDeviceToken } = useSendDeviceToken();
 
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
@@ -133,24 +131,9 @@ export default function CartLoginPage() {
   const [error, setError] = useState("");
 
   const handleCheckout = () => {
-    const payload = {
-      items: items.map((item) => ({ ...item, qty: item.qty || 1 })),
-      paymentMethod: "wallet",
-    };
-
-    checkout(payload, {
-      onSuccess: () => {
-        toast.success("Checkout successful");
-        clearCart();
-        localStorage.removeItem("testBooking");
-        navigate("/user/checkout-success");
-      },
-      onError: (error: any) => {
-        const errMsg = error?.response?.data?.message || "Checkout failed";
-        setError(errMsg);
-        toast.error("Checkout failed");
-      },
-    });
+    setError("");
+    // PHASE4_CHECKOUT_V1: delivery, collection and payment are chosen at checkout.
+    navigate("/user/checkout");
   };
 
   const renderIcon = (type: string) => {
@@ -294,9 +277,8 @@ export default function CartLoginPage() {
           <Button
             className="bg-green-700 text-white w-full sm:w-auto"
             onClick={handleCheckout}
-            disabled={isPending}
           >
-            {isPending ? "Processing..." : "Checkout"}
+            Continue to checkout
           </Button>
           {error && (
             <div style={{ color: "red", marginTop: "10px" }}>{error}</div>

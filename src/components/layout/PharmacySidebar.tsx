@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  ShieldCheck,
   ShoppingCart,
   Package,
   Settings,
@@ -11,6 +12,10 @@ import {
   Wallet,
   CalendarClock,
   HelpCircle,
+  Truck,
+  Banknote,
+  LifeBuoy,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
@@ -25,6 +30,9 @@ export function PharmacySidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/pharmacy/dashboard" },
+    { icon: ShieldCheck, label: "Verification", href: "/pharmacy/verification" },
+    { icon: Truck, label: "Order queue", href: "/pharmacy/deliveries" },
+    { icon: Settings2, label: "Delivery settings", href: "/pharmacy/delivery-settings" },
     { icon: ShoppingCart, label: "Orders", href: "/pharmacy/orders" },
     { icon: Columns4, label: "Products List", href: "/pharmacy/products-list" },
     {
@@ -38,6 +46,8 @@ export function PharmacySidebar({ onClose }: SidebarProps) {
       href: "/pharmacy/availability",
     },
     { icon: Wallet, label: "Wallet", href: "/pharmacy/wallet" },
+    { icon: Banknote, label: "Earnings", href: "/pharmacy/earnings" },
+    { icon: LifeBuoy, label: "Support inbox", href: "/pharmacy/support" },
     { icon: Settings, label: "Settings", href: "/pharmacy/settings" },
   ];
 
@@ -64,7 +74,7 @@ export function PharmacySidebar({ onClose }: SidebarProps) {
 
   return (
     <aside
-      className="h-full w-64 bg-white text-white z-50 flex flex-col justify-between"
+      className="h-full w-64 overflow-y-auto bg-white text-white z-50 flex flex-col justify-between"
       style={{ backgroundColor: "#ecf3f9" }}
     >
       <div>
