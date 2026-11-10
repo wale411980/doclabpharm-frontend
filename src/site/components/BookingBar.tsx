@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * The first thing on the homepage: pick what you need and go straight to
- * booking it. Each tab leads into the patient app (sign-in comes first for
- * new visitors, then they land on the right screen).
+ * booking it. Lab tests are booked without an account; the other tabs lead
+ * into the patient app, which asks for sign-in.
  */
 const TABS = [
   {

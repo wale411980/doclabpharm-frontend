@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Menu, Phone } from "lucide-react";
 import { APP_LINKS, SITE } from "@/site/config";
+import { BasketLink } from "./BasketLink";
 import { Logo } from "./Logo";
 import { ButtonLink, Container } from "./ui";
 
@@ -34,6 +35,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
+          <BasketLink />
           <ButtonLink href={APP_LINKS.login} variant="secondary">
             Log in
           </ButtonLink>
@@ -43,7 +45,12 @@ export function SiteHeader() {
         </div>
 
         {/* Phone and tablet menu: a native disclosure, works without JavaScript. */}
-        <details className="group relative lg:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
+        <BasketLink />
+        <ButtonLink href="/tests" className="whitespace-nowrap bg-night px-4 text-sm hover:bg-brand-900">
+          Book a test
+        </ButtonLink>
+        <details className="group relative">
           <summary
             className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full ring-1 ring-brand-200 [&::-webkit-details-marker]:hidden"
             aria-label="Open menu"
@@ -67,7 +74,7 @@ export function SiteHeader() {
               <ButtonLink href={APP_LINKS.login} variant="secondary">
                 Log in
               </ButtonLink>
-              <ButtonLink href={APP_LINKS.register}>Sign up</ButtonLink>
+              <ButtonLink href="/tests">Book a test</ButtonLink>
             </div>
             <a
               href={SITE.phoneHref}
@@ -78,6 +85,7 @@ export function SiteHeader() {
             </a>
           </div>
         </details>
+        </div>
       </Container>
     </header>
   );

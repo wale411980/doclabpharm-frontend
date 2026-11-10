@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, Home } from "lucide-react";
 import type { CatalogueTest } from "@/site/api";
+import { BookButton } from "./BookButton";
 
 export const naira = (amount: number) => `₦${Math.round(amount).toLocaleString("en-NG")}`;
 
@@ -19,16 +20,18 @@ export function TestCard({ test }: { test: CatalogueTest }) {
   const count = test.includes.length;
 
   return (
-    <Link
-      href={testHref(test)}
-      className="group flex h-full flex-col gap-4 rounded-3xl bg-white p-5 ring-1 ring-brand-100 transition-shadow hover:shadow-[0_18px_40px_-18px_rgba(6,40,31,0.35)] hover:ring-brand-300 sm:p-6"
-    >
-      <span className="flex flex-col gap-1.5">
-        <span className="text-xl font-extrabold leading-snug text-ink-900">{test.name}</span>
-        {test.summary && <span className="line-clamp-2 text-[15px] leading-relaxed text-ink-500">{test.summary}</span>}
-      </span>
+    <article className="group relative flex h-full flex-col gap-4 rounded-3xl bg-white p-5 ring-1 ring-brand-100 transition-shadow hover:shadow-[0_18px_40px_-18px_rgba(6,40,31,0.35)] hover:ring-brand-300 sm:p-6">
+      <div className="flex flex-col gap-1.5">
+        <h3 className="text-xl font-extrabold leading-snug text-ink-900">
+          {/* The whole card opens the test; the Book button sits above this link. */}
+          <Link href={testHref(test)} className="after:absolute after:inset-0 after:rounded-3xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-brand-500">
+            {test.name}
+          </Link>
+        </h3>
+        {test.summary && <p className="line-clamp-2 text-[15px] leading-relaxed text-ink-500">{test.summary}</p>}
+      </div>
 
-      <span className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-ink-700">
+      <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-ink-700">
         {count > 1 && <span>{count} tests inside</span>}
         {test.turnaround && (
           <span className="flex items-center gap-1.5">
@@ -42,14 +45,14 @@ export function TestCard({ test }: { test: CatalogueTest }) {
             Home collection
           </span>
         )}
-      </span>
+      </p>
 
-      <span className="mt-auto flex items-end justify-between gap-3 pt-1">
+      <div className="mt-auto flex items-end justify-between gap-3 pt-1">
         <span className="font-display text-3xl font-extrabold tracking-tight text-ink-900">{naira(test.price)}</span>
-        <span className="rounded-full bg-lime px-5 py-2.5 text-[15px] font-extrabold text-night transition-transform group-hover:scale-105">
-          Book
-        </span>
-      </span>
-    </Link>
+        <BookButton test={test} className="relative z-10 min-h-11 px-6 text-[15px]">
+          Book now
+        </BookButton>
+      </div>
+    </article>
   );
 }
