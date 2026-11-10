@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { PROVIDER_ROLES } from "@/lib/providerTypes";
 import { Check, RefreshCw } from "lucide-react";
 import { OTPInput } from "./OTPInput";
 import { useVerifyEmailDoctor, useResendOtpDoctor } from "@/queries";
@@ -126,9 +127,11 @@ export function EnterOTP() {
                 <SelectValue placeholder="Choose your role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="doctor">Doctor</SelectItem>
-                <SelectItem value="pharmacy">Pharmacy</SelectItem>
-                <SelectItem value="lab_technician">Lab Technician</SelectItem>
+                {PROVIDER_ROLES.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {!role && error && (

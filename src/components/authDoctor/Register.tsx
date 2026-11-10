@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { PROVIDER_ROLES, ROLES_WITH_BUSINESS_NAME, type ProviderRole } from "@/lib/providerTypes";
+import { apiErrorMessage } from "@/lib/apiError";
 import { useRegisterDoctor, useGetSpecializationList } from "@/queries";
 import { OTPVerificationModal } from "./OTPVerification";
 import { toast } from "react-toastify";
@@ -36,6 +38,10 @@ export default function Register({
   const [address, setAddress] = useState("");
   const [specializationId, setSpecializationId] = useState("");
   const [role, setRole] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const asksBusinessName = ROLES_WITH_BUSINESS_NAME.includes(role as ProviderRole);
+  // Ambulance operators register as a business; pharmacies and labs may add their trading name.
+  const needsBusinessName = role === "ambulance_operator";
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<RegisterStep>(1);
@@ -64,6 +70,10 @@ export default function Register({
       setError("All required fields must be filled.");
       return;
     }
+    if (needsBusinessName && !businessName.trim()) {
+      setError("Please go back and enter your business name.");
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -84,6 +94,10 @@ export default function Register({
         payload.specializationId = specializationId; // keep it as string
       }
 
+      if (asksBusinessName && businessName.trim()) {
+        payload.businessName = businessName.trim();
+      }
+
       await register(payload as RegisterDoctorRequest);
 
       setStep(3);
@@ -92,7 +106,7 @@ export default function Register({
         position: "top-right",
       });
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Registration failed");
+      setError(apiErrorMessage(err, "Registration failed"));
       toast.error("Registration failed. Please try again.", {
         position: "top-right",
       });
@@ -202,11 +216,11 @@ export default function Register({
                       <SelectValue placeholder="Select Profession" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="doctor">Doctor</SelectItem>
-                      <SelectItem value="lab_technician">
-                        Lab Technician
-                      </SelectItem>
-                      <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                      {PROVIDER_ROLES.map((r) => (
+                        <SelectItem key={r.value} value={r.value}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -263,6 +277,25 @@ export default function Register({
                         <circle cx="12" cy="7" r="4"></circle>
                       </svg>
                     </div>
+                  </div>
+                )}
+
+                {asksBusinessName && (
+                  <div>
+                    <label htmlFor="register-business-name" className="sr-only">
+                      {needsBusinessName ? "Business name" : "Business name (optional)"}
+                    </label>
+                    <input
+                      id="register-business-name"
+                      type="text"
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder={needsBusinessName ? "Business name (as on your CAC certificate)" : "Business name (optional)"}
+                      className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2E9063] focus:outline-none"
+                      maxLength={255}
+                      autoComplete="organization"
+                      required={needsBusinessName}
+                    />
                   </div>
                 )}
 
