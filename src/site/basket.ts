@@ -6,10 +6,8 @@ export type BasketTest = {
   name: string;
   price: number;
   lab_id: number;
-  lab_name: string;
-  lab_area: string | null;
-  home_collection: boolean;
-  home_fee: number | null;
+  /** What the nurse's visit to the patient costs. */
+  visit_fee: number | null;
 };
 
 const KEY = "dlp_basket";
@@ -42,10 +40,7 @@ export function addToBasket(test: CatalogueTest): BasketTest[] {
     name: test.name,
     price: test.price,
     lab_id: test.lab.id,
-    lab_name: test.lab.name,
-    lab_area: test.lab.area ?? null,
-    home_collection: Boolean(test.lab.home_collection),
-    home_fee: test.lab.home_collection_fee ?? null,
+    visit_fee: test.lab.home_collection_fee ?? null,
   };
   const next = [...readBasket().filter((entry) => entry.id !== test.id), item];
   writeBasket(next);
@@ -60,9 +55,6 @@ export type BasketMedicine = {
   price: number;
   qty: number;
   max: number;
-  pharmacy_id: number;
-  pharmacy_name: string;
-  delivers: boolean;
   prescription_only: boolean;
 };
 

@@ -39,10 +39,10 @@ export function TestCard({ test }: { test: CatalogueTest }) {
             {test.turnaround}
           </span>
         )}
-        {test.lab?.home_collection && (
+        {test.lab && (
           <span className="flex items-center gap-1.5">
             <Home className="h-4 w-4 text-brand-600" aria-hidden="true" />
-            Home collection
+            Nurse comes to you
           </span>
         )}
       </p>

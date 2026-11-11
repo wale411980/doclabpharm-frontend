@@ -17,24 +17,24 @@ type ServicePage = {
 export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
   pharmacy: {
     slug: "pharmacy",
-    title: "Medicine from the nearest pharmacy, delivered",
+    title: "Genuine medicine, delivered to your door",
     metaTitle: "Order medicine online in Abuja",
     metaDescription:
-      "Order medicine online in Abuja from verified pharmacies near you. We find the closest pharmacy with your medicine in stock and deliver it to your door.",
+      "Order medicine online in Abuja and have it delivered to your door. Licensed pharmacists, genuine medicine, clear prices.",
     intro:
-      "Search for your medicine and we send your order to the nearest verified pharmacy that has everything in stock. If it cannot take the order, the next nearest pharmacy gets it.",
+      "Search for your medicine, pay online and we bring it to your door. A licensed pharmacist checks every order.",
     image: { src: "/images/doctor-map.webp", width: 687, height: 608, alt: "A pharmacist next to a map of Abuja" },
     cta: { label: "Order medicine", href: "/medicines" },
     steps: [
-      ["Search your medicine", "Find it by name and see prices from pharmacies near you."],
-      ["We pick the closest pharmacy", "Only pharmacies with every item in stock are matched."],
-      ["Pay and track delivery", "Pay securely and follow your rider on the map."],
+      ["Search your medicine", "Find it by name and see the price."],
+      ["We prepare your order", "A licensed pharmacist checks and packs it."],
+      ["Pay and receive it", "Pay securely online. A rider brings it to your door."],
     ],
     points: [
-      ["Licensed pharmacies only", "Every pharmacy holds a current Pharmacy Council of Nigeria premises licence."],
+      ["Licensed pharmacists", "Your medicine is dispensed under a current Pharmacy Council of Nigeria licence."],
       ["Prescriptions handled properly", "Prescription-only medicine needs a valid prescription, checked by the pharmacist."],
-      ["Fair prices you can compare", "Pharmacies set their own prices and you see them before you pay."],
-      ["Pickup or delivery", "Collect from the pharmacy yourself, or have it brought to you."],
+      ["Clear prices", "You see the price and the delivery fee before you pay."],
+      ["Delivered to you", "At home or at work. You never queue at a counter."],
     ],
     faq: [
       {
@@ -65,7 +65,7 @@ export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
     points: [
       ["Verified doctors only", "MDCN registration and current practising licence checked, and rechecked each year."],
       ["Chat, voice or video", "Use whichever suits you, from any phone."],
-      ["Prescriptions to your pharmacy", "Send a prescription to the nearest pharmacy in one tap."],
+      ["Prescriptions delivered", "Order the medicine your doctor prescribed and we bring it to you."],
       ["Your notes stay private", "Consultation records are only shared with you and your doctor."],
     ],
     faq: [
@@ -84,18 +84,18 @@ export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
     title: "Lab tests at home, results on your phone",
     metaTitle: "Book lab tests in Abuja with home sample collection",
     metaDescription:
-      "Book blood tests and other lab tests with registered labs in Abuja. Have your sample collected at home and get your results on your phone.",
+      "Book blood tests and health checks in Abuja. Our nurse takes your sample at home and your results arrive on your phone.",
     intro:
-      "Book a test with a registered lab, choose home collection or a lab visit, and get your results in the app.",
+      "Book a test, our nurse comes to you for the sample, and your results arrive on your phone.",
     image: { src: "/images/lab-sample.webp", width: 742, height: 492, alt: "A lab scientist taking a swab sample" },
     cta: { label: "Book a test", href: "/tests" },
     steps: [
-      ["Choose your test", "Search tests and health packages and compare labs near you."],
-      ["Pick a time and place", "A collector comes to you, or you visit the lab."],
+      ["Choose your test", "Search tests and health packages and see the price."],
+      ["Pick a time", "Our nurse comes to your home or office to take the sample."],
       ["Get your result", "Results arrive in the app, and can be shared with your doctor."],
     ],
     points: [
-      ["Registered labs only", "Every lab is registered with the Medical Laboratory Science Council of Nigeria."],
+      ["Registered laboratories", "Your sample is tested in a laboratory registered with the Medical Laboratory Science Council of Nigeria."],
       ["Home sample collection", "Save the trip and the queue."],
       ["Results in the app", "Keep your results in one place."],
       ["Share with your doctor", "Only when you choose to."],
@@ -107,7 +107,7 @@ export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
       },
       {
         q: "How long do results take?",
-        a: "It depends on the test and the lab. Each test shows the lab's expected turnaround time before you book.",
+        a: "It depends on the test. Each test shows how long the result takes before you book.",
       },
     ],
   },

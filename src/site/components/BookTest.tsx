@@ -18,7 +18,7 @@ export function BookTest({ test }: { test: CatalogueTest }) {
 
   const promises = [
     "No account needed to book",
-    test.lab?.home_collection ? "We come to your home, or you visit the lab" : "Done at the lab",
+    "Our nurse comes to your home for the sample",
     "Results on your phone, explained simply",
   ];
 
@@ -26,9 +26,9 @@ export function BookTest({ test }: { test: CatalogueTest }) {
     <div className="flex min-w-0 flex-col gap-5 rounded-[28px] bg-white p-5 shadow-[0_30px_70px_-30px_rgba(6,40,31,0.45)] ring-1 ring-brand-100 sm:p-6">
       <div className="flex items-end justify-between gap-3">
         <span className="font-display text-4xl font-extrabold tracking-tight text-ink-900">{naira(test.price)}</span>
-        {test.lab?.home_collection && test.lab.home_collection_fee !== null && (
+        {test.lab && test.lab.home_collection_fee !== null && (
           <span className="text-right text-sm font-semibold text-ink-500">
-            Home collection
+            Nurse visit
             <br />+ {naira(test.lab.home_collection_fee)}
           </span>
         )}

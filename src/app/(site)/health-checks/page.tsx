@@ -22,7 +22,7 @@ export default async function HealthChecksPage() {
           <h1 className="text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">Health checks and guides</h1>
           <p className="max-w-2xl text-lg leading-relaxed text-ink-700">
             Symptoms to look out for, when to get tested and what each check includes. When you are ready, book a
-            test with a registered lab near you.
+            test and our nurse comes to you.
           </p>
         </Container>
       </section>

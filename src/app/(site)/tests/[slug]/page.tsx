@@ -37,7 +37,7 @@ export default async function TestPage({ params }: Props) {
     {
       icon: Home,
       label: "Where",
-      value: test.lab?.home_collection ? "At your home, or at the lab" : "At the lab",
+      value: "At your home. Our nurse comes to you.",
     },
   ].filter((fact) => fact.value);
 
@@ -97,16 +97,6 @@ export default async function TestPage({ params }: Props) {
                 ))}
               </dl>
 
-              {test.lab && (
-                <p className="flex items-start gap-3 rounded-3xl bg-white p-5 text-[17px] text-ink-700 ring-1 ring-brand-100">
-                  <MapPin className="mt-0.5 h-5 w-5 flex-none text-brand-700" aria-hidden="true" />
-                  <span>
-                    Done by <strong className="text-ink-900">{test.lab.name}</strong>
-                    {test.lab.area ? `, ${test.lab.area}` : ""}
-                    {test.lab.city ? `, ${test.lab.city}` : ""}.
-                  </span>
-                </p>
-              )}
             </div>
 
             <div id="book" className="min-w-0 scroll-mt-24 lg:sticky lg:top-24">

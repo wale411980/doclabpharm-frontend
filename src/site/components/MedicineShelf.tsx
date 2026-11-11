@@ -8,8 +8,8 @@ import { API_URL, basketCount, naira, onBasketChange, readMedicines, setMedicine
 import { cn } from "@/lib/utils";
 
 /**
- * Browse what pharmacies have in stock and add it to the basket, without
- * signing in. Choosing an area shows what delivery to it costs.
+ * Browse the medicine we deliver and add it to the basket, without signing
+ * in. Choosing an area shows what we can deliver there and what it costs.
  */
 export function MedicineShelf({ initial }: { initial: Shelf }) {
   const [shelf, setShelf] = useState(initial);
@@ -66,9 +66,6 @@ export function MedicineShelf({ initial }: { initial: Shelf }) {
         pack: medicine.pack,
         price: medicine.price,
         max: medicine.in_stock,
-        pharmacy_id: medicine.pharmacy.id,
-        pharmacy_name: medicine.pharmacy.name,
-        delivers: medicine.pharmacy.delivers,
         prescription_only: medicine.prescription_only,
       },
       qty
@@ -100,7 +97,7 @@ export function MedicineShelf({ initial }: { initial: Shelf }) {
             onChange={(event) => setArea(event.target.value)}
             className="h-14 w-full appearance-none rounded-2xl bg-white px-4 text-base font-bold text-ink-900 ring-1 ring-inset ring-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
-            <option value="">Your area (for delivery cost)</option>
+            <option value="">Your area (for delivery)</option>
             {shelf.areas.map((name) => (
               <option key={name} value={name}>
                 {name}
@@ -123,14 +120,13 @@ export function MedicineShelf({ initial }: { initial: Shelf }) {
 
       {shown.length === 0 ? (
         <div className="rounded-3xl bg-white p-8 text-center ring-1 ring-brand-100">
-          <p className="text-xl font-extrabold text-ink-900">{all.length === 0 ? "No pharmacy has listed medicines yet" : "Nothing matches that search"}</p>
+          <p className="text-xl font-extrabold text-ink-900">{all.length === 0 ? "No medicine is listed yet" : "Nothing matches that search"}</p>
           <p className="mt-2 text-ink-700">{all.length === 0 ? "Please check back soon." : "Try a shorter name, or clear the search."}</p>
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((medicine) => {
             const qty = inBasket[medicine.id] ?? 0;
-            const pharmacy = medicine.pharmacy;
             return (
               <li key={medicine.id} className="flex min-w-0 flex-col gap-3 rounded-3xl bg-white p-5 ring-1 ring-brand-100">
                 <div className="min-w-0">
@@ -141,12 +137,7 @@ export function MedicineShelf({ initial }: { initial: Shelf }) {
                 {medicine.prescription_only && (
                   <p className="w-fit rounded-full bg-[#fff1ed] px-3 py-1 text-sm font-bold text-[#7a1d0a]">Needs a prescription. The pharmacist will ask for it.</p>
                 )}
-                <p className="text-sm text-ink-500">
-                  {pharmacy.name}
-                  {pharmacy.distance_km !== null ? `, ${pharmacy.distance_km} km away` : ""}
-                  {pharmacy.delivers_here === true && pharmacy.delivery_fee !== null ? `. Delivery ${naira(pharmacy.delivery_fee)}` : ""}
-                  {pharmacy.delivers_here === false ? ". Pickup only for your area" : ""}
-                </p>
+<p className="text-sm text-ink-500">{medicine.delivery_fee !== null ? `Delivered to you. Delivery ${naira(medicine.delivery_fee)}` : "Delivered to you"}</p>
                 <div className="mt-auto flex items-center justify-between gap-3">
                   <span className="font-display text-2xl font-extrabold tracking-tight text-ink-900">{naira(medicine.price)}</span>
                   {qty === 0 ? (

@@ -12,7 +12,7 @@ type Booking = {
   amount: number;
   tests: { name: string; date: string | null; time: string | null; collection: string }[];
   medicines?: { name: string; qty: number }[];
-  deliveries?: { pharmacy: string | null; method: string; address: string | null; handover_code: string | null }[];
+  deliveries?: { address: string | null; handover_code: string | null }[];
   consult?: { booking_id: number; status: string; doctor: string | null } | null;
   can_set_password: boolean;
 };
@@ -181,7 +181,7 @@ export function CheckoutComplete() {
               <p className="text-lg font-extrabold text-ink-900">{test.name}</p>
               <p className="text-[15px] text-ink-700">
                 {when(test.date, test.time)}
-                {test.collection === "home" ? ", at your home" : ", at the lab"}
+                . Our nurse comes to your home.
               </p>
             </div>
           </li>
@@ -190,9 +190,7 @@ export function CheckoutComplete() {
 
       {(booking.deliveries ?? []).map((delivery, index) => (
         <div key={index} className="rounded-3xl bg-white p-5 ring-1 ring-brand-100">
-          <p className="text-lg font-extrabold text-ink-900">
-            {delivery.method === "delivery" ? `${delivery.pharmacy} delivers to you` : `Pick up at ${delivery.pharmacy}`}
-          </p>
+<p className="text-lg font-extrabold text-ink-900">Your medicine is being prepared for delivery</p>
           <p className="text-[15px] text-ink-700">{delivery.address}</p>
           <ul className="mt-2 text-[15px] text-ink-700">
             {(booking.medicines ?? []).map((medicine) => (
@@ -203,7 +201,7 @@ export function CheckoutComplete() {
           </ul>
           {delivery.handover_code && (
             <p className="mt-3 w-fit rounded-2xl bg-brand-50 px-4 py-2 text-[15px] font-bold text-ink-900">
-              Your code: <span className="font-display text-xl tracking-widest">{delivery.handover_code}</span>. Give it only when you receive your medicine.
+              Your code: <span className="font-display text-xl tracking-widest">{delivery.handover_code}</span>. Give it to the rider only when you receive your medicine.
             </p>
           )}
         </div>

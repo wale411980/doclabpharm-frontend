@@ -3,7 +3,7 @@ export const SITE = {
   name: "DocLabPharm",
   url: (process.env.NEXT_PUBLIC_SITE_URL || "https://doclabpharm.com").replace(/\/$/, ""),
   description:
-    "Order medicine from the nearest verified pharmacy, talk to a licensed doctor, book lab tests at home and request an ambulance. Now serving Abuja.",
+    "Your online hospital. Medicine delivered, a licensed doctor on your phone, lab tests taken at home and an ambulance when you need one. Now serving Abuja.",
   owner: "Walex Biz Group",
   email: "info@doclabpharm.com",
   phone: "+234 707 710 1826",
@@ -31,7 +31,7 @@ export const SERVICES = [
   {
     slug: "pharmacy",
     name: "Pharmacy delivery",
-    short: "Medicine from the nearest pharmacy that has it in stock, delivered to you.",
+    short: "Genuine medicine delivered to your door.",
     cta: "Order medicine",
     href: "/services/pharmacy",
     tone: "brand",

@@ -205,7 +205,7 @@ export function RequestAmbulance() {
 
         {ride.vehicle && (
           <div className="rounded-3xl bg-white p-5 ring-1 ring-brand-100">
-            <p className="text-lg font-extrabold text-ink-900">{ride.operator?.name}</p>
+            <p className="text-lg font-extrabold text-ink-900">Your ambulance</p>
             <p className="text-[15px] text-ink-700">
               Plate {ride.vehicle.plate_number}
               {ride.vehicle.driver_name ? `, driver ${ride.vehicle.driver_name}` : ""}

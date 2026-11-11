@@ -237,7 +237,7 @@ function router() {
             <Route path="/user/profile" element={<PatientProfile />} />
             <Route path="/user/appointments" element={<PatientAppointment />} />
             <Route path="/user/orders" element={<PatientOrder />} />
-            <Route path="/user/pharmacy" element={<PatientPharmacy />} />
+            <Route path="/user/pharmacy" element={<SiteRedirect to="/medicines" />} />
             <Route path="/doctor/select" element={<AvailableDoctors />} />
             <Route
               path="/doctor/:doctorId/patient-details"
@@ -257,7 +257,7 @@ function router() {
               path="/user/checkout-success"
               element={<CheckoutSuccess />}
             />
-            <Route path="/lab/select" element={<SelectLab />} />
+            <Route path="/lab/select" element={<SiteRedirect to="/tests" />} />
             <Route path="/patient/booking/select-test" element={<SiteRedirect to="/tests" />} />
             <Route
               path="/patient/booking/select-date-time"
@@ -269,7 +269,7 @@ function router() {
             <Route path="/user/prescriptions" element={<UserPrescriptions />} />
             <Route path="/user/prescriptions/:id" element={<UserPrescriptions />} />
             {/* MEDICINES_ROUTE_V1: medicines browser was built but never routed */}
-            <Route path="/user/medicines" element={<MedicationBrowser />} />
+            <Route path="/user/medicines" element={<SiteRedirect to="/medicines" />} />
             <Route
               path="/user/profile-details"
               element={<PatientDetailsLandingPage />}
@@ -282,7 +282,7 @@ function router() {
             />
             <Route path="/user/checkout" element={<Checkout />} />
             <Route path="/user/checkout/complete" element={<CheckoutComplete />} />
-            <Route path="/user/medicines/near-me" element={<NearbyMedicines />} />
+            <Route path="/user/medicines/near-me" element={<SiteRedirect to="/medicines" />} />
             <Route path="/user/deliveries" element={<MyDeliveries />} />
             <Route path="/user/see-doctor-now" element={<SeeDoctorNow />} />
             <Route path="/user/consults/:id" element={<ConsultWaiting />} />

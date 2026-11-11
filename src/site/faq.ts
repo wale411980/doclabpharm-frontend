@@ -9,7 +9,7 @@ export const HOME_FAQ = [
   },
   {
     q: "How does medicine delivery work?",
-    a: "Tell us what you need and where you are. We send the order to the nearest verified pharmacy that has everything in stock. If that pharmacy cannot take it, the order moves to the next nearest one. You can follow the delivery in the app.",
+    a: "Choose your medicine, tell us where you are and pay online. A licensed pharmacist prepares your order and a rider brings it to your door.",
   },
   {
     q: "Can I buy prescription-only medicine?",

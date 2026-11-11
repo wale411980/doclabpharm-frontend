@@ -119,9 +119,6 @@ export type CatalogueTest = {
   turnaround: string | null;
   lab: {
     id: number;
-    name: string;
-    area: string | null;
-    city: string | null;
     home_collection: boolean;
     home_collection_fee: number | null;
     sample_listing: boolean;
@@ -176,17 +173,11 @@ export type ShelfMedicine = {
   in_stock: number;
   prescription_only: boolean;
   category: string;
-  pharmacy: {
-    id: number;
-    name: string;
-    address: string | null;
-    delivers: boolean;
-    distance_km: number | null;
-    delivers_here: boolean | null;
-    delivery_fee: number | null;
-    min_order_amount: number;
-    sample_listing: boolean;
-  };
+  /** Items from the same source arrive in one delivery. */
+  source: string;
+  /** Known once the visitor has chosen their area. */
+  delivery_fee: number | null;
+  min_order_amount: number;
 };
 
 export type MedicineShelf = { count: number; area: string | null; areas: string[]; categories: { name: string; medicines: ShelfMedicine[] }[] };

@@ -130,7 +130,7 @@ export function TestsSection({ categories }: { categories: CatalogueCategory[] }
           <div className="flex max-w-2xl flex-col gap-3">
             <h2 className={cn(display, "text-4xl text-ink-900 sm:text-5xl")}>Pick a test. Book it now.</h2>
             <p className="text-lg leading-relaxed text-ink-500">
-              See the price before you book. A collector comes to your house, or you visit the lab. No sign-in until
+              See the price before you book. Our nurse comes to your house for the sample. No sign-in until
               you pay.
             </p>
           </div>
@@ -245,7 +245,7 @@ export function ServicesBento() {
             />
             <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-night via-night/50 to-transparent" />
             <h3 className={cn(display, "text-3xl sm:text-4xl")}>Lab tests that come to you</h3>
-            <p className="mt-2 text-lg text-white/85">A collector comes to your house. Results land on your phone.</p>
+            <p className="mt-2 text-lg text-white/85">Our nurse comes to your house. Results land on your phone.</p>
             <span className="mt-5 inline-flex w-fit rounded-full bg-white px-6 py-3 text-base font-extrabold text-night">
               Book a test
             </span>
@@ -262,7 +262,7 @@ export function ServicesBento() {
             <span>
               <h3 className={cn(display, "text-3xl")}>Medicine at your door</h3>
               <p className="mt-2 max-w-md text-lg text-night/80">
-                From the nearest pharmacy that has it in stock. Track the rider, pay in the app.
+                Genuine medicine brought to your door. Order in a minute, pay online.
               </p>
               <span className="mt-4 inline-flex w-fit rounded-full bg-night px-6 py-3 text-base font-extrabold text-white">
                 Order medicine
@@ -301,7 +301,7 @@ export function ServicesBento() {
 const STEPS = [
   { icon: MapPin, title: "Tell us what you need", body: "Pick a test, a doctor or your medicine, and share where you are." },
   { icon: Clock, title: "We match you nearby", body: "Licensed labs, doctors, pharmacies and ambulances close to you respond in minutes." },
-  { icon: Smartphone, title: "Pay and follow it live", body: "Pay with your card or wallet. Track your collector, rider or ambulance on your phone." },
+  { icon: Smartphone, title: "Pay and follow it live", body: "Pay with your card or wallet. Follow your nurse, rider or ambulance on your phone." },
 ];
 
 export function HowItWorks() {
