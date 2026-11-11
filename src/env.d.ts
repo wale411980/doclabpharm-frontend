@@ -13,7 +13,7 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_FIREBASE_PROJECT_ID: string;
     readonly NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: string;
     readonly NEXT_PUBLIC_FIREBASE_VAPID_KEY: string;
-    readonly NEXT_PUBLIC_TAWK_TO_PROPERTY_ID: string;
+    readonly NEXT_PUBLIC_WALEX_CHAT_URL?: string;
     readonly NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: string;
   }
 }
