@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/site/components/SiteFooter";
 import { SiteHeader } from "@/site/components/SiteHeader";
+import { SupportChat } from "@/site/components/SupportChat";
 import { JsonLd } from "@/site/components/ui";
 import { SITE } from "@/site/config";
 
@@ -35,6 +36,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <main id="main">{children}</main>
       <SiteFooter />
       <JsonLd data={organization} />
+      <SupportChat />
     </>
   );
 }
