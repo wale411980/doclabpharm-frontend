@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import logo from "@/assets/dashboard-logo.png";
 import { useAuth } from "@/hooks/useAuth";
+import { openSupportChat } from "@/components/WalexChatWidget";
 
 interface SidebarProps {
   onClose: () => void;
@@ -154,6 +155,7 @@ export function DoctorSidebar({ onClose }: SidebarProps) {
         >
           <a
             href="mailto:support@doclabpharm.com"
+            onClick={openSupportChat}
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100"
           >
             <HelpCircle className="h-5 w-5" color="rgba(58, 150, 108, 0.7)" strokeWidth={2} />

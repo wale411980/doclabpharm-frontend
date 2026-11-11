@@ -11,7 +11,7 @@ import Spinner from "@/components/Spinner";
 import { onMessage } from "firebase/messaging";
 import { messaging } from "@/lib/firebase";
 import AcceptCallModal from "@/components/AcceptCallModal";
-import TawkToWidget from "@/components/TawkToWidget";
+import WalexChatWidget from "@/components/WalexChatWidget";
 
 // Lazy-loaded: pulls in the Agora video SDK (~1.3MB) only when a call opens,
 // instead of on every page load.
@@ -55,7 +55,7 @@ const App = () => {
 
   return (
     <>
-      <TawkToWidget />
+      <WalexChatWidget />
       <AuthProvider>
         <Index />
       </AuthProvider>
