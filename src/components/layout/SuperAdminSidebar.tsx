@@ -40,6 +40,7 @@ export function SuperAdminSidebar({ onClose }: SidebarProps) {
     },
     { icon: Gauge, label: "Overview", href: "/super-admin/overview" },
     { icon: Activity, label: "Live operations", href: "/super-admin/operations" },
+    { icon: FileText, label: "Test details", href: "/super-admin/test-details" },
     { icon: LifeBuoy, label: "Support tickets", href: "/super-admin/support" },
     { icon: Percent, label: "Commission", href: "/super-admin/commission" },
     { icon: ShieldCheck, label: "Provider verification", href: "/super-admin/verifications" },

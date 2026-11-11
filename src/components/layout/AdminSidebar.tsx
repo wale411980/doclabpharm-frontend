@@ -31,6 +31,7 @@ export function AdminSidebar({ onClose }: SidebarProps) {
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
     { icon: Gauge, label: "Overview", href: "/admin/overview" },
     { icon: Activity, label: "Live operations", href: "/admin/operations" },
+    { icon: FileText, label: "Test details", href: "/admin/test-details" },
     { icon: LifeBuoy, label: "Support tickets", href: "/admin/support" },
     { icon: ShieldCheck, label: "Provider verification", href: "/admin/verifications" },
     { icon: Flag, label: "Provider reports", href: "/admin/provider-reports" },
