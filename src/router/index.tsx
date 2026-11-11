@@ -177,6 +177,7 @@ import AdminOverview from "@/screens/admin/console/AdminOverview";
 import LiveOperations from "@/screens/admin/console/LiveOperations";
 import SupportScorecard from "@/screens/admin/console/SupportScorecard";
 import ProviderAccount from "@/screens/admin/console/ProviderAccount";
+import TestDetailsEditor from "@/screens/admin/console/TestDetailsEditor";
 import CommissionReport from "@/screens/superAdmin/console/CommissionReport";
 import MarketplaceSettingsPage from "@/screens/superAdmin/console/MarketplaceSettingsPage";
 
@@ -462,6 +463,7 @@ function router() {
             />
             <Route path="/admin/overview" element={<AdminOverview basePath="/admin" />} />
             <Route path="/admin/operations" element={<LiveOperations />} />
+            <Route path="/admin/test-details" element={<TestDetailsEditor />} />
             <Route path="/admin/support" element={<SupportList audience="admin" basePath="/admin/support" />} />
             <Route path="/admin/support/scorecard" element={<SupportScorecard basePath="/admin" />} />
             <Route path="/admin/support/:id" element={<SupportThread audience="admin" basePath="/admin/support" />} />
@@ -551,6 +553,7 @@ function router() {
             />
             <Route path="/super-admin/overview" element={<AdminOverview basePath="/super-admin" />} />
             <Route path="/super-admin/operations" element={<LiveOperations />} />
+            <Route path="/super-admin/test-details" element={<TestDetailsEditor />} />
             <Route path="/super-admin/support" element={<SupportList audience="admin" basePath="/super-admin/support" />} />
             <Route path="/super-admin/support/scorecard" element={<SupportScorecard basePath="/super-admin" />} />
             <Route path="/super-admin/support/:id" element={<SupportThread audience="admin" basePath="/super-admin/support" />} />

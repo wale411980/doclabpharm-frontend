@@ -114,6 +114,10 @@ export type CatalogueTest = {
   audience: "everyone" | "women" | "men" | "children";
   featured: boolean;
   includes: string[];
+  /** Plain-language detail written by staff in the admin. */
+  about?: string | null;
+  who_for?: string[];
+  includes_explained?: { name: string; what: string | null }[];
   sample: string | null;
   preparation: string | null;
   turnaround: string | null;

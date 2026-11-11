@@ -67,17 +67,46 @@ export default async function TestPage({ params }: Props) {
                 </div>
               </div>
 
+              {(test.about || (test.who_for ?? []).length > 0) && (
+                <div className="flex flex-col gap-6 rounded-[28px] bg-white p-6 ring-1 ring-brand-100 sm:p-8">
+                  {test.about && (
+                    <div>
+                      <h2 className="text-xl font-extrabold text-ink-900">What this test is</h2>
+                      <p className="mt-3 max-w-2xl whitespace-pre-line text-[17px] leading-relaxed text-ink-700">{test.about}</p>
+                    </div>
+                  )}
+                  {(test.who_for ?? []).length > 0 && (
+                    <div>
+                      <h2 className="text-xl font-extrabold text-ink-900">Who should take it</h2>
+                      <ul className="mt-3 flex flex-col gap-2.5">
+                        {(test.who_for ?? []).map((line) => (
+                          <li key={line} className="flex items-start gap-3 text-[17px] text-ink-900">
+                            <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brand-50">
+                              <Check className="h-4 w-4 text-brand-700" aria-hidden="true" />
+                            </span>
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="rounded-[28px] bg-white p-6 ring-1 ring-brand-100 sm:p-8">
                 <h2 className="text-xl font-extrabold text-ink-900">
-                  {test.includes.length > 1 ? `${test.includes.length} tests in this check` : "What is tested"}
+                  {test.includes.length > 1 ? `${test.includes.length} tests in this check, and what each one looks at` : "What we check"}
                 </h2>
-                <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {test.includes.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-[17px] font-semibold text-ink-900">
+                <ul className="mt-5 flex flex-col divide-y divide-brand-100">
+                  {(test.includes_explained ?? test.includes.map((name) => ({ name, what: null }))).map((item) => (
+                    <li key={item.name} className="flex items-start gap-3 py-3.5 first:pt-0 last:pb-0">
                       <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-lime">
                         <Check className="h-4 w-4 text-night" aria-hidden="true" />
                       </span>
-                      {item}
+                      <div className="min-w-0">
+                        <p className="text-[17px] font-bold text-ink-900">{item.name}</p>
+                        {item.what && <p className="mt-0.5 text-[16px] leading-relaxed text-ink-700">{item.what}</p>}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -126,7 +155,7 @@ export default async function TestPage({ params }: Props) {
           "@context": "https://schema.org",
           "@type": "MedicalTest",
           name: test.name,
-          description: test.summary ?? undefined,
+          description: test.about ?? test.summary ?? undefined,
           url: `${SITE.url}${testPath(test)}`,
           offers: { "@type": "Offer", price: test.price, priceCurrency: "NGN", availability: "https://schema.org/InStock" },
         }}
