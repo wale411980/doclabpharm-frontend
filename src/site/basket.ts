@@ -52,6 +52,51 @@ export function addToBasket(test: CatalogueTest): BasketTest[] {
   return next;
 }
 
+/** Medicines chosen from the public shelf. */
+export type BasketMedicine = {
+  id: number;
+  name: string;
+  pack: string | null;
+  price: number;
+  qty: number;
+  max: number;
+  pharmacy_id: number;
+  pharmacy_name: string;
+  delivers: boolean;
+  prescription_only: boolean;
+};
+
+const MED_KEY = "dlp_medicines";
+
+export function readMedicines(): BasketMedicine[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(MED_KEY) || "[]");
+    return Array.isArray(list) ? list.filter((item) => item && typeof item.id === "number" && item.qty > 0) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function writeMedicines(medicines: BasketMedicine[]): void {
+  try {
+    localStorage.setItem(MED_KEY, JSON.stringify(medicines.filter((item) => item.qty > 0)));
+  } catch {
+    // Storage is blocked: the basket lasts for this page only.
+  }
+  window.dispatchEvent(new Event(EVENT));
+}
+
+/** Set how many of a medicine are in the basket (0 removes it). */
+export function setMedicineQty(medicine: Omit<BasketMedicine, "qty">, qty: number): BasketMedicine[] {
+  const amount = Math.max(0, Math.min(qty, medicine.max, 20));
+  const rest = readMedicines().filter((entry) => entry.id !== medicine.id);
+  const next = amount > 0 ? [...rest, { ...medicine, qty: amount }] : rest;
+  writeMedicines(next);
+  return next;
+}
+
+export const basketCount = () => readBasket().length + readMedicines().reduce((sum, item) => sum + item.qty, 0);
+
 export function onBasketChange(listener: () => void): () => void {
   window.addEventListener(EVENT, listener);
   window.addEventListener("storage", listener);

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { CalendarCheck, Check, Loader2 } from "lucide-react";
-import { API_URL, naira, writeBasket } from "@/site/basket";
+import { API_URL, naira, writeBasket, writeMedicines } from "@/site/basket";
 
 type Booking = {
   status: "pending" | "paid" | "failed" | "refunded" | "refund_failed";
@@ -11,6 +11,9 @@ type Booking = {
   first_name: string | null;
   amount: number;
   tests: { name: string; date: string | null; time: string | null; collection: string }[];
+  medicines?: { name: string; qty: number }[];
+  deliveries?: { pharmacy: string | null; method: string; address: string | null; handover_code: string | null }[];
+  consult?: { booking_id: number; status: string; doctor: string | null } | null;
   can_set_password: boolean;
 };
 
@@ -63,7 +66,10 @@ export function CheckoutComplete() {
         const body = (await res.json()) as Booking;
         if (stopped) return;
         setBooking(body);
-        if (body.status === "paid") writeBasket([]);
+        if (body.status === "paid") {
+          writeBasket([]);
+          writeMedicines([]);
+        }
         if (body.status === "pending" && tries.current++ < 20) timer = setTimeout(check, 3000);
       } catch {
         if (!stopped && tries.current++ < 20) timer = setTimeout(check, 3000);
@@ -161,13 +167,14 @@ export function CheckoutComplete() {
       </span>
       <div className="flex flex-col gap-2">
         <h1 className="font-display text-[2.5rem] font-extrabold leading-[1.03] tracking-[-0.03em] text-ink-900 sm:text-6xl">
-          You are booked{booking.first_name ? `, ${booking.first_name}` : ""}
+          {(booking.tests ?? []).length > 0 || booking.consult ? "You are booked" : "Order placed"}
+          {booking.first_name ? `, ${booking.first_name}` : ""}
         </h1>
         <p className="text-lg text-ink-700">We received {naira(booking.amount)}. Your booking details are sent to your email.</p>
       </div>
 
       <ul className="flex flex-col gap-2">
-        {booking.tests.map((test, index) => (
+        {(booking.tests ?? []).map((test, index) => (
           <li key={index} className="flex items-start gap-4 rounded-3xl bg-white p-5 ring-1 ring-brand-100">
             <CalendarCheck className="mt-0.5 h-6 w-6 flex-none text-brand-700" aria-hidden="true" />
             <div>
@@ -180,6 +187,43 @@ export function CheckoutComplete() {
           </li>
         ))}
       </ul>
+
+      {(booking.deliveries ?? []).map((delivery, index) => (
+        <div key={index} className="rounded-3xl bg-white p-5 ring-1 ring-brand-100">
+          <p className="text-lg font-extrabold text-ink-900">
+            {delivery.method === "delivery" ? `${delivery.pharmacy} delivers to you` : `Pick up at ${delivery.pharmacy}`}
+          </p>
+          <p className="text-[15px] text-ink-700">{delivery.address}</p>
+          <ul className="mt-2 text-[15px] text-ink-700">
+            {(booking.medicines ?? []).map((medicine) => (
+              <li key={medicine.name}>
+                {medicine.qty} × {medicine.name}
+              </li>
+            ))}
+          </ul>
+          {delivery.handover_code && (
+            <p className="mt-3 w-fit rounded-2xl bg-brand-50 px-4 py-2 text-[15px] font-bold text-ink-900">
+              Your code: <span className="font-display text-xl tracking-widest">{delivery.handover_code}</span>. Give it only when you receive your medicine.
+            </p>
+          )}
+        </div>
+      ))}
+
+      {booking.consult && (
+        <div className="rounded-3xl bg-white p-5 ring-1 ring-brand-100">
+          <p className="text-lg font-extrabold text-ink-900">{booking.consult.doctor ?? "Your doctor"} has been told you are waiting</p>
+          <p className="text-[15px] text-ink-700">
+            {showPassword
+              ? "Choose a password below to open your chat or video call. If the doctor does not accept in a few minutes, you are refunded."
+              : "Sign in to open your chat or video call."}
+          </p>
+          {accountReady && (
+            <a href={`/user/consults/${booking.consult.booking_id}`} className="mt-3 inline-flex min-h-12 items-center rounded-2xl bg-lime px-6 text-base font-extrabold text-night">
+              Open my consultation
+            </a>
+          )}
+        </div>
+      )}
 
       {showPassword && (
         <form onSubmit={createAccount} className="flex flex-col gap-4 rounded-[28px] bg-night p-6 text-white sm:p-7">

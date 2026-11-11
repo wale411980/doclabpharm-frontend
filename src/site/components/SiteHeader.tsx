@@ -47,7 +47,7 @@ export function SiteHeader() {
         {/* Phone and tablet menu: a native disclosure, works without JavaScript. */}
         <div className="flex items-center gap-2 lg:hidden">
         <BasketLink />
-        <ButtonLink href="/tests" className="whitespace-nowrap bg-night px-4 text-sm hover:bg-brand-900">
+        <ButtonLink href="/tests" className="whitespace-nowrap bg-night px-4 text-sm hover:bg-brand-900 max-sm:peer-[.has-items]:hidden">
           Book a test
         </ButtonLink>
         <details className="group relative">

@@ -24,7 +24,7 @@ export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
     intro:
       "Search for your medicine and we send your order to the nearest verified pharmacy that has everything in stock. If it cannot take the order, the next nearest pharmacy gets it.",
     image: { src: "/images/doctor-map.webp", width: 687, height: 608, alt: "A pharmacist next to a map of Abuja" },
-    cta: { label: "Order medicine", href: "/user/pharmacy" },
+    cta: { label: "Order medicine", href: "/medicines" },
     steps: [
       ["Search your medicine", "Find it by name and see prices from pharmacies near you."],
       ["We pick the closest pharmacy", "Only pharmacies with every item in stock are matched."],
@@ -88,7 +88,7 @@ export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
     intro:
       "Book a test with a registered lab, choose home collection or a lab visit, and get your results in the app.",
     image: { src: "/images/lab-sample.webp", width: 742, height: 492, alt: "A lab scientist taking a swab sample" },
-    cta: { label: "Book a test", href: "/lab/select" },
+    cta: { label: "Book a test", href: "/tests" },
     steps: [
       ["Choose your test", "Search tests and health packages and compare labs near you."],
       ["Pick a time and place", "A collector comes to you, or you visit the lab."],
@@ -120,7 +120,7 @@ export const SERVICE_PAGES: Record<ServiceSlug, ServicePage> = {
     intro:
       "Request an ambulance and the nearest available verified operator is alerted. Follow it on the map and share the link with family. Scheduled transfers between home and hospital are available too.",
     image: { src: "/images/patient-phone.webp", width: 745, height: 492, alt: "A man using his phone" },
-    cta: { label: "Create your account", href: "/register" },
+    cta: { label: "Request an ambulance", href: "/request-ambulance" },
     steps: [
       ["Request", "Choose emergency or scheduled transfer and confirm your location."],
       ["The nearest ambulance accepts", "If it does not accept quickly, the next nearest is alerted."],

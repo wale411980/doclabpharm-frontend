@@ -6,8 +6,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * The first thing on the homepage: pick what you need and go straight to
- * booking it. Lab tests are booked without an account; the other tabs lead
- * into the patient app, which asks for sign-in.
+ * booking it. Nothing here asks for an account first.
  */
 const TABS = [
   {
@@ -33,9 +32,9 @@ const TABS = [
     label: "Medicine",
     icon: Pill,
     placeholder: "Which medicine? Try paracetamol, amoxicillin",
-    button: "Find it near me",
+    button: "Find medicine",
     quick: ["Paracetamol", "Malaria drugs", "Vitamin C", "Antacid", "Cough syrup", "ORS"],
-    target: (q: string) => `/user/medicines/near-me${q ? `?q=${encodeURIComponent(q)}` : ""}`,
+    target: (q: string) => `/medicines${q ? `?q=${encodeURIComponent(q)}` : ""}`,
   },
   {
     key: "ambulance",
@@ -44,7 +43,7 @@ const TABS = [
     placeholder: "",
     button: "Request an ambulance",
     quick: [],
-    target: () => "/user/ambulance",
+    target: () => "/request-ambulance",
   },
 ] as const;
 

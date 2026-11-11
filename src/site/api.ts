@@ -163,3 +163,43 @@ export async function getCatalogueTest(id: number): Promise<(CatalogueTest & { r
 export function testPath(test: Pick<CatalogueTest, "id" | "name">): string {
   return `/tests/${test.id}-${slugify(test.name)}`;
 }
+
+
+/* ---------- Public medicine shelf ---------- */
+
+export type ShelfMedicine = {
+  id: number;
+  name: string;
+  pack: string | null;
+  details: string | null;
+  price: number;
+  in_stock: number;
+  prescription_only: boolean;
+  category: string;
+  pharmacy: {
+    id: number;
+    name: string;
+    address: string | null;
+    delivers: boolean;
+    distance_km: number | null;
+    delivers_here: boolean | null;
+    delivery_fee: number | null;
+    min_order_amount: number;
+    sample_listing: boolean;
+  };
+};
+
+export type MedicineShelf = { count: number; area: string | null; areas: string[]; categories: { name: string; medicines: ShelfMedicine[] }[] };
+
+/** What approved pharmacies have in stock. Empty when the API cannot be reached. */
+export async function getMedicineShelf(): Promise<MedicineShelf> {
+  const empty: MedicineShelf = { count: 0, area: null, areas: [], categories: [] };
+  const base = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+  if (!base) return empty;
+  try {
+    const res = await fetch(`${base}/medicines`, { headers: { Accept: "application/json" }, next: { revalidate: 300 } });
+    return res.ok ? ((await res.json()) as MedicineShelf) : empty;
+  } catch {
+    return empty;
+  }
+}

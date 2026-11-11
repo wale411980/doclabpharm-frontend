@@ -48,11 +48,13 @@ export function BookDoctor() {
       .then(setOptions)
       .catch(() => setFailed(true));
     try {
+      // Details typed last time, or the signed-in account's own.
+      const account = JSON.parse(localStorage.getItem("user") || "{}");
       const saved = JSON.parse(localStorage.getItem("dlp_contact") || "{}");
-      setFirstName(saved.first_name || "");
-      setLastName(saved.last_name || "");
-      setPhone(saved.phone || "");
-      setEmail(saved.email || "");
+      setFirstName(saved.first_name || account.firstName || account.first_name || "");
+      setLastName(saved.last_name || account.lastName || account.last_name || "");
+      setPhone(saved.phone || account.phone || "");
+      setEmail(saved.email || account.email || "");
     } catch {
       // Nothing saved from last time.
     }

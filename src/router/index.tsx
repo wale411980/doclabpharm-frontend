@@ -249,7 +249,7 @@ function router() {
             />
             <Route path="/user/confirm" element={<Confirm />} />
             <Route path="/user/cart" element={<Cart />} />
-            <Route path="/user/laboratories2" element={<TestBooking />} />
+            <Route path="/user/laboratories2" element={<SiteRedirect to="/tests" />} />
             <Route path="/user/results" element={<TestResults />} />
             <Route path="/user/messages" element={<FirstMessagePage />} />
             <Route path="/user/wallet" element={<Wallet />} />
@@ -258,10 +258,7 @@ function router() {
               element={<CheckoutSuccess />}
             />
             <Route path="/lab/select" element={<SelectLab />} />
-            <Route
-              path="/patient/booking/select-test"
-              element={<SelectTest />}
-            />
+            <Route path="/patient/booking/select-test" element={<SiteRedirect to="/tests" />} />
             <Route
               path="/patient/booking/select-date-time"
               element={<SelectDateTime />}

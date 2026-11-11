@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Building2, Home, Lock, Plus, X } from "lucide-react";
-import { API_URL, naira, readBasket, writeBasket, type BasketTest } from "@/site/basket";
+import { Bike, Building2, Home, Lock, Minus, Plus, Store, X } from "lucide-react";
+import { API_URL, naira, readBasket, readMedicines, writeBasket, writeMedicines, type BasketMedicine, type BasketTest } from "@/site/basket";
 import { cn } from "@/lib/utils";
 
 const TIMES = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
@@ -45,6 +45,8 @@ export function Checkout() {
   const [tests, setTests] = useState<BasketTest[] | null>(null);
   const [date, setDate] = useState(days[0].value);
   const [time, setTime] = useState("09:00");
+  const [meds, setMeds] = useState<BasketMedicine[]>([]);
+  const [delivery, setDelivery] = useState<"pickup" | "delivery">("delivery");
   const [where, setWhere] = useState<"at_lab" | "home">("at_lab");
   const [areas, setAreas] = useState<string[]>([]);
   const [paymentsReady, setPaymentsReady] = useState(true);
@@ -63,12 +65,20 @@ export function Checkout() {
 
   useEffect(() => {
     setTests(readBasket());
+    setMeds(readMedicines());
     try {
+      setArea(localStorage.getItem("dlp_area") || "");
+    } catch {
+      // No remembered area.
+    }
+    try {
+      // Details typed last time, or the signed-in account's own.
+      const account = JSON.parse(localStorage.getItem("user") || "{}");
       const saved = JSON.parse(localStorage.getItem("dlp_contact") || "{}");
-      setFirstName(saved.first_name || "");
-      setLastName(saved.last_name || "");
-      setPhone(saved.phone || "");
-      setEmail(saved.email || "");
+      setFirstName(saved.first_name || account.firstName || account.first_name || "");
+      setLastName(saved.last_name || account.lastName || account.last_name || "");
+      setPhone(saved.phone || account.phone || "");
+      setEmail(saved.email || account.email || "");
     } catch {
       // Nothing saved from last time.
     }
@@ -83,29 +93,43 @@ export function Checkout() {
 
   const list = tests ?? [];
   const canComeHome = list.length > 0 && list.every((test) => test.home_collection);
-  const subtotal = list.reduce((sum, test) => sum + test.price, 0);
+  const canDeliver = meds.length > 0 && meds.every((item) => item.delivers);
+  const subtotal = list.reduce((sum, test) => sum + test.price, 0) + meds.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const needsAddress = (list.length > 0 && where === "home") || (meds.length > 0 && delivery === "delivery");
 
   useEffect(() => {
     if (!canComeHome && where === "home") setWhere("at_lab");
   }, [canComeHome, where]);
 
+  useEffect(() => {
+    if (meds.length > 0 && !canDeliver && delivery === "delivery") setDelivery("pickup");
+  }, [meds, canDeliver, delivery]);
+
   const items = useMemo(
-    () => list.map((test) => ({ service_type: "lab", service_id: test.id, lab_technician_id: test.lab_id, date, time })),
-    [list, date, time]
+    () => [
+      ...list.map((test) => ({ service_type: "lab", service_id: test.id, lab_technician_id: test.lab_id, date, time })),
+      ...meds.map((item) => ({ service_type: "med", product_id: item.id, qty: item.qty })),
+    ],
+    [list, meds, date, time]
   );
 
   // Ask the server what home collection costs for this area (and whether the lab reaches it).
   useEffect(() => {
     setHomeProblem("");
     setHomeFee(null);
-    if (where !== "home" || !area || items.length === 0) return;
+    if (!needsAddress || !area || items.length === 0) return;
 
     const controller = new AbortController();
     fetch(`${API_URL}/guest/checkout/quote`, {
       method: "POST",
       signal: controller.signal,
       headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ items, collection: "home", address: { area, line: line || "-" } }),
+      body: JSON.stringify({
+        items,
+        collection: list.length > 0 ? where : undefined,
+        delivery: meds.length > 0 ? delivery : undefined,
+        address: { area, line: line || "-" },
+      }),
     })
       .then(async (res) => {
         const body = await res.json().catch(() => ({}));
@@ -117,20 +141,27 @@ export function Checkout() {
     return () => controller.abort();
     // The street address does not change the price, only the area does.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [where, area, items, subtotal]);
+  }, [needsAddress, where, delivery, area, items, subtotal]);
 
   const estimateFee = () => {
     const perLab = new Map<number, number>();
     list.forEach((test) => perLab.set(test.lab_id, test.home_fee ?? 0));
     return Array.from(perLab.values()).reduce((sum, fee) => sum + fee, 0);
   };
-  const fee = where === "home" ? homeFee ?? estimateFee() : 0;
+  // Delivery cost depends on the area, so it shows once the area is chosen.
+  const fee = needsAddress ? homeFee ?? (list.length > 0 && where === "home" ? estimateFee() : 0) : 0;
   const total = subtotal + fee;
 
   const remove = (id: number) => {
     const next = list.filter((test) => test.id !== id);
     setTests(next);
     writeBasket(next);
+  };
+
+  const changeMedicine = (id: number, qty: number) => {
+    const next = meds.map((item) => (item.id === id ? { ...item, qty: Math.max(0, Math.min(qty, item.max, 20)) } : item)).filter((item) => item.qty > 0);
+    setMeds(next);
+    writeMedicines(next);
   };
 
   const submit = async (event: FormEvent) => {
@@ -142,8 +173,8 @@ export function Checkout() {
     if (!lastName.trim()) found.last_name = "Enter your last name";
     if (!/^\+?[0-9 ]{10,16}$/.test(phone.trim())) found.phone = "Enter a phone number we can call, like 0803 123 4567";
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) found.email = "Enter the email we should send your result to";
-    if (where === "home" && !area) found.area = "Choose your area";
-    if (where === "home" && !line.trim()) found.line = "Enter your house address";
+    if (needsAddress && !area) found.area = "Choose your area";
+    if (needsAddress && !line.trim()) found.line = "Enter your house address";
     setErrors(found);
 
     if (Object.keys(found).length > 0) {
@@ -167,8 +198,9 @@ export function Checkout() {
         body: JSON.stringify({
           items,
           contact,
-          collection: where,
-          address: where === "home" ? { area, line: line.trim(), landmark: landmark.trim() || null } : undefined,
+          collection: list.length > 0 ? where : undefined,
+          delivery: meds.length > 0 ? delivery : undefined,
+          address: needsAddress ? { area, line: line.trim(), landmark: landmark.trim() || null } : undefined,
           callback_url: `${window.location.origin}/checkout/complete`,
         }),
       });
@@ -198,11 +230,11 @@ export function Checkout() {
     return <div className="min-h-[50vh]" aria-busy="true" />;
   }
 
-  if (list.length === 0) {
+  if (list.length === 0 && meds.length === 0) {
     return (
       <div className="mx-auto flex max-w-xl flex-col items-center gap-5 py-16 text-center">
-        <h1 className="font-display text-4xl font-extrabold tracking-tight text-ink-900">Choose a test to book</h1>
-        <p className="text-lg text-ink-700">Pick any test and you will be back here in one tap. No account needed.</p>
+        <h1 className="font-display text-4xl font-extrabold tracking-tight text-ink-900">Your basket is empty</h1>
+        <p className="text-lg text-ink-700">Pick a test or a medicine and you will be back here in one tap. No account needed.</p>
         <Link href="/tests" className="inline-flex min-h-14 items-center rounded-2xl bg-lime px-8 text-lg font-extrabold text-night hover:bg-[#d6fa85]">
           See all tests and prices
         </Link>
@@ -226,15 +258,15 @@ export function Checkout() {
     <form onSubmit={submit} noValidate className="grid grid-cols-1 gap-6 pb-28 lg:grid-cols-[1.2fr_0.8fr] lg:items-start lg:pb-0">
       <div className="flex min-w-0 flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <h1 className="font-display text-[2.25rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-ink-900 sm:text-5xl">Book your test</h1>
+          <h1 className="font-display text-[2.25rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-ink-900 sm:text-5xl">{list.length > 0 ? "Book your test" : "Your order"}</h1>
           <p className="text-lg text-ink-700">One page, then you pay. No account needed.</p>
         </div>
 
         <section className={card} aria-labelledby="h-tests">
           <h2 id="h-tests" className={heading}>
-            Your {list.length === 1 ? "test" : "tests"}
+            Your basket
           </h2>
-          <ul className="mt-4 flex flex-col divide-y divide-brand-100">
+          <ul className={cn("mt-4 flex flex-col divide-y divide-brand-100", list.length === 0 && "hidden")}>
             {list.map((test) => (
               <li key={test.id} className="flex items-center gap-3 py-3.5">
                 <div className="min-w-0 flex-1">
@@ -256,12 +288,44 @@ export function Checkout() {
               </li>
             ))}
           </ul>
-          <Link href="/tests" className="mt-2 inline-flex min-h-11 items-center gap-2 text-[15px] font-bold text-brand-700 hover:underline">
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            Add another test
-          </Link>
+          {meds.length > 0 && (
+            <ul className="flex flex-col divide-y divide-brand-100 border-t border-brand-100">
+              {meds.map((item) => (
+                <li key={item.id} className="flex items-center gap-3 py-3.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[17px] font-bold leading-snug text-ink-900">{item.name}</p>
+                    <p className="text-sm text-ink-500">
+                      {item.pack ? `${item.pack}, ` : ""}
+                      {item.pharmacy_name}
+                    </p>
+                  </div>
+                  <div className="flex flex-none items-center gap-1 rounded-full bg-brand-50 p-1">
+                    <button type="button" onClick={() => changeMedicine(item.id, item.qty - 1)} aria-label={`One less ${item.name}`} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-white">
+                      <Minus className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <span className="min-w-5 text-center font-extrabold">{item.qty}</span>
+                    <button type="button" onClick={() => changeMedicine(item.id, item.qty + 1)} disabled={item.qty >= Math.min(item.max, 20)} aria-label={`One more ${item.name}`} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-white disabled:opacity-40">
+                      <Plus className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <span className="w-20 text-right text-[17px] font-extrabold text-ink-900">{naira(item.price * item.qty)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-2 flex flex-wrap gap-x-6">
+            <Link href="/tests" className="inline-flex min-h-11 items-center gap-2 text-[15px] font-bold text-brand-700 hover:underline">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add a test
+            </Link>
+            <Link href="/medicines" className="inline-flex min-h-11 items-center gap-2 text-[15px] font-bold text-brand-700 hover:underline">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add medicine
+            </Link>
+          </div>
         </section>
 
+        {list.length > 0 && (
         <section className={card} aria-labelledby="h-when">
           <h2 id="h-when" className={heading}>
             When?
@@ -282,7 +346,9 @@ export function Checkout() {
             ))}
           </div>
         </section>
+        )}
 
+        {list.length > 0 && (
         <section className={card} aria-labelledby="h-where">
           <h2 id="h-where" className={heading}>
             Where?
@@ -319,7 +385,43 @@ export function Checkout() {
             </p>
           )}
 
-          {where === "home" && (
+        </section>
+        )}
+
+        {meds.length > 0 && (
+          <section className={card} aria-labelledby="h-delivery">
+            <h2 id="h-delivery" className={heading}>
+              How do you want your medicine?
+            </h2>
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button type="button" aria-pressed={delivery === "delivery"} disabled={!canDeliver} onClick={() => setDelivery("delivery")} className={cn(chip(delivery === "delivery"), "flex min-h-[72px] items-center gap-3 text-left disabled:opacity-50")}>
+                <Bike className="h-6 w-6 flex-none" aria-hidden="true" />
+                <span>
+                  <span className="block text-base">Deliver to me</span>
+                  <span className="block text-sm font-semibold opacity-80">{canDeliver ? "Cost shows when you choose your area" : "This pharmacy does not deliver"}</span>
+                </span>
+              </button>
+              <button type="button" aria-pressed={delivery === "pickup"} onClick={() => setDelivery("pickup")} className={cn(chip(delivery === "pickup"), "flex min-h-[72px] items-center gap-3 text-left")}>
+                <Store className="h-6 w-6 flex-none" aria-hidden="true" />
+                <span>
+                  <span className="block text-base">I will pick it up</span>
+                  <span className="block text-sm font-semibold opacity-80">No extra fee</span>
+                </span>
+              </button>
+            </div>
+            {meds.some((item) => item.prescription_only) && (
+              <p className="mt-4 rounded-2xl bg-[#fff1ed] px-4 py-3 text-[15px] font-semibold text-[#7a1d0a]">
+                Some of these need a prescription. The pharmacist will ask to see it before releasing them, and refunds you if you do not have one.
+              </p>
+            )}
+          </section>
+        )}
+
+        {needsAddress && (
+          <section className={card} aria-labelledby="h-address">
+            <h2 id="h-address" className={heading}>
+              Your address
+            </h2>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-1.5 block text-[15px] font-bold text-ink-900">Your area in Abuja</span>
@@ -348,8 +450,8 @@ export function Checkout() {
                 </p>
               )}
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
         <section className={card} aria-labelledby="h-you">
           <h2 id="h-you" className={heading}>
@@ -386,13 +488,13 @@ export function Checkout() {
           <dl className="flex flex-col gap-2.5 text-[16px]">
             <div className="flex justify-between gap-4">
               <dt className="text-white/75">
-                {list.length} {list.length === 1 ? "test" : "tests"}
+                {list.length + meds.reduce((sum, item) => sum + item.qty, 0)} {list.length + meds.reduce((sum, item) => sum + item.qty, 0) === 1 ? "item" : "items"}
               </dt>
               <dd className="font-bold">{naira(subtotal)}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-white/75">{where === "home" ? "Home collection" : "Lab visit"}</dt>
-              <dd className="font-bold">{fee > 0 ? naira(fee) : "Free"}</dd>
+              <dt className="text-white/75">{meds.length > 0 ? (list.length > 0 ? "Delivery and collection" : delivery === "delivery" ? "Delivery" : "Pickup") : where === "home" ? "Home collection" : "Lab visit"}</dt>
+              <dd className="font-bold">{fee > 0 ? naira(fee) : needsAddress && !area ? "Choose your area" : "Free"}</dd>
             </div>
             <div className="mt-1 flex items-end justify-between gap-4 border-t border-white/15 pt-4">
               <dt className="text-lg font-bold">Total</dt>

@@ -253,7 +253,7 @@ export function ServicesBento() {
 
           {/* Medicine */}
           <Link
-            href="/user/medicines/near-me"
+            href="/medicines"
             className="group flex min-h-[240px] flex-col justify-between gap-6 rounded-[32px] bg-lime p-7 text-night lg:col-span-6"
           >
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-night text-lime">
@@ -272,7 +272,7 @@ export function ServicesBento() {
 
           {/* Ambulance */}
           <Link
-            href="/user/ambulance"
+            href="/request-ambulance"
             className="group flex min-h-[240px] flex-col justify-between gap-6 rounded-[32px] bg-siren p-7 text-white lg:col-span-6"
           >
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-siren">

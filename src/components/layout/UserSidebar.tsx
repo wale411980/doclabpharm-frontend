@@ -35,6 +35,7 @@ export function UserSidebar({ onClose }: SidebarProps) {
     { icon: Zap, label: "See a doctor now", href: "/user/see-doctor-now" },
     { icon: Ambulance, label: "Ambulance", href: "/user/ambulance" },
     { icon: MapPin, label: "Medicines near me", href: "/user/medicines/near-me" },
+    { icon: Flask, label: "Book a lab test", href: "/user/laboratories2" },
     { icon: Package, label: "My orders", href: "/user/deliveries" },
     { icon: Calendar, label: "Appointments", href: "/user/appointments" },
     {
@@ -47,7 +48,6 @@ export function UserSidebar({ onClose }: SidebarProps) {
     { icon: Pill, label: "Pharmacy", href: "/user/pharmacy" },
     { icon: Pill, label: "Medicines", href: "/user/medicines" },
     { icon: Pill, label: "Prescriptions", href: "/user/prescriptions" },
-    { icon: Flask, label: "Tests", href: "/patient/booking/select-test" },
     { icon: FileText, label: "Lab results", href: "/user/lab-results" },
     { icon: LifeBuoy, label: "Help & support", href: "/user/support" },
   ];
