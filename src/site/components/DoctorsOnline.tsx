@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Stethoscope, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { API_URL } from "@/site/basket";
 
 type Doctor = {
@@ -41,40 +40,10 @@ export function DoctorsOnline() {
     };
   }, []);
 
-  if (doctors === null && !failed) {
-    return <p className="py-10 text-lg text-ink-700" aria-busy="true">Checking which doctors are online</p>;
-  }
-
-  if (failed && doctors === null) {
-    return (
-      <p role="alert" className="rounded-3xl bg-white p-6 text-lg text-ink-700 ring-1 ring-brand-100">
-        We could not load the doctors. Check your internet and refresh this page.
-      </p>
-    );
-  }
-
   const list = doctors ?? [];
 
-  if (list.length === 0) {
-    return (
-      <div className="flex flex-col items-start gap-4 rounded-[28px] bg-white p-6 ring-1 ring-brand-100 sm:p-8">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50">
-          <Stethoscope className="h-7 w-7 text-brand-700" aria-hidden="true" />
-        </span>
-        <h2 className="font-display text-3xl font-extrabold tracking-tight text-ink-900">No doctor is online right now</h2>
-        <p className="max-w-xl text-lg text-ink-700">
-          This page updates by itself, so you can keep it open. If it is an emergency, call{" "}
-          <a href="tel:112" className="font-bold text-brand-700 underline">
-            112
-          </a>
-          .
-        </p>
-        <Link href="/tests" className="inline-flex min-h-14 items-center rounded-2xl bg-lime px-7 text-lg font-extrabold text-night hover:bg-[#d6fa85]">
-          Book a lab test instead
-        </Link>
-      </div>
-    );
-  }
+  // Nobody online: the booking form below is the way in, so this section stays out of the way.
+  if (list.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -108,13 +77,13 @@ export function DoctorsOnline() {
               href="/user/see-doctor-now"
               className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-lime px-5 text-base font-extrabold text-night hover:bg-[#d6fa85]"
             >
-              Talk to this doctor
+              Talk now
             </a>
           </li>
         ))}
       </ul>
       <p className="text-[15px] text-ink-500">
-        The chat or video call happens inside your DocLabPharm account, so you sign in or create one at this step.
+        Talking now happens inside your DocLabPharm account, so you sign in at this step. Or book a time below without an account.
       </p>
     </div>
   );

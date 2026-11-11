@@ -166,6 +166,7 @@ import EarningsPage from "@/screens/shared/EarningsPage";
 import PharmacyDeliveries from "@/screens/pharmacist/orders/PharmacyDeliveries";
 import DeliverySettingsPage from "@/screens/pharmacist/orders/DeliverySettingsPage";
 import DoctorOnDemand from "@/screens/doctor/onDemand/DoctorOnDemand";
+import PatientRequests from "@/screens/doctor/PatientRequests";
 import LabResultsManager from "@/screens/labTechnician/results/LabResultsManager";
 import HomeCollectionPage from "@/screens/labTechnician/results/HomeCollectionPage";
 import Fleet from "@/screens/ambulanceOperator/Fleet";
@@ -303,6 +304,7 @@ function router() {
             <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
             <Route path="/doctor/verification" element={<VerificationPage role="doctor" />} />
             <Route path="/doctor/see-now" element={<DoctorOnDemand />} />
+            <Route path="/doctor/patient-requests" element={<PatientRequests />} />
             <Route path="/doctor/earnings" element={<EarningsPage role="doctor" />} />
             <Route path="/doctor/support" element={<SupportList audience="doctor" basePath="/doctor/support" />} />
             <Route path="/doctor/support/:id" element={<SupportThread audience="doctor" basePath="/doctor/support" />} />

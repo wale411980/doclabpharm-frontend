@@ -17,7 +17,7 @@ type Booking = {
 const when = (date: string | null, time: string | null) => {
   if (!date) return "";
   const day = new Date(`${date}T${time || "09:00"}:00`);
-  return day.toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long" }) + (time ? `, ${day.toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}` : "");
+  return day.toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long" }) + (time ? `, ${day.toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit", hour12: true })}` : "");
 };
 
 /** After Paystack: confirm the booking, then offer a password (the account comes last). */

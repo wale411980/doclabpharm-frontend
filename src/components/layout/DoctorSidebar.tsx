@@ -33,6 +33,7 @@ export function DoctorSidebar({ onClose }: SidebarProps) {
     { icon: LayoutDashboard, label: "Dashboard", href: "/doctor/dashboard" },
     { icon: ShieldCheck, label: "Verification", href: "/doctor/verification" },
     { icon: Zap, label: "See patients now", href: "/doctor/see-now" },
+    { icon: Calendar, label: "Patient requests", href: "/doctor/patient-requests" },
     { icon: User, label: "Patients", href: "/doctor/patients" },
     { icon: Calendar, label: "Appointments", href: "/doctor/appointments" },
     {
